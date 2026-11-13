@@ -60,10 +60,12 @@ export type MediaCategory = 'graphic' | 'graphic_best' | 'video' | 'video_best';
 export interface ProjectItem {
   id: string;
   title: LocalizedText;
+  groupName?: LocalizedText;
   category: MediaCategory | string;
   description: LocalizedText;
   coverImage?: string;
   galleryImages?: string[];
+  galleryCaptions?: string[];
   behanceUrl?: string;
   externalUrl?: string;
   videoUrl?: string;

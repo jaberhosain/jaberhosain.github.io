@@ -63,6 +63,7 @@ import { SocialLinksEditor } from './SocialLinksEditor';
 import { WorkflowEditor } from './WorkflowEditor';
 import { ContactFooterEditor } from './ContactFooterEditor';
 import { ConfirmDeleteModal } from './ConfirmDeleteModal';
+import { ProjectGalleryManager } from './ProjectGalleryManager';
 import { extractYouTubeId } from '../VideoModal';
 import { uploadMediaToStorage } from '../../lib/mediaUpload';
 import { 
@@ -1398,8 +1399,24 @@ function doPost(e) {
                   about: { ...prev.about, avatarUrl: val }
                 }))}
                 defaultFallback="/assets/jabir_profile.png"
-                helperText="Upload image or specify local path. Syncs to live site upon Publish."
+                helperText="Upload image or paste direct image URL (i.postimg.cc, Google Drive, Firebase). Syncs to live site upon Publish."
               />
+              <div className="flex items-center justify-end">
+                <button
+                  type="button"
+                  onClick={() => {
+                    updateDraft(prev => ({
+                      ...prev,
+                      hero: { ...prev.hero, avatarUrl: prev.about.avatarUrl }
+                    }));
+                    showToast('About portrait also applied to Hero section!');
+                  }}
+                  className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-[#181E24] hover:bg-[#232B33] border border-[#232B33] text-[11px] font-mono text-neutral-300 hover:text-white transition-colors cursor-pointer"
+                >
+                  <CheckCircle className="w-3.5 h-3.5 text-[#FF5722]" />
+                  <span>Also use this photo for Hero section</span>
+                </button>
+              </div>
             </div>
           )}
 
@@ -1942,6 +1959,55 @@ function doPost(e) {
                       </div>
                     </div>
 
+                    {/* Group / Series Name (Behance Project Group) */}
+                    <div className="p-3 rounded-2xl bg-[#0F1419] border border-[#232B33] space-y-2">
+                      <label className="block text-[11px] font-mono text-neutral-300 font-semibold">
+                        Behance Group / Poster Series Name (Optional — e.g. Eid Poster Series, Brand Identity)
+                      </label>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                        <input
+                          type="text"
+                          placeholder="Group Name (EN)"
+                          value={proj.groupName?.en || ''}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            updateDraft(prev => ({
+                              ...prev,
+                              projects: prev.projects.map(p => p.id === proj.id ? { ...p, groupName: { ...(p.groupName || { en: '', bn: '', ar: '' }), en: val } } : p)
+                            }));
+                          }}
+                          className="w-full px-3 py-1.5 rounded-lg bg-[#141A20] border border-[#232B33] text-xs text-white"
+                        />
+                        <input
+                          type="text"
+                          placeholder="গ্রুপের নাম (বাংলা)"
+                          value={proj.groupName?.bn || ''}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            updateDraft(prev => ({
+                              ...prev,
+                              projects: prev.projects.map(p => p.id === proj.id ? { ...p, groupName: { ...(p.groupName || { en: '', bn: '', ar: '' }), bn: val } } : p)
+                            }));
+                          }}
+                          className="w-full px-3 py-1.5 rounded-lg bg-[#141A20] border border-[#232B33] text-xs text-white"
+                        />
+                        <input
+                          type="text"
+                          dir="rtl"
+                          placeholder="اسم المجموعة (العربية)"
+                          value={proj.groupName?.ar || ''}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            updateDraft(prev => ({
+                              ...prev,
+                              projects: prev.projects.map(p => p.id === proj.id ? { ...p, groupName: { ...(p.groupName || { en: '', bn: '', ar: '' }), ar: val } } : p)
+                            }));
+                          }}
+                          className="w-full px-3 py-1.5 rounded-lg bg-[#141A20] border border-[#232B33] text-xs text-white"
+                        />
+                      </div>
+                    </div>
+
                     {/* Titles across 3 languages */}
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                       <div>
@@ -2091,14 +2157,36 @@ function doPost(e) {
 
                     {/* Artwork Image Uploader & Live Preview */}
                     <ImageUploaderField
-                      label="Project Artwork / Cover Image"
+                      label="Project Cover Poster / Main Artwork"
                       value={proj.coverImage || ''}
                       onChange={(val) => updateDraft(prev => ({
                         ...prev,
                         projects: prev.projects.map(p => p.id === proj.id ? { ...p, coverImage: val } : p)
                       }))}
                       defaultFallback=""
-                      helperText="Upload image file or paste URL. Clicking on the website opens this artwork in the lightbox."
+                      helperText="Upload image file or paste direct poster URL (mir-s3-cdn-cf.behance.net/..., i.postimg.cc/...)."
+                    />
+
+                    {/* Multi-Poster Project Group Gallery */}
+                    <ProjectGalleryManager
+                      galleryImages={proj.galleryImages || []}
+                      galleryCaptions={proj.galleryCaptions || []}
+                      coverImage={proj.coverImage || ''}
+                      onChange={(nextImages, nextCaptions, newCover) => {
+                        updateDraft(prev => ({
+                          ...prev,
+                          projects: prev.projects.map(p =>
+                            p.id === proj.id
+                              ? {
+                                  ...p,
+                                  galleryImages: nextImages,
+                                  galleryCaptions: nextCaptions,
+                                  ...(newCover !== undefined ? { coverImage: newCover } : {})
+                                }
+                              : p
+                          )
+                        }));
+                      }}
                     />
                   </div>
                 ))}

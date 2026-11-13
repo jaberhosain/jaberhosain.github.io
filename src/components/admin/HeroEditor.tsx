@@ -290,8 +290,21 @@ export const HeroEditor: React.FC = () => {
               hero: { ...prev.hero, avatarUrl: val }
             }))}
             defaultFallback="/assets/jabir_profile.png"
-            helperText="Upload image file to Firebase Storage or paste image URL. Never stores large base64."
+            helperText="Upload image file or paste direct image link (Postimages Direct Link, Drive, Firebase)."
           />
+          <div className="flex items-center justify-end">
+            <button
+              type="button"
+              onClick={() => updateDraft(prev => ({
+                ...prev,
+                about: { ...prev.about, avatarUrl: prev.hero.avatarUrl }
+              }))}
+              className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-[#181E24] hover:bg-[#232B33] border border-[#232B33] text-[11px] font-mono text-neutral-300 hover:text-white transition-colors cursor-pointer"
+            >
+              <CheckCircle className="w-3.5 h-3.5 text-[#FF5722]" />
+              <span>Also use this photo for About section</span>
+            </button>
+          </div>
 
           {/* Floating Badge on Portrait */}
           <div className="p-4 rounded-2xl bg-[#181E24] border border-[#232B33] space-y-3">

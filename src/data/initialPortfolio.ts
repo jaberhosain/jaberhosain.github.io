@@ -474,6 +474,11 @@ export const initialPortfolioData: PortfolioConfig = {
   projects: [
     {
       id: 'proj-graphic-1',
+      groupName: {
+        en: 'Brand Identity',
+        bn: 'ব্র্যান্ড আইডেন্টিটি',
+        ar: 'الهوية البصرية'
+      },
       title: {
         en: 'Brand Identity & Visual Poster Series',
         bn: 'ব্র্যান্ড আইডেন্টিটি এবং ভিজ্যুয়াল পোস্টার সিরিজ',
@@ -485,7 +490,8 @@ export const initialPortfolioData: PortfolioConfig = {
         bn: 'আধুনিক টাইপোগ্রাফি, ভেক্টর কম্পোজিশন এবং ফটোশপ ও ইলাস্ট্রেটরে তৈরি ব্র্যান্ড আইডেন্টিটি ডিজাইন।',
         ar: 'تصميم هوية بصرية متميزة مع طباعة حديثة وتكوينات فكتور مصممة عبر فوتوشوب وإليستريتور.'
       },
-      coverImage: '/assets/jabir_profile.png',
+      coverImage: '',
+      galleryImages: [],
       behanceUrl: 'https://www.behance.net/jaberhosain',
       externalUrl: 'https://www.behance.net/jaberhosain',
       tags: ['Graphic Design', 'Branding', 'Photoshop'],
@@ -494,6 +500,11 @@ export const initialPortfolioData: PortfolioConfig = {
     },
     {
       id: 'proj-graphic-2',
+      groupName: {
+        en: 'Social Media & Posters',
+        bn: 'সোশ্যাল মিডিয়া ও পোস্টার',
+        ar: 'السوشيال ميديا والبوسترات'
+      },
       title: {
         en: 'Social Media Visuals & Creative Thumbnails',
         bn: 'সোশ্যাল মিডিয়া ভিজ্যুয়ালস এবং ক্রিয়েটিভ থাম্বনেইল',
@@ -505,7 +516,8 @@ export const initialPortfolioData: PortfolioConfig = {
         bn: 'হাই-কনভার্টিং ইউটিউব থাম্বনেইল, ইভেন্ট ফ্লায়ার এবং অডিয়েন্স এনগেজমেন্টের জন্য প্রস্তুত ক্যাম্পেইন গ্রাফিক্স।',
         ar: 'تصاميم مصغرات يوتيوب ومنشورات ترويجية عالية الجاذبية لزيادة التفاعل والمشاهدات.'
       },
-      coverImage: '/assets/jabir_profile.png',
+      coverImage: '',
+      galleryImages: [],
       behanceUrl: 'https://www.behance.net/jaberhosain',
       externalUrl: 'https://www.behance.net/jaberhosain',
       tags: ['Social Media', 'Thumbnails', 'Illustrator'],
@@ -617,7 +629,7 @@ export const initialPortfolioData: PortfolioConfig = {
         bn: 'ব্র্যান্ড আইডেন্টিটি এবং ভিজ্যুয়াল পোস্টার সিরিজ',
         ar: 'الهوية البصرية وسلسلة البوسترات الاحترافية'
       },
-      imageUrl: '/assets/jabir_profile.png',
+      imageUrl: '',
       behanceUrl: 'https://www.behance.net/jaberhosain',
       order: 1,
       visible: true
@@ -629,7 +641,7 @@ export const initialPortfolioData: PortfolioConfig = {
         bn: 'সোশ্যাল মিডিয়া ভিজ্যুয়ালস এবং ক্রিয়েটিভ থাম্বনেইল',
         ar: 'تصاميم السوشيال ميديا والمصغرات الإبداعية'
       },
-      imageUrl: '/assets/jabir_profile.png',
+      imageUrl: '',
       behanceUrl: 'https://www.behance.net/jaberhosain',
       order: 2,
       visible: true

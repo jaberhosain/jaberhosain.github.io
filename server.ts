@@ -125,6 +125,16 @@ app.get('/api/fetch-og', async (req, res) => {
       }
     }
 
+    // Direct support for Google Drive file links
+    const driveFileMatch = targetUrl.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/) ||
+      targetUrl.match(/drive\.google\.com\/(?:open|uc)\?.*id=([a-zA-Z0-9_-]+)/);
+    if (driveFileMatch?.[1]) {
+      const driveThumb = `https://drive.google.com/thumbnail?id=${driveFileMatch[1]}&sz=w1600`;
+      const payload = { success: true, ogImage: driveThumb, ogTitle: 'Google Drive Image', cachedAt: Date.now() };
+      ogCache.set(targetUrl, payload);
+      return res.json(payload);
+    }
+
     // Attempt fetch with facebookexternalhit User-Agent
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 8000);
@@ -143,28 +153,37 @@ app.get('/api/fetch-og', async (req, res) => {
 
     const html = await response.text();
 
-    // Extract og:image
-    const ogImageMatch = 
+    // Extract og:image or twitter:image
+    const ogImageMatch =
       html.match(/<meta[^>]*property=["']og:image["'][^>]*content=["']([^"']+)["']/i) ||
-      html.match(/<meta[^>]*content=["']([^"']+)["'][^>]*property=["']og:image["']/i);
+      html.match(/<meta[^>]*content=["']([^"']+)["'][^>]*property=["']og:image["']/i) ||
+      html.match(/<meta[^>]*name=["']twitter:image(?::src)?["'][^>]*content=["']([^"']+)["']/i) ||
+      html.match(/<meta[^>]*content=["']([^"']+)["'][^>]*name=["']twitter:image(?::src)?["']/i);
     
     // Extract og:title
     const ogTitleMatch = 
       html.match(/<meta[^>]*property=["']og:title["'][^>]*content=["']([^"']+)["']/i) ||
       html.match(/<meta[^>]*content=["']([^"']+)["'][^>]*property=["']og:title["']/i);
 
-    const ogImage = ogImageMatch ? ogImageMatch[1].replace(/&amp;/g, '&') : undefined;
+    let ogImage = ogImageMatch ? ogImageMatch[1].replace(/&amp;/g, '&') : undefined;
+    if (ogImage && ogImage.startsWith('/')) {
+      try {
+        ogImage = new URL(ogImage, parsed.origin).toString();
+      } catch {
+        // leave as-is
+      }
+    }
     const ogTitle = ogTitleMatch ? ogTitleMatch[1].replace(/&amp;/g, '&') : undefined;
 
-    if (ogImage) {
+    if (ogImage && !ogImage.includes('behance.net/assets') && !ogImage.startsWith('data:')) {
       ogCache.set(targetUrl, { ogImage, ogTitle, cachedAt: Date.now() });
       return res.json({ success: true, ogImage, ogTitle });
     }
 
-    // If Facebook login redirect or no OG image found
+    // If login redirect or JS challenge blocked extraction
     return res.json({ 
       success: false, 
-      message: 'No open graph image could be extracted automatically (Facebook requires authentication). You can upload a custom thumbnail.',
+      message: 'No open graph image could be extracted automatically. Please paste the direct image URL or upload the image file.',
       ogTitle: ogTitle || ''
     });
   } catch (err: any) {

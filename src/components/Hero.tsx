@@ -3,6 +3,7 @@ import { ArrowDown, ArrowUpRight, Sparkles } from 'lucide-react';
 import { usePortfolio } from '../context/PortfolioContext';
 import { useNavigation } from '../context/NavigationContext';
 import { resolveAssetUrl } from '../utils/assetUrl';
+import { normalizeDirectImageUrl } from '../lib/imageUrlResolver';
 import { EditableElement } from './common/EditableElement';
 
 export const Hero: React.FC = () => {
@@ -257,8 +258,9 @@ export const Hero: React.FC = () => {
                   
                   {/* Portrait Image (with fallback chain) */}
                   <img
-                    src={resolveAssetUrl(hero.avatarUrl)}
+                    src={resolveAssetUrl(normalizeDirectImageUrl(hero.avatarUrl) || '/assets/jabir_profile.png')}
                     alt={loc(hero.name)}
+                    referrerPolicy="no-referrer"
                     className="w-full h-full object-cover object-top pointer-events-none transition-transform duration-500"
                     style={{
                       transform: `scale(${cardTransform.isHovered ? 1.05 : 1}) translateZ(20px)`,
@@ -268,9 +270,12 @@ export const Hero: React.FC = () => {
                       const img = e.currentTarget as HTMLImageElement;
                       const fallback = resolveAssetUrl('/assets/jaber_hero.png');
                       const secondFallback = resolveAssetUrl('/assets/jabir_profile.png');
-                      if (img.src !== fallback && !img.src.endsWith('/assets/jaber_hero.png')) {
+                      if (img.dataset.fallbackStage === '2') return;
+                      if (img.dataset.fallbackStage !== '1') {
+                        img.dataset.fallbackStage = '1';
                         img.src = fallback;
-                      } else if (img.src !== secondFallback) {
+                      } else {
+                        img.dataset.fallbackStage = '2';
                         img.src = secondFallback;
                       }
                     }}

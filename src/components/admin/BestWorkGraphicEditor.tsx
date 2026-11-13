@@ -67,7 +67,7 @@ export const BestWorkGraphicEditor: React.FC<BestWorkGraphicEditorProps> = ({ on
     const newItem: BestWorkGraphicItem = {
       id: 'best-graphic-' + Date.now(),
       title: { en: 'Top Graphic Artwork', bn: 'সেরা গ্রাফিক্স ডিজাইন', ar: 'عمل جرافيك مميز' },
-      imageUrl: '/assets/jabir_profile.png',
+      imageUrl: '',
       behanceUrl: 'https://www.behance.net/jaberhosain',
       order: items.length + 1,
       visible: true
@@ -392,8 +392,8 @@ export const BestWorkGraphicEditor: React.FC<BestWorkGraphicEditorProps> = ({ on
                     )
                   }));
                 }}
-                defaultFallback="/assets/jabir_profile.png"
-                helperText="Upload image file from device. It is automatically compressed to 1600px and stored in Firebase Storage."
+                defaultFallback=""
+                helperText="Upload from device OR paste a direct image URL (Behance CDN mir-s3-cdn-cf.behance.net/..., i.postimg.cc/..., Google Drive)."
               />
             </div>
           );

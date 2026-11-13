@@ -5,7 +5,7 @@ import { HomeHighlights } from '../HomeHighlights';
 import { PagePagination } from '../common/PagePagination';
 
 interface HomePageProps {
-  onOpenLightbox?: (project: ProjectItem) => void;
+  onOpenLightbox?: (project: ProjectItem, initialIndex?: number) => void;
   onOpenVideo?: (video: VideoShowcaseItem) => void;
 }
 

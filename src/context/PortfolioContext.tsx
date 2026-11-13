@@ -16,6 +16,7 @@ import { db, auth, handleFirestoreError, OperationType } from '../lib/firebase';
 import { initialPortfolioData, defaultThemeColors, defaultThemeFonts } from '../data/initialPortfolio';
 import { PortfolioConfig, Lead, Language, LocalizedText, ThemeId } from '../types/portfolio';
 import { translations, UITranslations } from '../translations/ui';
+import { normalizeDirectImageUrl } from '../lib/imageUrlResolver';
 import firebaseConfig from '../../firebase-applet-config.json';
 
 interface PortfolioContextType {
@@ -274,11 +275,8 @@ export const PortfolioProvider: React.FC<{ children: ReactNode }> = ({ children 
 
   const resolveValidAvatar = (url?: string): string => {
     if (!url || typeof url !== 'string') return '/assets/jabir_profile.png';
-    const clean = url.trim();
+    const clean = normalizeDirectImageUrl(url);
     if (!clean) return '/assets/jabir_profile.png';
-    if (clean.includes('postimg') || clean.includes('unsplash')) {
-      return '/assets/jabir_profile.png';
-    }
     return clean;
   };
 

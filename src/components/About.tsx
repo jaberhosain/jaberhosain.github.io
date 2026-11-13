@@ -3,6 +3,7 @@ import { GraduationCap, Award, Video, Palette, Wrench } from 'lucide-react';
 import { usePortfolio } from '../context/PortfolioContext';
 import { useNavigation } from '../context/NavigationContext';
 import { resolveAssetUrl } from '../utils/assetUrl';
+import { normalizeDirectImageUrl } from '../lib/imageUrlResolver';
 import { EditableElement } from './common/EditableElement';
 
 const iconMap: Record<string, React.ElementType> = {
@@ -29,17 +30,21 @@ export const About: React.FC = () => {
           <div className="lg:col-span-5 flex justify-center">
             <div className="relative w-full max-w-sm aspect-[3/4] rounded-3xl overflow-hidden border border-[#232B33] bg-[#12161A] shadow-xl">
               <img
-                src={resolveAssetUrl(about.avatarUrl)}
+                src={resolveAssetUrl(normalizeDirectImageUrl(about.avatarUrl) || '/assets/jabir_profile.png')}
                 alt="MD. Jaber Hossain"
+                referrerPolicy="no-referrer"
                 className="w-full h-full object-cover object-top"
                 loading="lazy"
                 onError={(e) => {
                   const img = e.currentTarget as HTMLImageElement;
                   const fallback = resolveAssetUrl('/assets/jaber_about.png');
                   const secondFallback = resolveAssetUrl('/assets/jabir_profile.png');
-                  if (img.src !== fallback && !img.src.endsWith('/assets/jaber_about.png')) {
+                  if (img.dataset.fallbackStage === '2') return;
+                  if (img.dataset.fallbackStage !== '1') {
+                    img.dataset.fallbackStage = '1';
                     img.src = fallback;
-                  } else if (img.src !== secondFallback) {
+                  } else {
+                    img.dataset.fallbackStage = '2';
                     img.src = secondFallback;
                   }
                 }}

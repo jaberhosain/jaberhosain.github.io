@@ -48,6 +48,12 @@ function MainApp() {
 
   const [activeVideo, setActiveVideo] = useState<VideoShowcaseItem | null>(null);
   const [activeProject, setActiveProject] = useState<ProjectItem | null>(null);
+  const [activeLightboxIndex, setActiveLightboxIndex] = useState<number>(0);
+
+  const handleOpenLightbox = (proj: ProjectItem, initialIndex = 0) => {
+    setActiveLightboxIndex(initialIndex);
+    setActiveProject(proj);
+  };
 
   // Track responsive screen width for mobile admin breakpoint (<= 768px)
   useEffect(() => {
@@ -101,7 +107,7 @@ function MainApp() {
       case 'videos':
         return <VideosPage key="videos" onOpenVideo={(vid) => setActiveVideo(vid)} />;
       case 'design':
-        return <DesignPage key="design" onOpenLightbox={(proj) => setActiveProject(proj)} />;
+        return <DesignPage key="design" onOpenLightbox={handleOpenLightbox} />;
       case 'skills':
         return <SkillsPage key="skills" />;
       case 'contact':
@@ -111,7 +117,7 @@ function MainApp() {
         return (
           <HomePage
             key="home"
-            onOpenLightbox={(proj) => setActiveProject(proj)}
+            onOpenLightbox={handleOpenLightbox}
             onOpenVideo={(vid) => setActiveVideo(vid)}
           />
         );
@@ -143,7 +149,11 @@ function MainApp() {
       {activeProject && (
         <LightboxModal
           project={activeProject}
-          onClose={() => setActiveProject(null)}
+          initialIndex={activeLightboxIndex}
+          onClose={() => {
+            setActiveProject(null);
+            setActiveLightboxIndex(0);
+          }}
         />
       )}
     </div>

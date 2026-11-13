@@ -14,11 +14,12 @@ import { usePortfolio } from '../context/PortfolioContext';
 import { useNavigation } from '../context/NavigationContext';
 import { ProjectItem, VideoShowcaseItem } from '../types/portfolio';
 import { resolveAssetUrl } from '../utils/assetUrl';
+import { normalizeDirectImageUrl } from '../lib/imageUrlResolver';
 import { Tilt3DImageStage } from './common/Tilt3DImageStage';
 import { VideoParallaxCarousel } from './VideoParallaxCarousel';
 
 interface HomeHighlightsProps {
-  onOpenLightbox?: (project: ProjectItem) => void;
+  onOpenLightbox?: (project: ProjectItem, initialIndex?: number) => void;
   onOpenVideo?: (video: VideoShowcaseItem) => void;
 }
 
@@ -48,6 +49,7 @@ export const HomeHighlights: React.FC<HomeHighlightsProps> = ({
   const [slideSource, setSlideSource] = useState<'projects' | 'best'>(
     visibleVideos.length > 0 ? 'projects' : 'best'
   );
+  const [brokenGraphicIds, setBrokenGraphicIds] = useState<Record<string, boolean>>({});
 
   const visibleGraphicProjects = [...(portfolio.projects || [])]
     .filter((p: any) => p.category === 'graphic' && p.visible !== false && !p.hidden)
@@ -203,24 +205,45 @@ export const HomeHighlights: React.FC<HomeHighlightsProps> = ({
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {spotlightGraphics.map((proj, idx) => (
+              {spotlightGraphics.map((proj, idx) => {
+                const imgKey = proj.id || `sg-${idx}`;
+                const cleanCover = normalizeDirectImageUrl(proj.coverImage);
+                const hasBroken = brokenGraphicIds[imgKey];
+                const posterCount = Array.from(
+                  new Set(
+                    [cleanCover, ...(proj.galleryImages || []).map(normalizeDirectImageUrl)].filter(Boolean)
+                  )
+                ).length;
+
+                return (
                 <div
-                  key={proj.id || `sg-${idx}`}
-                  onClick={() => onOpenLightbox?.(proj)}
+                  key={imgKey}
+                  onClick={() => onOpenLightbox?.(proj, 0)}
                   className="group rounded-3xl bg-[#12161A] border border-[#232B33] hover:border-[#FF5722]/60 overflow-hidden transition-all duration-300 cursor-pointer flex flex-col justify-between shadow-xl"
                 >
                   <div className="p-2.5 bg-[#0D1115] border-b border-[#232B33]">
                     <Tilt3DImageStage className="aspect-[16/10] w-full" maxTilt={13} scaleOnHover={1.03}>
                       <div className="relative w-full h-full rounded-2xl bg-[#181E24] overflow-hidden flex items-center justify-center">
-                        {proj.coverImage ? (
+                        {cleanCover && !hasBroken ? (
                           <img
-                            src={resolveAssetUrl(proj.coverImage)}
+                            src={resolveAssetUrl(cleanCover)}
                             alt={loc(proj.title)}
                             className="w-full h-full object-cover"
                             referrerPolicy="no-referrer"
+                            onError={() => setBrokenGraphicIds((prev) => ({ ...prev, [imgKey]: true }))}
                           />
                         ) : (
-                          <Palette className="w-10 h-10 text-[#FF5722]" />
+                          <div className="w-full h-full flex flex-col items-center justify-center text-center p-5 bg-gradient-to-br from-[#141A20] via-[#12161A] to-[#0B0F12]">
+                            <div className="w-12 h-12 rounded-2xl bg-[#181E24] border border-[#232B33] flex items-center justify-center text-[#FF5722] mb-2">
+                              <Palette className="w-6 h-6" />
+                            </div>
+                            <span className="text-xs font-mono text-neutral-300 font-semibold line-clamp-1">
+                              {loc(proj.title)}
+                            </span>
+                            <span className="text-[10px] font-mono text-neutral-500 mt-0.5">
+                              {proj.behanceUrl ? 'Behance Visual Project' : 'Graphic Design'}
+                            </span>
+                          </div>
                         )}
                         <div className="absolute inset-0 bg-black/45 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                           <span className="inline-flex items-center space-x-1.5 rtl:space-x-reverse px-4 py-2 rounded-xl bg-black/85 border border-[#FF5722]/60 text-white text-xs font-mono">
@@ -234,8 +257,14 @@ export const HomeHighlights: React.FC<HomeHighlightsProps> = ({
 
                   <div className="p-6 flex items-center justify-between gap-4">
                     <div className="min-w-0">
-                      <div className="text-xs font-mono text-neutral-400 mb-1">
-                        <span>{language === 'bn' ? 'গ্রাফিক ডিজাইন' : 'Graphic Design'}</span>
+                      <div className="text-xs font-mono text-neutral-400 mb-1 flex items-center gap-1.5">
+                        <span>{loc(proj.groupName) || (language === 'bn' ? 'গ্রাফিক ডিজাইন' : 'Graphic Design')}</span>
+                        {posterCount > 1 && (
+                          <>
+                            <span aria-hidden="true">·</span>
+                            <span className="text-[#FF5722] tabular-nums">{posterCount} Posters</span>
+                          </>
+                        )}
                       </div>
                       <h3 className="text-base sm:text-lg font-bold text-white group-hover:text-[#FF5722] transition-colors truncate">
                         {loc(proj.title)}
@@ -255,7 +284,8 @@ export const HomeHighlights: React.FC<HomeHighlightsProps> = ({
                     </button>
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </section>

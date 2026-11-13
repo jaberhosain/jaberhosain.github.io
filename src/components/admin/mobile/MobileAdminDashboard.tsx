@@ -79,6 +79,8 @@ import {
 } from '../../../lib/videoUtils';
 import { BestWorkGraphicEditor } from '../BestWorkGraphicEditor';
 import { BestWorkVideoEditor } from '../BestWorkVideoEditor';
+import { ImageUploaderField } from '../ImageUploaderField';
+import { ProjectGalleryManager } from '../ProjectGalleryManager';
 
 interface MobileAdminDashboardProps {
   onBackToSite: () => void;
@@ -1027,43 +1029,32 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
         return (
           <div className="space-y-4">
             <div className="p-4 rounded-2xl bg-[#0F1419] border border-[#232B33] space-y-4">
-              <h3 className="text-sm font-bold text-white font-mono">About Portrait Image</h3>
-              <div className="flex items-center space-x-3">
-                <div className="w-16 h-16 rounded-xl overflow-hidden bg-black border border-[#232B33] shrink-0">
-                  <img
-                    src={resolveAssetUrl(draftPortfolio.about.avatarUrl)}
-                    alt="About Portrait"
-                    className="w-full h-full object-cover object-top"
-                  />
-                </div>
-                <div className="flex-1 space-y-1.5">
-                  <label className="px-3.5 py-2.5 rounded-xl bg-[#141A20] hover:bg-[#1A222B] border border-[#232B33] text-xs font-mono font-semibold text-white cursor-pointer inline-flex items-center space-x-2 min-h-[44px]">
-                    <Upload className="w-4 h-4 text-[#FF5722]" />
-                    <span>Upload from Phone</span>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={(e) =>
-                        handleMobileFileUpload(e, 'about-image', (dataUrl) => {
-                          updateDraft((prev) => ({
-                            ...prev,
-                            about: { ...prev.about, avatarUrl: dataUrl },
-                          }));
-                        })
-                      }
-                    />
-                  </label>
-                  {uploadProgress['about-image'] && (
-                    <div className="w-full bg-[#141A20] rounded-full h-1.5 mt-1">
-                      <div
-                        className="bg-[#FF5722] h-1.5 rounded-full transition-all"
-                        style={{ width: `${uploadProgress['about-image']}%` }}
-                      />
-                    </div>
-                  )}
-                </div>
-              </div>
+              <ImageUploaderField
+                label="About Portrait Photo (URL or Upload)"
+                value={draftPortfolio.about.avatarUrl}
+                onChange={(val) =>
+                  updateDraft((prev) => ({
+                    ...prev,
+                    about: { ...prev.about, avatarUrl: val },
+                  }))
+                }
+                defaultFallback="/assets/jabir_profile.png"
+                helperText="Paste direct image link (i.postimg.cc/..., Google Drive, Firebase) or upload from phone."
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  updateDraft((prev) => ({
+                    ...prev,
+                    hero: { ...prev.hero, avatarUrl: prev.about.avatarUrl },
+                  }));
+                  showToast('Synced photo to Hero & About!');
+                }}
+                className="w-full py-2.5 rounded-xl bg-[#141A20] hover:bg-[#1A222B] border border-[#232B33] text-xs font-mono font-semibold text-neutral-200 flex items-center justify-center space-x-2 min-h-[44px]"
+              >
+                <CheckCircle className="w-3.5 h-3.5 text-[#FF5722]" />
+                <span>Also Apply This Photo to Hero Section</span>
+              </button>
 
               <div>
                 <label className="block text-xs font-mono text-neutral-300 font-semibold mb-1.5">
@@ -1109,43 +1100,48 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
         return (
           <div className="space-y-4">
             <div className="p-4 rounded-2xl bg-[#0F1419] border border-[#232B33] space-y-4">
-              <h3 className="text-sm font-bold text-white font-mono">Profile Photo (Portrait)</h3>
-              <div className="flex items-center space-x-3">
-                <div className="w-16 h-16 rounded-xl overflow-hidden bg-black border border-[#232B33] shrink-0">
-                  <img
-                    src={resolveAssetUrl(draftPortfolio.about.avatarUrl)}
-                    alt="About Portrait"
-                    className="w-full h-full object-cover object-top"
-                  />
-                </div>
-                <div className="flex-1 space-y-1.5">
-                  <label className="px-3.5 py-2.5 rounded-xl bg-[#141A20] hover:bg-[#1A222B] border border-[#232B33] text-xs font-mono font-semibold text-white cursor-pointer inline-flex items-center space-x-2 min-h-[44px]">
-                    <Upload className="w-4 h-4 text-[#FF5722]" />
-                    <span>Upload from Phone</span>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={(e) =>
-                        handleMobileFileUpload(e, 'about-image', (dataUrl) => {
-                          updateDraft((prev) => ({
-                            ...prev,
-                            about: { ...prev.about, avatarUrl: dataUrl },
-                          }));
-                        })
-                      }
-                    />
-                  </label>
-                  {uploadProgress['about-image'] && (
-                    <div className="w-full bg-[#141A20] rounded-full h-1.5 mt-1">
-                      <div
-                        className="bg-[#FF5722] h-1.5 rounded-full transition-all"
-                        style={{ width: `${uploadProgress['about-image']}%` }}
-                      />
-                    </div>
-                  )}
-                </div>
-              </div>
+              <ImageUploaderField
+                label="Hero Main Portrait Photo"
+                value={draftPortfolio.hero.avatarUrl}
+                onChange={(val) =>
+                  updateDraft((prev) => ({
+                    ...prev,
+                    hero: { ...prev.hero, avatarUrl: val },
+                  }))
+                }
+                defaultFallback="/assets/jabir_profile.png"
+                helperText="Paste direct image link (i.postimg.cc/..., Google Drive, Firebase) or upload from phone."
+              />
+
+              <ImageUploaderField
+                label="About Section Portrait Photo"
+                value={draftPortfolio.about.avatarUrl}
+                onChange={(val) =>
+                  updateDraft((prev) => ({
+                    ...prev,
+                    about: { ...prev.about, avatarUrl: val },
+                  }))
+                }
+                defaultFallback="/assets/jabir_profile.png"
+                helperText="Paste direct image link or upload from phone."
+              />
+
+              <button
+                type="button"
+                onClick={() => {
+                  const chosen = draftPortfolio.hero.avatarUrl || draftPortfolio.about.avatarUrl;
+                  updateDraft((prev) => ({
+                    ...prev,
+                    hero: { ...prev.hero, avatarUrl: chosen },
+                    about: { ...prev.about, avatarUrl: chosen },
+                  }));
+                  showToast('Synced Hero & About profile photo!');
+                }}
+                className="w-full py-2.5 rounded-xl bg-[#FF5722] hover:bg-[#F4511E] text-xs font-mono font-bold text-white flex items-center justify-center space-x-2 min-h-[44px]"
+              >
+                <CheckCircle className="w-4 h-4" />
+                <span>Use Hero Photo for Both Hero &amp; About</span>
+              </button>
             </div>
           </div>
         );
@@ -1407,9 +1403,11 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
                 const newProject: ProjectItem = {
                   id: 'proj-' + Date.now(),
                   title: { en: 'New Graphic Project', bn: 'নতুন গ্রাফিক্স প্রজেক্ট', ar: 'مشروع جرافيك جديد' },
+                  groupName: { en: '', bn: '', ar: '' },
                   description: { en: 'Graphic design project', bn: '', ar: '' },
                   category: 'graphic',
-                  coverImage: '/assets/jabir_profile.png',
+                  coverImage: '',
+                  galleryImages: [],
                   behanceUrl: 'https://www.behance.net/jaberhosain',
                   order: (draftPortfolio.projects?.length || 0) + 1,
                 };
@@ -1417,7 +1415,7 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
                   ...prev,
                   projects: [...(prev.projects || []), newProject],
                 }));
-                showToast('New project slot added');
+                showToast('New graphic project created!');
               }}
               className="w-full py-3 rounded-xl bg-[#141A20] hover:bg-[#1A222B] border border-[#232B33] text-xs font-mono font-bold text-[#FF5722] flex items-center justify-center space-x-2 min-h-[44px]"
             >
@@ -1496,44 +1494,33 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
                   </div>
                 </div>
 
-                {/* Image Preview & Upload */}
-                <div className="flex items-center space-x-3">
-                  <div className="w-16 h-16 rounded-xl overflow-hidden bg-black border border-[#232B33] shrink-0">
-                    <img
-                      src={resolveAssetUrl(proj.coverImage)}
-                      alt="Project"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <div className="flex-1 space-y-1">
-                    <label className="px-3 py-2 rounded-xl bg-[#141A20] hover:bg-[#1A222B] border border-[#232B33] text-xs font-mono font-semibold text-white cursor-pointer inline-flex items-center space-x-2 min-h-[44px]">
-                      <Upload className="w-3.5 h-3.5 text-[#FF5722]" />
-                      <span>Upload Image</span>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={(e) =>
-                          handleMobileFileUpload(e, `proj-${idx}`, (dataUrl) => {
-                            updateDraft((prev) => ({
-                              ...prev,
-                              projects: prev.projects?.map((p, i) =>
-                                i === idx ? { ...p, coverImage: dataUrl } : p
-                              ),
-                            }));
-                          })
-                        }
-                      />
-                    </label>
-                    {uploadProgress[`proj-${idx}`] && (
-                      <div className="w-full bg-[#141A20] rounded-full h-1 mt-1">
-                        <div
-                          className="bg-[#FF5722] h-1 rounded-full"
-                          style={{ width: `${uploadProgress[`proj-${idx}`]}%` }}
-                        />
-                      </div>
-                    )}
-                  </div>
+                {/* Group / Series Name */}
+                <div>
+                  <label className="block text-[11px] font-mono text-neutral-400 mb-1">
+                    Project Group / Series Name (Optional, e.g. Eid Poster Series)
+                  </label>
+                  <input
+                    type="text"
+                    value={proj.groupName?.en || ''}
+                    onChange={(e) =>
+                      updateDraft((prev) => ({
+                        ...prev,
+                        projects: prev.projects?.map((p, i) =>
+                          i === idx
+                            ? {
+                                ...p,
+                                groupName: {
+                                  ...(p.groupName || { en: '', bn: '', ar: '' }),
+                                  en: e.target.value,
+                                },
+                              }
+                            : p
+                        ),
+                      }))
+                    }
+                    placeholder="e.g. Brand Identity / Poster Campaign"
+                    className="w-full px-3 py-2 rounded-xl bg-[#070A0C] border border-[#232B33] text-xs text-white font-mono min-h-[44px]"
+                  />
                 </div>
 
                 <div>
@@ -1574,6 +1561,42 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
                     className="w-full px-3 py-2 rounded-xl bg-[#070A0C] border border-[#232B33] text-xs text-white font-mono min-h-[44px]"
                   />
                 </div>
+
+                <ImageUploaderField
+                  label="Cover Poster / Artwork Image"
+                  value={proj.coverImage || ''}
+                  onChange={(val) =>
+                    updateDraft((prev) => ({
+                      ...prev,
+                      projects: prev.projects?.map((p, i) =>
+                        i === idx ? { ...p, coverImage: val } : p
+                      ),
+                    }))
+                  }
+                  defaultFallback=""
+                  helperText="Paste direct image link (mir-s3-cdn-cf.behance.net/..., i.postimg.cc/...) or upload."
+                />
+
+                <ProjectGalleryManager
+                  galleryImages={proj.galleryImages || []}
+                  galleryCaptions={proj.galleryCaptions || []}
+                  coverImage={proj.coverImage || ''}
+                  onChange={(nextImages, nextCaptions, newCover) => {
+                    updateDraft((prev) => ({
+                      ...prev,
+                      projects: prev.projects?.map((p, i) =>
+                        i === idx
+                          ? {
+                              ...p,
+                              galleryImages: nextImages,
+                              galleryCaptions: nextCaptions,
+                              ...(newCover !== undefined ? { coverImage: newCover } : {}),
+                            }
+                          : p
+                      ),
+                    }));
+                  }}
+                />
               </div>
             ))}
           </div>
