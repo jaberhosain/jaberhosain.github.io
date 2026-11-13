@@ -1,0 +1,63 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default-deny safety net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner() {
+      return isSignedIn() && (
+        (request.auth.token.email != null && request.auth.token.email.matches('(?i)^sbmc\\.3925@gmail\\.com$')) ||
+        request.auth.uid == 'ngH4tKvzVDee0eI0IvTnC6mwSnS2'
+      );
+    }
+
+    function isAdmin() {
+      return isOwner();
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // Lead validation helper
+    function isValidLead(data) {
+      return data.keys().hasAll(['name', 'email', 'message']) &&
+             data.name is string && data.name.size() >= 2 && data.name.size() <= 100 &&
+             data.email is string && data.email.size() >= 5 && data.email.size() <= 150 &&
+             data.message is string && data.message.size() >= 5 && data.message.size() <= 3000 &&
+             (!('phone' in data) || (data.phone is string && data.phone.size() <= 50)) &&
+             (!('country' in data) || (data.country is string && data.country.size() <= 80)) &&
+             (!('projectType' in data) || (data.projectType is string && data.projectType.size() <= 80));
+    }
+
+    // Portfolio configurations: 'published' and 'design_published' are publicly readable.
+    // 'draft', 'design_draft' and all modifications are restricted to the verified owner.
+    match /portfolio/{docId} {
+      allow get: if docId == 'published' || docId == 'design_published' || isAdmin();
+      allow list: if isAdmin();
+      allow create, update, delete: if isAdmin() && isValidId(docId);
+    }
+
+    // Contact inquiries & feedback collection
+    match /leads/{leadId} {
+      // Anyone can submit a contact inquiry as long as payload meets strict validation
+      allow create: if isValidId(leadId) && isValidLead(request.resource.data);
+      // Only owner can view, list, update, or delete customer inquiries
+      allow get, list, update, delete: if isAdmin();
+    }
+
+    // Admin authorization records
+    match /admins/{userId} {
+      allow get: if isAdmin();
+      allow list: if isAdmin();
+      allow write: if isOwner() && isValidId(userId);
+    }
+  }
+}

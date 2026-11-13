@@ -1,0 +1,204 @@
+import express from 'express';
+import path from 'path';
+
+const app = express();
+const PORT = parseInt(process.env.PORT || '3000', 10);
+
+app.use(express.json({ limit: '10mb' }));
+app.use(express.static(path.resolve(process.cwd(), 'public')));
+
+// In-memory cache for Open Graph metadata
+const ogCache = new Map<string, { ogImage?: string; ogTitle?: string; cachedAt: number }>();
+
+// API route to securely fetch Open Graph metadata from links (including Facebook)
+app.get('/api/fetch-og', async (req, res) => {
+  const targetUrl = req.query.url as string;
+
+  if (!targetUrl || typeof targetUrl !== 'string') {
+    return res.status(400).json({ error: 'URL query parameter is required' });
+  }
+
+  try {
+    const parsed = new URL(targetUrl);
+    if (!['http:', 'https:'].includes(parsed.protocol)) {
+      return res.status(400).json({ error: 'Invalid URL protocol' });
+    }
+
+    // Check cache (valid for 1 hour)
+    const cached = ogCache.get(targetUrl);
+    if (cached && Date.now() - cached.cachedAt < 3600000) {
+      return res.json({ success: true, ...cached, fromCache: true });
+    }
+
+    // Direct support for YouTube (try maxresdefault.jpg, fall back to hqdefault.jpg)
+    const ytIdMatch = targetUrl.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=|shorts\/))([\w-]{11})/);
+    if (ytIdMatch && ytIdMatch[1]) {
+      const ytId = ytIdMatch[1];
+      const highResThumb = `https://img.youtube.com/vi/${ytId}/maxresdefault.jpg`;
+      const fallbackThumb = `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
+      let chosenThumb = fallbackThumb;
+
+      try {
+        const ytHead = await fetch(highResThumb, { 
+          method: 'HEAD', 
+          headers: { 'User-Agent': 'Mozilla/5.0 (compatible; PortfolioApp/1.0)' },
+          signal: AbortSignal.timeout(3500) 
+        });
+        if (ytHead.ok) {
+          chosenThumb = highResThumb;
+        }
+      } catch (headErr) {
+        // Fall back to hqdefault
+      }
+
+      // Fetch official title from YouTube oEmbed
+      let ogTitle = '';
+      try {
+        const oembedRes = await fetch(
+          `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${ytId}&format=json`,
+          { signal: AbortSignal.timeout(4000) }
+        );
+        if (oembedRes.ok) {
+          const oembedData = await oembedRes.json();
+          ogTitle = oembedData.title || '';
+        }
+      } catch (oeErr) {
+        // Ignore oembed failure
+      }
+
+      const payload = {
+        success: true,
+        ogImage: chosenThumb,
+        thumbnailUrl: chosenThumb,
+        fallbackThumb,
+        ogTitle,
+        platform: 'youtube',
+        videoId: ytId,
+        cachedAt: Date.now()
+      };
+      ogCache.set(targetUrl, payload);
+      return res.json(payload);
+    }
+
+    // Direct support for Vimeo oEmbed API (fast, reliable, returns high-res thumbnails)
+    if (targetUrl.toLowerCase().includes('vimeo.com')) {
+      try {
+        const vimeoOembedUrl = `https://vimeo.com/api/oembed.json?url=${encodeURIComponent(targetUrl)}`;
+        const vimeoRes = await fetch(vimeoOembedUrl, {
+          headers: { 'User-Agent': 'Mozilla/5.0 (compatible; PortfolioApp/1.0)' },
+          signal: AbortSignal.timeout(6000),
+        });
+        if (vimeoRes.ok) {
+          const vData = await vimeoRes.json();
+          let ogImage = vData.thumbnail_url || '';
+          if (ogImage) {
+            // Request higher resolution thumbnail
+            ogImage = ogImage.replace(/_\d+x\d+/, '_1280').replace(/_\d+\.jpg$/, '_1280.jpg');
+          }
+          const ogTitle = vData.title || '';
+          const durSeconds = vData.duration ? parseInt(vData.duration, 10) : 0;
+          const duration = durSeconds > 0 
+            ? `${Math.floor(durSeconds / 60)}:${String(durSeconds % 60).padStart(2, '0')}`
+            : undefined;
+
+          const unlistedMatch = targetUrl.match(/vimeo\.com\/(\d+)\/([a-zA-Z0-9]+)/i);
+          const qHashMatch = targetUrl.match(/[?&]h=([a-zA-Z0-9]+)/i);
+          const videoId = String(vData.video_id || unlistedMatch?.[1] || '');
+          const videoHash = unlistedMatch?.[2] || qHashMatch?.[1] || undefined;
+
+          const payload = { 
+            success: true,
+            ogImage, 
+            thumbnailUrl: ogImage, 
+            ogTitle, 
+            duration, 
+            videoId, 
+            videoHash, 
+            platform: 'vimeo', 
+            cachedAt: Date.now() 
+          };
+          ogCache.set(targetUrl, payload);
+          return res.json(payload);
+        }
+      } catch (vErr) {
+        console.warn('Vimeo oEmbed fetch attempt failed, falling back to HTML fetch:', vErr);
+      }
+    }
+
+    // Attempt fetch with facebookexternalhit User-Agent
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
+
+    const response = await fetch(targetUrl, {
+      signal: controller.signal,
+      redirect: 'follow',
+      headers: {
+        'User-Agent': 'facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.9',
+      },
+    });
+
+    clearTimeout(timeout);
+
+    const html = await response.text();
+
+    // Extract og:image
+    const ogImageMatch = 
+      html.match(/<meta[^>]*property=["']og:image["'][^>]*content=["']([^"']+)["']/i) ||
+      html.match(/<meta[^>]*content=["']([^"']+)["'][^>]*property=["']og:image["']/i);
+    
+    // Extract og:title
+    const ogTitleMatch = 
+      html.match(/<meta[^>]*property=["']og:title["'][^>]*content=["']([^"']+)["']/i) ||
+      html.match(/<meta[^>]*content=["']([^"']+)["'][^>]*property=["']og:title["']/i);
+
+    const ogImage = ogImageMatch ? ogImageMatch[1].replace(/&amp;/g, '&') : undefined;
+    const ogTitle = ogTitleMatch ? ogTitleMatch[1].replace(/&amp;/g, '&') : undefined;
+
+    if (ogImage) {
+      ogCache.set(targetUrl, { ogImage, ogTitle, cachedAt: Date.now() });
+      return res.json({ success: true, ogImage, ogTitle });
+    }
+
+    // If Facebook login redirect or no OG image found
+    return res.json({ 
+      success: false, 
+      message: 'No open graph image could be extracted automatically (Facebook requires authentication). You can upload a custom thumbnail.',
+      ogTitle: ogTitle || ''
+    });
+  } catch (err: any) {
+    console.error('Fetch OG error:', err);
+    return res.status(500).json({ 
+      success: false, 
+      error: err.message || 'Failed to fetch Open Graph metadata' 
+    });
+  }
+});
+
+async function startServer() {
+  if (process.env.NODE_ENV !== 'production') {
+    const { createServer: createViteServer } = await import('vite');
+    const vite = await createViteServer({
+      server: { 
+        middlewareMode: true,
+        host: '0.0.0.0',
+        port: PORT,
+      },
+      appType: 'spa',
+    });
+    app.use(vite.middlewares);
+  } else {
+    const distPath = path.resolve(process.cwd(), 'dist');
+    app.use(express.static(distPath));
+    app.get('*', (req, res) => {
+      res.sendFile(path.join(distPath, 'index.html'));
+    });
+  }
+
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server running at http://0.0.0.0:${PORT}`);
+  });
+}
+
+startServer();

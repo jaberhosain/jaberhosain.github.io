@@ -1,0 +1,28 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    // Strict check for verified owner (Gmail or exact UID)
+    function isOwner() {
+      return isSignedIn() && (
+        (request.auth.token.email != null && request.auth.token.email.matches('(?i)^(sbmc\\.3925@gmail\\.com|jabirbd@jabir\\.internal)$')) ||
+        request.auth.uid == 'ngH4tKvzVDee0eI0IvTnC6mwSnS2'
+      );
+    }
+
+    // Public read for portfolio uploaded images and videos so visitors can view artwork & media
+    // Only the verified owner may upload, replace, or delete files
+    match /portfolio_uploads/{allPaths=**} {
+      allow read: if true;
+      allow write: if isOwner() && (request.resource == null || request.resource.size < 25 * 1024 * 1024);
+    }
+
+    // Default deny for everything else
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

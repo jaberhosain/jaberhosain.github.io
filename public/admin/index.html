@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Redirecting to Admin Dashboard...</title>
+    <meta http-equiv="refresh" content="0;url=../#admin" />
+    <script>
+      // Instantly forward to the single-page application with #admin hash
+      var target = window.location.pathname.replace(/\/admin\/?$/, '/') + '#admin';
+      window.location.replace(target);
+    </script>
+  </head>
+  <body style="background-color: #0B0F12; color: #FF5722; font-family: monospace; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0;">
+    <div style="text-align: center;">
+      <p style="font-size: 16px; font-weight: bold;">Opening Admin Dashboard...</p>
+      <p style="font-size: 12px; color: #888;">If you are not redirected automatically, <a href="../#admin" style="color: #FF5722;">click here</a>.</p>
+    </div>
+  </body>
+</html>

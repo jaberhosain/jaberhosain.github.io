@@ -1,0 +1,140 @@
+{
+  "entities": {
+    "PortfolioData": {
+      "title": "PortfolioData",
+      "description": "Full site content including localized texts, projects, videos, skills, services, and profile information for draft and published versions.",
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["draft", "published"],
+          "description": "State of this configuration version."
+        },
+        "hero": {
+          "type": "object",
+          "description": "Hero section content and statistics."
+        },
+        "about": {
+          "type": "object",
+          "description": "About me story, philosophy, and background."
+        },
+        "skills": {
+          "type": "array",
+          "description": "Grouped design, video editing, and marketing skills."
+        },
+        "services": {
+          "type": "array",
+          "description": "Offered creative service offerings."
+        },
+        "projects": {
+          "type": "array",
+          "description": "Portfolio work pieces with Behance links, images, and details."
+        },
+        "videos": {
+          "type": "array",
+          "description": "Showcase video projects with YouTube or direct links."
+        },
+        "experiences": {
+          "type": "array",
+          "description": "Career journey and educational history."
+        },
+        "testimonials": {
+          "type": "array",
+          "description": "Client reviews and ratings."
+        },
+        "socialLinks": {
+          "type": "object",
+          "description": "Social channels and contact details."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when document was last modified."
+        }
+      },
+      "required": ["status", "hero", "about", "projects", "socialLinks"]
+    },
+    "Lead": {
+      "title": "Lead",
+      "description": "Client contact or project inquiry submitted via the website.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 100,
+          "description": "Client name."
+        },
+        "email": {
+          "type": "string",
+          "minLength": 5,
+          "maxLength": 150,
+          "description": "Client email address."
+        },
+        "phone": {
+          "type": "string",
+          "maxLength": 50,
+          "description": "Phone number or WhatsApp contact."
+        },
+        "country": {
+          "type": "string",
+          "maxLength": 80,
+          "description": "Client country or location."
+        },
+        "projectType": {
+          "type": "string",
+          "maxLength": 50,
+          "description": "Selected service or inquiry type."
+        },
+        "message": {
+          "type": "string",
+          "minLength": 5,
+          "maxLength": 3000,
+          "description": "Project details or message."
+        },
+        "status": {
+          "type": "string",
+          "enum": ["new", "contacted", "completed"],
+          "description": "Workflow status of lead."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when inquiry was received."
+        }
+      },
+      "required": ["name", "email", "message"]
+    },
+    "AdminProfile": {
+      "title": "AdminProfile",
+      "description": "Authorized site owner and administrator profile.",
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string",
+          "description": "Admin email address."
+        },
+        "role": {
+          "type": "string",
+          "enum": ["owner", "admin"],
+          "description": "Administrative authority role."
+        }
+      },
+      "required": ["email", "role"]
+    }
+  },
+  "firestore": {
+    "/portfolio/{docId}": {
+      "schema": "PortfolioData",
+      "description": "Global portfolio configuration. 'published' is publicly readable. 'draft' and all modifications are restricted to verified admins."
+    },
+    "/leads/{leadId}": {
+      "schema": "Lead",
+      "description": "Contact form submissions from prospective clients. Anyone can create with valid payload, but only admins can list, read, or delete."
+    },
+    "/admins/{userId}": {
+      "schema": "AdminProfile",
+      "description": "RBAC mapping for authorized site owners."
+    }
+  }
+}
