@@ -19,6 +19,8 @@ import { VideosPage } from './components/pages/VideosPage';
 import { DesignPage } from './components/pages/DesignPage';
 import { SkillsPage } from './components/pages/SkillsPage';
 import { ContactPage } from './components/pages/ContactPage';
+import { PortfolioAIAgent } from './components/PortfolioAIAgent';
+import { WelcomeSalamToast } from './components/WelcomeSalamToast';
 import { VideoShowcaseItem, ProjectItem } from './types/portfolio';
 
 function MainApp() {
@@ -127,6 +129,9 @@ function MainApp() {
   // PUBLIC WEBSITE (Multi-page architecture, zero admin links exposed)
   return (
     <div className="min-h-screen bg-[#070A0C] text-neutral-100 flex flex-col font-sans selection:bg-[#FF5722] selection:text-white">
+      {/* Automatic Salam Greeting Popup on Site Entry */}
+      <WelcomeSalamToast />
+
       {/* Navbar with brand monogram, page links, theme & language switcher */}
       <Navbar />
 
@@ -156,6 +161,9 @@ function MainApp() {
           }}
         />
       )}
+
+      {/* Floating Portfolio AI Agent */}
+      <PortfolioAIAgent />
     </div>
   );
 }

@@ -1,11 +1,25 @@
 import express from 'express';
 import path from 'path';
+import { GoogleGenAI, ThinkingLevel } from '@google/genai';
 
 const app = express();
 const PORT = parseInt(process.env.PORT || '3000', 10);
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.static(path.resolve(process.cwd(), 'public')));
+
+function getGenAIClient(): GoogleGenAI | null {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) return null;
+  return new GoogleGenAI({
+    apiKey,
+    httpOptions: {
+      headers: {
+        'User-Agent': 'aistudio-build',
+      },
+    },
+  });
+}
 
 // In-memory cache for Open Graph metadata
 const ogCache = new Map<string, { ogImage?: string; ogTitle?: string; cachedAt: number }>();
@@ -191,6 +205,65 @@ app.get('/api/fetch-og', async (req, res) => {
     return res.status(500).json({ 
       success: false, 
       error: err.message || 'Failed to fetch Open Graph metadata' 
+    });
+  }
+});
+
+// Portfolio AI Agent Server-Side Chat Endpoint
+app.post('/api/agent/chat', async (req, res) => {
+  const { message, language = 'en', history = [], portfolioSummary = '' } = req.body || {};
+
+  if (!message || typeof message !== 'string') {
+    return res.status(400).json({ error: 'Message is required' });
+  }
+
+  const ai = getGenAIClient();
+  if (!ai) {
+    return res.status(503).json({ error: 'AI service key not configured on server' });
+  }
+
+  try {
+    const conversationContext = Array.isArray(history)
+      ? history
+          .slice(-6)
+          .map((m: any) => `${m.role === 'user' ? 'Visitor' : 'Assistant'}: ${m.text}`)
+          .join('\n')
+      : '';
+
+    const systemInstruction = [
+      'You are the official Portfolio AI Agent for MD. Jaber Hosain (মোঃ জাবের হোসাইন), a Creative Video Editor, Graphic Designer, and Digital Marketer.',
+      'Your role is to help visitors, clients, and recruiters explore his Video Editing portfolio, Graphic Design & Behance poster groups, Skills, Education, and Contact options.',
+      'Guidelines:',
+      '- Reply in the same language the visitor uses (Bangla, English, or Arabic). Keep responses concise (2 to 4 short sentences or clean bullet points), warm, and professional.',
+      '- Base your answers strictly on the provided live portfolio summary below. Never invent fake projects or pricing numbers; for custom quotes, invite them to reach out via the Contact page, Email, or Telegram.',
+      '',
+      'LIVE PORTFOLIO DATA:',
+      portfolioSummary,
+    ].join('\n');
+
+    const prompt = conversationContext
+      ? `Recent conversation:\n${conversationContext}\n\nVisitor (${language}): ${message}`
+      : message;
+
+    const response = await ai.models.generateContent({
+      model: 'gemini-4-hydrogen',
+      contents: prompt,
+      config: {
+        systemInstruction,
+        thinkingConfig: { thinkingLevel: ThinkingLevel.LOW },
+      },
+    });
+
+    const reply = (response.text ?? '').trim();
+    if (!reply) {
+      return res.status(502).json({ error: 'Empty response from model' });
+    }
+
+    return res.json({ success: true, reply });
+  } catch (err: any) {
+    console.error('AI Agent error:', err);
+    return res.status(500).json({
+      error: err?.message || 'Failed to generate AI response',
     });
   }
 });
