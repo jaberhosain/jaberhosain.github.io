@@ -21,6 +21,7 @@ import { SkillsPage } from './components/pages/SkillsPage';
 import { ContactPage } from './components/pages/ContactPage';
 import { PortfolioAIAgent } from './components/PortfolioAIAgent';
 import { WelcomeSalamToast } from './components/WelcomeSalamToast';
+import { StudioBackdrop3D } from './components/three/StudioBackdrop3D';
 import { VideoShowcaseItem, ProjectItem } from './types/portfolio';
 
 function MainApp() {
@@ -126,21 +127,26 @@ function MainApp() {
     }
   };
 
-  // PUBLIC WEBSITE (Multi-page architecture, zero admin links exposed)
+  // PUBLIC WEBSITE (3D WebGL Spatial World + Multi-page architecture)
   return (
-    <div className="min-h-screen bg-[#070A0C] text-neutral-100 flex flex-col font-sans selection:bg-[#FF5722] selection:text-white">
+    <div className="relative min-h-screen bg-[#121419] text-[#F4F0E8] flex flex-col font-sans selection:bg-[#E4583B] selection:text-white overflow-x-clip">
+      {/* Persistent Three.js Interactive 3D WebGL Backdrop */}
+      <StudioBackdrop3D activePage={currentPage} />
+
       {/* Automatic Salam Greeting Popup on Site Entry */}
       <WelcomeSalamToast />
 
       {/* Navbar with brand monogram, page links, theme & language switcher */}
       <Navbar />
 
-      <main className="flex-1 flex flex-col">
+      <main className="relative z-10 flex-1 flex flex-col">
         {renderActivePage()}
       </main>
 
       {/* Footer */}
-      <Footer onOpenAdmin={() => setIsAdminRoute(true)} />
+      <div className="relative z-10">
+        <Footer onOpenAdmin={() => setIsAdminRoute(true)} />
+      </div>
 
       {/* Video Modal Player */}
       {activeVideo && (

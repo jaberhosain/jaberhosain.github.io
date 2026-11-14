@@ -9,15 +9,15 @@ interface Tilt3DImageStageProps {
 }
 
 /**
- * Reusable mouse-responsive 3D perspective stage for project showcase images.
- * Smoothly rotates/tilts toward the cursor direction with subtle dynamic light glare.
+ * Physical 3D perspective stage for visual cards & showcases.
+ * Smoothly tilts toward cursor with subtle champagne/vermilion studio specular sheen.
  */
 export const Tilt3DImageStage: React.FC<Tilt3DImageStageProps> = ({
   children,
   className = '',
   maxTilt = 14,
   scaleOnHover = 1.03,
-  glareOpacity = 0.28,
+  glareOpacity = 0.24,
 }) => {
   const stageRef = useRef<HTMLDivElement>(null);
   const [tilt, setTilt] = useState({
@@ -36,7 +36,6 @@ export const Tilt3DImageStage: React.FC<Tilt3DImageStageProps> = ({
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
 
-    // Normalize coordinates to [-1, 1]
     const normX = (x / rect.width) * 2 - 1;
     const normY = (y / rect.height) * 2 - 1;
 
@@ -64,7 +63,7 @@ export const Tilt3DImageStage: React.FC<Tilt3DImageStageProps> = ({
       ref={stageRef}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
-      className={`relative [perspective:900px] ${className}`}
+      className={`relative [perspective:1000px] ${className}`}
     >
       <div
         className="relative w-full h-full preserve-3d will-change-transform"
@@ -79,11 +78,11 @@ export const Tilt3DImageStage: React.FC<Tilt3DImageStageProps> = ({
       >
         {children}
 
-        {/* Dynamic Cursor Light Glare */}
+        {/* Calibrated Studio Specular Reflection */}
         <div
-          className="absolute inset-0 pointer-events-none z-20 transition-opacity duration-200 mix-blend-overlay"
+          className="absolute inset-0 pointer-events-none z-20 transition-opacity duration-200 mix-blend-overlay rounded-2xl"
           style={{
-            background: `radial-gradient(circle 260px at ${tilt.glareX}% ${tilt.glareY}%, rgba(255, 255, 255, ${glareOpacity}) 0%, rgba(255, 87, 34, 0.14) 45%, transparent 80%)`,
+            background: `radial-gradient(circle 280px at ${tilt.glareX}% ${tilt.glareY}%, rgba(244, 240, 232, ${glareOpacity}) 0%, rgba(228, 88, 59, 0.12) 45%, transparent 80%)`,
             opacity: tilt.isHovered ? 1 : 0,
           }}
         />

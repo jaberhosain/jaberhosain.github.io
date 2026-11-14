@@ -35,7 +35,7 @@ export const LayerExplosionShowcase: React.FC = () => {
       name: language === 'bn' ? 'লেয়ার ৪: কাইনেটিক টাইপ ও সাবটাইটেল' : 'Layer 4: Kinetic Typography & Hook HUD',
       tech: 'After Effects • Bezier Curves • Alpha Channel',
       icon: Type,
-      color: '#FF5722',
+      color: '#E4583B',
       depthOffset: 120,
       desc: language === 'bn' ? 'অ্যাকশন-সিঙ্ক টেক্সট অ্যানিমেশন যা স্ক্রল থামিয়ে দেয়।' : 'Dynamic typography with custom easing that locks viewer attention.'
     },
@@ -69,37 +69,33 @@ export const LayerExplosionShowcase: React.FC = () => {
   ];
 
   return (
-    <section className="py-24 bg-[#090C0F] border-t border-[#1D232A] relative overflow-hidden">
-      {/* Ambient background glows */}
-      <div className="absolute top-1/2 left-1/3 -translate-y-1/2 w-[600px] h-[600px] bg-[#FF5722]/8 rounded-full blur-[180px] pointer-events-none" />
-      <div className="absolute top-1/2 right-1/4 -translate-y-1/2 w-[500px] h-[500px] bg-[#A855F7]/8 rounded-full blur-[160px] pointer-events-none" />
-
+    <section className="py-24 bg-[#14171E]/80 border-t border-[#2B303D] relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        
+
         {/* Section Header with 3D Explode Toggle */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16 pb-8 border-b border-[#1D232A]">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16 pb-8 border-b border-[#2B303D]">
           <div>
-            <div className="inline-flex items-center space-x-2 rtl:space-x-reverse px-3 py-1 rounded-md bg-[#181E24] border border-[#232B33] text-xs font-mono text-[#FF5722] mb-3">
-              <Layers className="w-3.5 h-3.5 text-[#FF5722]" />
+            <p className="inline-flex items-center space-x-2 rtl:space-x-reverse text-[11px] font-mono tracking-[0.22em] uppercase text-[#E4583B] mb-3">
+              <Layers className="w-3.5 h-3.5 text-[#E4583B]" />
               <span>3D LAYER DECONSTRUCTION</span>
-            </div>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight uppercase">
+            </p>
+            <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#F4F0E8] tracking-tight uppercase">
               {language === 'bn' ? 'একটির ভেতর থেকে বহুমাত্রিক বিস্তার' : 'One Frame. Exploded in 3D.'}
-              <span className="block font-serif italic text-[#FF7043] lowercase font-normal mt-1">
+              <span className="block font-editorial italic text-[#E4583B] lowercase font-normal mt-1 text-[1.08em]">
                 {language === 'bn' ? 'ভিডিওর প্রতিটি লেয়ার যখন থ্রিডি স্পেসে দৃশ্যমান।' : 'see how every cut is stacked frame by frame.'}
               </span>
             </h2>
           </div>
 
           {/* Mode Switcher */}
-          <div className="flex items-center space-x-2 p-1.5 rounded-2xl bg-[#12161A] border border-[#232B33] self-start md:self-auto">
+          <div className="flex items-center space-x-2 p-1.5 rounded-2xl bg-[#181B22] border border-[#2B303D] self-start md:self-auto">
             <button
               type="button"
               onClick={() => setIsExploded(true)}
-              className={`px-4 py-2 rounded-xl text-xs font-mono font-bold transition-all flex items-center space-x-2 ${
+              className={`px-4 py-2 rounded-xl text-xs font-mono font-bold transition-all flex items-center space-x-2 cursor-pointer ${
                 isExploded
-                  ? 'bg-[#FF5722] text-white glow-orange-sm'
-                  : 'text-neutral-400 hover:text-white'
+                  ? 'bg-[#E4583B] text-[#F4F0E8]'
+                  : 'text-[#A7A298] hover:text-[#F4F0E8]'
               }`}
             >
               <Layers className="w-3.5 h-3.5" />
@@ -108,10 +104,10 @@ export const LayerExplosionShowcase: React.FC = () => {
             <button
               type="button"
               onClick={() => setIsExploded(false)}
-              className={`px-4 py-2 rounded-xl text-xs font-mono font-bold transition-all flex items-center space-x-2 ${
+              className={`px-4 py-2 rounded-xl text-xs font-mono font-bold transition-all flex items-center space-x-2 cursor-pointer ${
                 !isExploded
-                  ? 'bg-[#FF5722] text-white glow-orange-sm'
-                  : 'text-neutral-400 hover:text-white'
+                  ? 'bg-[#E4583B] text-[#F4F0E8]'
+                  : 'text-[#A7A298] hover:text-[#F4F0E8]'
               }`}
             >
               <Eye className="w-3.5 h-3.5" />
@@ -122,22 +118,22 @@ export const LayerExplosionShowcase: React.FC = () => {
 
         {/* 3D Stage & Layer Cards Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-          
+
           {/* Left Column: Interactive 3D Perspective Sandwich View */}
-          <div 
+          <div
             ref={containerRef}
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
             className="lg:col-span-7 h-[460px] sm:h-[540px] relative flex items-center justify-center perspective-1200 cursor-grab active:cursor-grabbing select-none"
           >
-            <div 
+            <div
               className="relative w-[300px] sm:w-[420px] aspect-[16/10] preserve-3d transition-transform duration-200 ease-out"
               style={{
                 transform: `rotateX(${tilt.rotX}deg) rotateY(${tilt.rotY}deg)`
               }}
             >
-              
-              {/* Render 4 Floating Glass Planes */}
+
+              {/* Render 4 Floating Glass Planes (NO backdrop-blur to protect 60fps WebGL) */}
               {layers.map((layer, idx) => {
                 const zDist = isExploded ? layer.depthOffset * 1.5 : idx * 3;
                 const isSelected = activeLayer === layer.id;
@@ -147,34 +143,34 @@ export const LayerExplosionShowcase: React.FC = () => {
                     key={layer.id}
                     onMouseEnter={() => setActiveLayer(layer.id)}
                     onMouseLeave={() => setActiveLayer(null)}
-                    className="absolute inset-0 rounded-2xl overflow-hidden border backdrop-blur-md transition-all duration-700 ease-out shadow-2xl"
+                    className="absolute inset-0 rounded-2xl overflow-hidden border transition-all duration-700 ease-out"
                     style={{
                       transform: `translateZ(${zDist}px) ${isSelected ? 'scale(1.05)' : 'scale(1)'}`,
-                      borderColor: isSelected ? layer.color : isExploded ? `${layer.color}66` : '#232B33',
-                      backgroundColor: isExploded ? 'rgba(15, 20, 25, 0.75)' : '#0F1419',
-                      boxShadow: isSelected 
-                        ? `0 25px 50px -12px rgba(0,0,0,0.8), 0 0 25px ${layer.color}40`
-                        : '0 20px 40px -10px rgba(0,0,0,0.6)'
+                      borderColor: isSelected ? layer.color : isExploded ? `${layer.color}66` : '#2B303D',
+                      backgroundColor: isExploded ? 'rgba(24, 27, 34, 0.90)' : '#181B22',
+                      boxShadow: isSelected
+                        ? `0 25px 50px -12px rgba(0,0,0,0.75), 0 0 22px ${layer.color}38`
+                        : '0 20px 40px -10px rgba(0,0,0,0.55)'
                     }}
                   >
-                    
+
                     {/* Layer 1: Audio Visualizer Grid */}
                     {layer.id === 1 && (
-                      <div className="w-full h-full p-6 flex flex-col justify-between bg-gradient-to-br from-[#0A1A12] to-[#050B08]">
+                      <div className="w-full h-full p-6 flex flex-col justify-between bg-gradient-to-br from-[#0F1F18] to-[#12161A]">
                         <div className="flex items-center justify-between text-xs font-mono text-[#34D399]">
                           <span className="font-bold">LAYER 01: AUDIO WAVEFORM</span>
                           <span>-14 LUFS</span>
                         </div>
                         <div className="flex items-end justify-between space-x-1.5 h-20 px-2">
                           {[40, 75, 30, 90, 60, 45, 85, 95, 35, 65, 80, 50, 70, 90, 40, 60, 85, 70].map((h, i) => (
-                            <div 
-                              key={i} 
+                            <div
+                              key={i}
                               className="flex-1 bg-[#10B981] rounded-t transition-all duration-300"
-                              style={{ height: `${h}%`, opacity: 0.8 }}
+                              style={{ height: `${h}%`, opacity: 0.85 }}
                             />
                           ))}
                         </div>
-                        <div className="text-[10px] font-mono text-neutral-400">
+                        <div className="text-[10px] font-mono text-[#A7A298]">
                           Beat Sync • Sub Drops • Foley Hits
                         </div>
                       </div>
@@ -182,14 +178,14 @@ export const LayerExplosionShowcase: React.FC = () => {
 
                     {/* Layer 2: 4K Master Footage */}
                     {layer.id === 2 && (
-                      <div className="relative w-full h-full overflow-hidden bg-[#0A0D10]">
+                      <div className="relative w-full h-full overflow-hidden bg-[#121419]">
                         <img
                           src={resolveAssetUrl(previewImage)}
                           alt="Color Graded Footage"
-                          className="w-full h-full object-cover filter contrast-110 saturate-110"
+                          className="w-full h-full object-cover contrast-105 saturate-105"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-                        <div className="absolute top-3 left-3 px-2 py-0.5 rounded bg-black/70 text-cyan-300 text-[10px] font-mono border border-cyan-500/40">
+                        <div className="absolute inset-0 bg-gradient-to-t from-[#121419]/85 via-transparent to-transparent" />
+                        <div className="absolute top-3 left-3 px-2.5 py-0.5 rounded bg-[#121419]/85 text-cyan-300 text-[10px] font-mono border border-cyan-500/40">
                           LOG TO 709 COLOR GRADE
                         </div>
                       </div>
@@ -197,13 +193,13 @@ export const LayerExplosionShowcase: React.FC = () => {
 
                     {/* Layer 3: 3D Motion Graphics & Vector Overlay */}
                     {layer.id === 3 && (
-                      <div className="w-full h-full p-6 flex flex-col justify-between bg-[#150F22]/80 border border-purple-500/30">
+                      <div className="w-full h-full p-6 flex flex-col justify-between bg-[#1B1626]/90 border border-purple-500/30">
                         <div className="flex items-center justify-between text-xs font-mono text-[#C084FC]">
                           <span className="font-bold">LAYER 03: 3D MOTION & VFX</span>
                           <span>60 FPS</span>
                         </div>
                         <div className="relative flex items-center justify-center">
-                          <div className="w-24 h-24 rounded-full border-2 border-dashed border-[#A855F7] animate-spin" style={{ animationDuration: '10s' }} />
+                          <div className="w-24 h-24 rounded-full border-2 border-dashed border-[#A855F7] animate-spin" style={{ animationDuration: '12s' }} />
                           <Sparkles className="w-8 h-8 text-[#C084FC] absolute" />
                         </div>
                         <div className="text-[10px] font-mono text-purple-300">
@@ -212,31 +208,31 @@ export const LayerExplosionShowcase: React.FC = () => {
                       </div>
                     )}
 
-                    {/* Layer 4: Kinetic Typography & Hook HUD */}
+                    {/* Layer 4: Kinetic Typography & Optical Title Gate */}
                     {layer.id === 4 && (
-                      <div className="w-full h-full p-6 flex flex-col justify-between bg-black/40">
-                        <div className="flex items-center justify-between text-xs font-mono text-[#FF7043]">
-                          <span className="font-bold">[ • REC ] 00:00:18:24</span>
-                          <span className="px-2 py-0.5 rounded bg-[#FF5722] text-white font-bold text-[10px]">HOOK TITLE</span>
+                      <div className="w-full h-full p-6 flex flex-col justify-between bg-[#14171E]/88">
+                        <div className="flex items-center justify-between text-[11px] font-mono text-[#DDD1BE]">
+                          <span>FRAME 018 · 24 FPS</span>
+                          <span className="px-2 py-0.5 rounded bg-[#E4583B] text-[#F4F0E8] font-bold text-[10px]">TITLE GATE</span>
                         </div>
                         <div className="text-center">
-                          <h3 className="text-xl sm:text-2xl font-black text-white uppercase tracking-tight text-gradient-orange">
+                          <h3 className="font-display text-xl sm:text-2xl font-extrabold text-[#F4F0E8] uppercase tracking-tight">
                             STORYTELLING THAT CONVERTS
                           </h3>
-                          <span className="text-xs font-mono text-neutral-300 tracking-widest mt-1 block">
-                            NO TEMPLATES • MEASURED FRAME BY FRAME
+                          <span className="text-[11px] font-editorial italic text-[#E4583B] tracking-wide mt-1 block">
+                            crafted frame by frame in 3D space
                           </span>
                         </div>
-                        <div className="flex items-center justify-between text-[10px] font-mono text-neutral-400">
-                          <span>24 FPS • 4K</span>
-                          <span className="text-[#FF5722]">MD JABER HOSAIN</span>
+                        <div className="flex items-center justify-between text-[10px] font-mono text-[#A7A298]">
+                          <span>4K MASTER GRADE</span>
+                          <span className="text-[#DDD1BE]">MD JABER HOSAIN</span>
                         </div>
                       </div>
                     )}
 
                     {/* Depth Label Badge on edge */}
                     {isExploded && (
-                      <div className="absolute bottom-2 right-2 px-2 py-0.5 rounded bg-black/90 border border-white/20 text-[9px] font-mono text-white font-bold">
+                      <div className="absolute bottom-2 right-2 px-2 py-0.5 rounded bg-[#121419]/92 border border-[#2B303D] text-[9px] font-mono text-[#DDD1BE] font-bold">
                         Z: {layer.depthOffset}px
                       </div>
                     )}
@@ -249,7 +245,7 @@ export const LayerExplosionShowcase: React.FC = () => {
 
           {/* Right Column: Layer Info Cards */}
           <div className="lg:col-span-5 space-y-3">
-            <span className="text-xs font-mono text-neutral-400 uppercase tracking-widest block mb-1">
+            <span className="text-xs font-mono text-[#A7A298] uppercase tracking-widest block mb-1">
               {language === 'bn' ? 'লেয়ার স্পেসিফিকেশন' : 'LAYER ARCHITECTURE'}
             </span>
 
@@ -262,10 +258,10 @@ export const LayerExplosionShowcase: React.FC = () => {
                   key={layer.id}
                   onMouseEnter={() => setActiveLayer(layer.id)}
                   onMouseLeave={() => setActiveLayer(null)}
-                  className={`p-4 rounded-2xl border transition-all duration-300 cursor-pointer ${
+                  className={`studio-card p-4 rounded-2xl border transition-all duration-300 cursor-pointer ${
                     isSelected
-                      ? 'bg-[#181E24] shadow-xl -translate-x-1.5'
-                      : 'bg-[#12161A] border-[#232B33] hover:border-neutral-600'
+                      ? 'bg-[#20242E] -translate-x-1.5'
+                      : 'hover:border-[#A7A298]/45'
                   }`}
                   style={{
                     borderColor: isSelected ? layer.color : undefined
@@ -273,30 +269,30 @@ export const LayerExplosionShowcase: React.FC = () => {
                 >
                   <div className="flex items-center justify-between mb-1.5">
                     <div className="flex items-center space-x-2.5 rtl:space-x-reverse">
-                      <div 
+                      <div
                         className="w-8 h-8 rounded-lg flex items-center justify-center"
-                        style={{ backgroundColor: `${layer.color}25`, color: layer.color }}
+                        style={{ backgroundColor: `${layer.color}22`, color: layer.color }}
                       >
                         <Icon className="w-4 h-4" />
                       </div>
-                      <h4 className="font-bold text-sm text-white">
+                      <h4 className="font-bold text-sm text-[#F4F0E8]">
                         {layer.name}
                       </h4>
                     </div>
 
-                    <span 
+                    <span
                       className="text-[10px] font-mono font-bold px-2 py-0.5 rounded"
-                      style={{ backgroundColor: `${layer.color}15`, color: layer.color }}
+                      style={{ backgroundColor: `${layer.color}18`, color: layer.color }}
                     >
                       {layer.depthOffset}px Depth
                     </span>
                   </div>
 
-                  <p className="text-xs text-neutral-400 pl-10 rtl:pl-0 rtl:pr-10 leading-relaxed mb-2">
+                  <p className="text-xs text-[#A7A298] pl-10 rtl:pl-0 rtl:pr-10 leading-relaxed mb-2">
                     {layer.desc}
                   </p>
 
-                  <div className="pl-10 rtl:pl-0 rtl:pr-10 text-[10px] font-mono text-neutral-500">
+                  <div className="pl-10 rtl:pl-0 rtl:pr-10 text-[10px] font-mono text-[#A7A298]/80">
                     {layer.tech}
                   </div>
                 </div>

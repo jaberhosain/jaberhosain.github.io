@@ -21,24 +21,24 @@ export const PagePagination: React.FC<PagePaginationProps> = ({ currentPageId })
   const nextKicker = language === 'bn' ? 'পরবর্তী পেজ' : language === 'ar' ? 'الصفحة التالية' : 'Next Page';
 
   return (
-    <section className="py-12 bg-[#070A0D] border-t border-[#1D232A]">
+    <section className="py-12 bg-[#121419]/80 border-t border-[#2B303D]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className={`grid grid-cols-1 ${prevPage ? 'md:grid-cols-2' : 'md:grid-cols-1'} gap-4`}>
           {prevPage && (
             <button
               type="button"
               onClick={() => navigateTo(prevPage.id)}
-              className="group p-6 rounded-2xl bg-[#12161A] border border-[#232B33] hover:border-[#FF5722]/60 transition-all text-left rtl:text-right flex items-center justify-between cursor-pointer"
+              className="group p-6 rounded-2xl studio-card text-left rtl:text-right flex items-center justify-between cursor-pointer hover:-translate-y-0.5"
             >
               <div>
-                <span className="text-[11px] font-mono text-neutral-400 uppercase tracking-wider block mb-1">
+                <span className="text-[11px] font-mono text-[#A7A298] uppercase tracking-wider block mb-1">
                   {prevKicker} · {prevPage.index}
                 </span>
-                <span className="text-lg font-bold text-white group-hover:text-[#FF5722] transition-colors">
+                <span className="text-lg font-bold text-[#F4F0E8] group-hover:text-[#E4583B] transition-colors">
                   {prevPage.title[language] || prevPage.title.en}
                 </span>
               </div>
-              <div className="w-10 h-10 rounded-xl bg-[#181E24] border border-[#232B33] flex items-center justify-center text-neutral-300 group-hover:text-[#FF5722] group-hover:border-[#FF5722]/40 transition-colors shrink-0">
+              <div className="w-10 h-10 rounded-lg bg-[#20242E] border border-[#2B303D] flex items-center justify-center text-[#DDD1BE] group-hover:text-[#E4583B] group-hover:border-[#E4583B]/40 transition-colors shrink-0">
                 <ArrowLeft className="w-4 h-4 rtl:rotate-180" />
               </div>
             </button>
@@ -47,17 +47,17 @@ export const PagePagination: React.FC<PagePaginationProps> = ({ currentPageId })
           <button
             type="button"
             onClick={() => navigateTo(nextPage.id)}
-            className="group p-6 rounded-2xl bg-[#12161A] border border-[#232B33] hover:border-[#FF5722]/60 transition-all text-left rtl:text-right flex items-center justify-between cursor-pointer"
+            className="group p-6 rounded-2xl studio-card text-left rtl:text-right flex items-center justify-between cursor-pointer hover:-translate-y-0.5"
           >
             <div>
-              <span className="text-[11px] font-mono text-neutral-400 uppercase tracking-wider block mb-1">
+              <span className="text-[11px] font-mono text-[#A7A298] uppercase tracking-wider block mb-1">
                 {nextKicker} · {nextPage.index}
               </span>
-              <span className="text-lg font-bold text-white group-hover:text-[#FF5722] transition-colors">
+              <span className="text-lg font-bold text-[#F4F0E8] group-hover:text-[#E4583B] transition-colors">
                 {nextPage.title[language] || nextPage.title.en}
               </span>
             </div>
-            <div className="w-10 h-10 rounded-xl bg-[#181E24] border border-[#232B33] flex items-center justify-center text-neutral-300 group-hover:text-[#FF5722] group-hover:border-[#FF5722]/40 transition-colors shrink-0">
+            <div className="w-10 h-10 rounded-lg bg-[#20242E] border border-[#2B303D] flex items-center justify-center text-[#DDD1BE] group-hover:text-[#E4583B] group-hover:border-[#E4583B]/40 transition-colors shrink-0">
               <ArrowRight className="w-4 h-4 rtl:rotate-180" />
             </div>
           </button>

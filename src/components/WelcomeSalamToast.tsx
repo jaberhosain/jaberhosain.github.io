@@ -60,50 +60,46 @@ export const WelcomeSalamToast: React.FC = () => {
       className={`fixed inset-0 z-[100] flex items-center justify-center p-4 transition-all duration-500 cursor-pointer ${
         exiting
           ? 'bg-black/0 backdrop-blur-none opacity-0 pointer-events-none'
-          : 'bg-black/65 backdrop-blur-md opacity-100'
+          : 'bg-[#121419]/70 backdrop-blur-md opacity-100'
       }`}
     >
       {/* Centered Salam Card */}
       <div
         onClick={(e) => e.stopPropagation()}
-        className={`relative w-full max-w-md overflow-hidden rounded-3xl bg-[#12161A]/95 border border-[#FF5722]/45 shadow-[0_25px_70px_-15px_rgba(0,0,0,0.9),0_0_40px_-10px_rgba(255,87,34,0.28)] px-6 py-7 text-center transition-all duration-500 cursor-default ${
+        className={`relative w-full max-w-md overflow-hidden rounded-2xl bg-[#181B22] border border-[#E4583B]/45 shadow-[0_28px_72px_-16px_rgba(0,0,0,0.8)] px-6 py-7 text-center transition-all duration-500 cursor-default ${
           exiting
             ? 'opacity-0 scale-95 -translate-y-3'
             : 'opacity-100 scale-100 translate-y-0 animate-in fade-in zoom-in-95 duration-300'
         }`}
       >
-        {/* Subtle Ambient Glow */}
-        <div className="absolute -top-16 left-1/2 -translate-x-1/2 w-56 h-32 bg-[#FF5722]/20 rounded-full blur-3xl pointer-events-none" />
-
-        {/* Close Button */}
         <button
           type="button"
           onClick={handleDismiss}
           aria-label="Close greeting"
-          className="absolute top-3.5 right-3.5 p-2 rounded-xl text-neutral-400 hover:text-white hover:bg-white/5 transition-colors cursor-pointer"
+          className="absolute top-3.5 right-3.5 p-2 rounded-lg text-[#A7A298] hover:text-[#F4F0E8] hover:bg-white/5 transition-colors cursor-pointer"
         >
           <X className="w-4 h-4" />
         </button>
 
         {/* Arabic Calligraphy Greeting Emblem */}
-        <div className="inline-flex items-center justify-center px-4 py-1.5 rounded-2xl bg-[#FF5722]/15 border border-[#FF5722]/35 text-[#FF7043] font-serif text-base sm:text-lg font-bold tracking-wide mb-4">
+        <div className="inline-flex items-center justify-center px-4 py-1.5 rounded-xl bg-[#E4583B]/12 border border-[#E4583B]/35 text-[#F07C63] font-serif text-base sm:text-lg font-bold tracking-wide mb-4">
           السلام عليكم ورحمة الله
         </div>
 
         {/* Main Salam Headline */}
-        <h2 className="text-xl sm:text-2xl font-extrabold text-white leading-snug tracking-tight mb-2">
+        <h2 className="font-display text-xl sm:text-2xl font-extrabold text-[#F4F0E8] leading-snug tracking-tight mb-2">
           {greetingTitle}
         </h2>
 
         {/* Welcome Subtitle */}
-        <p className="text-xs sm:text-sm font-mono text-neutral-300 leading-relaxed">
+        <p className="text-xs sm:text-sm font-mono text-[#DDD1BE] leading-relaxed">
           {subtitleText}
         </p>
 
         {/* Auto-hide countdown progress bar */}
-        <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#1D232A] overflow-hidden">
+        <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#2B303D] overflow-hidden">
           <div
-            className="h-full bg-gradient-to-r from-[#FF5722] to-[#FF7043] transition-all ease-linear"
+            className="h-full bg-gradient-to-r from-[#E4583B] to-[#F07C63] transition-all ease-linear"
             style={{
               width: progressActive ? '0%' : '100%',
               transitionDuration: '3500ms'

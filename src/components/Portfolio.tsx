@@ -45,12 +45,10 @@ export const Portfolio: React.FC<PortfolioProps> = ({
     return true;
   };
 
-  // Video Editing tab reads portfolio.videos, hiding items marked hidden/visible===false
   const visibleVideos = [...(videos || [])]
     .filter((v: any) => v.visible !== false && !v.hidden && matchesPlatform(v))
     .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
 
-  // Graphic Design project groups
   const graphicProjects = useMemo(() => {
     return [...(projects || [])]
       .filter((p: any) => {
@@ -65,7 +63,6 @@ export const Portfolio: React.FC<PortfolioProps> = ({
       .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
   }, [projects, behanceOnly, groupFilter, loc]);
 
-  // Flat individual poster entries across matching groups (and Best Work when showing All)
   const flattenedPosters = useMemo(() => {
     const entries: {
       key: string;
@@ -99,7 +96,6 @@ export const Portfolio: React.FC<PortfolioProps> = ({
       });
     });
 
-    // Also include Best Works in flat "All Posters" view when not restricted to a specific project group
     if (groupFilter === 'all') {
       (bestGraphicWorks || [])
         .filter((b) => b.visible !== false && (!behanceOnly || Boolean(b.behanceUrl)))
@@ -141,13 +137,13 @@ export const Portfolio: React.FC<PortfolioProps> = ({
   return (
     <section
       id={mode === 'graphic' ? 'graphic-projects' : mode === 'video' ? 'video-projects' : 'projects'}
-      className="py-20 bg-[#0B0F12] border-t border-[#1D232A] relative"
+      className="py-20 bg-[#14171E]/80 border-t border-[#2B303D] relative"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* Section Header */}
         <div className="flex flex-col items-center text-center mb-12">
-          <span className="text-xs font-mono text-[#FF5722] uppercase tracking-widest mb-2.5">
+          <span className="text-xs font-mono text-[#E4583B] uppercase tracking-[0.2em] mb-2.5">
             {mode === 'graphic'
               ? viewStyle === 'posters'
                 ? language === 'bn'
@@ -161,7 +157,7 @@ export const Portfolio: React.FC<PortfolioProps> = ({
               : ui.projects.sectionTag}
           </span>
           <EditableElement id="portfolio.title" label="Portfolio Section Title" as="h2">
-            <span className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight uppercase">
+            <span className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#F4F0E8] tracking-tight">
               {mode === 'graphic'
                 ? groupFilter && groupFilter !== 'all'
                   ? groupFilter
@@ -177,44 +173,39 @@ export const Portfolio: React.FC<PortfolioProps> = ({
           </EditableElement>
         </div>
 
-        {/* Tab Pills (Only shown in combined 'all' mode) */}
+        {/* Mode Tabs */}
         {mode === 'all' && (
           <div className="flex justify-center space-x-3 rtl:space-x-reverse mb-12">
             <button
               onClick={() => setActiveTab('video')}
-              className={`inline-flex items-center space-x-2 rtl:space-x-reverse px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
+              className={`inline-flex items-center space-x-2 rtl:space-x-reverse px-5 py-2.5 rounded-lg text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
                 activeTab === 'video'
-                  ? 'bg-[#FF5722] text-white glow-orange-sm'
-                  : 'bg-[#181E24] text-neutral-400 hover:text-white border border-[#232B33]'
+                  ? 'bg-[#E4583B] text-white'
+                  : 'bg-[#181B22] text-[#A7A298] hover:text-[#F4F0E8] border border-[#2B303D]'
               }`}
             >
               <EditableElement id="portfolio.tabVideo" label="Video Tab Label" as="span">
                 {ui.projects.tabVideo}
               </EditableElement>
-              <span className="text-xs font-mono opacity-80 tabular-nums">
-                ({videoCount})
-              </span>
+              <span className="text-xs font-mono opacity-80 tabular-nums">({videoCount})</span>
             </button>
 
             <button
               onClick={() => setActiveTab('graphic')}
-              className={`inline-flex items-center space-x-2 rtl:space-x-reverse px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
+              className={`inline-flex items-center space-x-2 rtl:space-x-reverse px-5 py-2.5 rounded-lg text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
                 activeTab === 'graphic'
-                  ? 'bg-[#FF5722] text-white glow-orange-sm'
-                  : 'bg-[#181E24] text-neutral-400 hover:text-white border border-[#232B33]'
+                  ? 'bg-[#E4583B] text-white'
+                  : 'bg-[#181B22] text-[#A7A298] hover:text-[#F4F0E8] border border-[#2B303D]'
               }`}
             >
               <EditableElement id="portfolio.tabGraphic" label="Graphic Tab Label" as="span">
                 {ui.projects.tabGraphic}
               </EditableElement>
-              <span className="text-xs font-mono opacity-80 tabular-nums">
-                ({graphicCount})
-              </span>
+              <span className="text-xs font-mono opacity-80 tabular-nums">({graphicCount})</span>
             </button>
           </div>
         )}
 
-        {/* Scrollable Video Card Grid OR Graphic Design Showcase */}
         {effectiveTab === 'video' ? (
           <div className="mb-12">
             <VideoCardGrid
@@ -224,7 +215,6 @@ export const Portfolio: React.FC<PortfolioProps> = ({
             />
           </div>
         ) : viewStyle === 'posters' ? (
-          /* ALL INDIVIDUAL POSTERS GRID */
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
             {flattenedPosters.length > 0 ? (
               flattenedPosters.map((entry) => {
@@ -233,37 +223,41 @@ export const Portfolio: React.FC<PortfolioProps> = ({
                   <div
                     key={entry.key}
                     onClick={() => onOpenLightbox?.(entry.project, entry.indexInProject)}
-                    className="group rounded-2xl bg-[#12161A] border border-[#232B33] hover:border-[#FF5722]/60 overflow-hidden transition-all duration-300 cursor-pointer flex flex-col justify-between shadow-lg hover:-translate-y-1"
+                    className="group rounded-2xl studio-card overflow-hidden cursor-pointer flex flex-col justify-between hover:-translate-y-1"
                   >
-                    <div className="relative aspect-[4/5] bg-[#0D1115] overflow-hidden flex items-center justify-center border-b border-[#232B33]">
-                      {entry.url && !isBroken ? (
-                        <img
-                          src={resolveAssetUrl(entry.url)}
-                          alt={entry.caption}
-                          referrerPolicy="no-referrer"
-                          onError={() => setBrokenImages((prev) => ({ ...prev, [entry.key]: true }))}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                          loading="lazy"
-                        />
-                      ) : (
-                        <div className="flex flex-col items-center justify-center p-6 text-center">
-                          <Palette className="w-8 h-8 text-[#FF5722] mb-2" />
-                          <span className="text-xs font-mono text-neutral-300">{entry.caption}</span>
-                        </div>
-                      )}
+                    <div className="p-2.5 bg-[#121419]/90 border-b border-[#2B303D]">
+                      <Tilt3DImageStage className="aspect-[4/5] w-full" maxTilt={11} scaleOnHover={1.02}>
+                        <div className="relative w-full h-full rounded-xl bg-[#0E1015] overflow-hidden flex items-center justify-center">
+                          {entry.url && !isBroken ? (
+                            <img
+                              src={resolveAssetUrl(entry.url)}
+                              alt={entry.caption}
+                              referrerPolicy="no-referrer"
+                              onError={() => setBrokenImages((prev) => ({ ...prev, [entry.key]: true }))}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                              loading="lazy"
+                            />
+                          ) : (
+                            <div className="flex flex-col items-center justify-center p-6 text-center">
+                              <Palette className="w-8 h-8 text-[#E4583B] mb-2" />
+                              <span className="text-xs font-mono text-[#DDD1BE]">{entry.caption}</span>
+                            </div>
+                          )}
 
-                      <div className="absolute inset-0 bg-black/45 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
-                        <span className="inline-flex items-center space-x-1.5 rtl:space-x-reverse px-4 py-2 rounded-xl bg-black/85 border border-[#FF5722]/60 text-white text-xs font-mono">
-                          <Eye className="w-4 h-4 text-[#FF5722]" />
-                          <span>{language === 'bn' ? 'পোস্টার দেখুন' : 'Inspect Poster'}</span>
-                        </span>
-                      </div>
+                          <div className="absolute inset-0 bg-black/45 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
+                            <span className="inline-flex items-center space-x-1.5 rtl:space-x-reverse px-4 py-2 rounded-lg bg-[#121419]/95 border border-[#E4583B]/60 text-[#F4F0E8] text-xs font-mono">
+                              <Eye className="w-4 h-4 text-[#E4583B]" />
+                              <span>{language === 'bn' ? 'পোস্টার দেখুন' : 'Inspect Poster'}</span>
+                            </span>
+                          </div>
+                        </div>
+                      </Tilt3DImageStage>
                     </div>
 
                     <div className="p-4 flex items-center justify-between gap-3">
                       <div className="min-w-0">
-                        <div className="text-[11px] font-mono text-neutral-400 flex items-center gap-1.5 truncate">
-                          <Layers className="w-3 h-3 text-[#FF5722] shrink-0" />
+                        <div className="text-[11px] font-mono text-[#A7A298] flex items-center gap-1.5 truncate">
+                          <Layers className="w-3 h-3 text-[#E4583B] shrink-0" />
                           <span className="truncate">{entry.groupLabel}</span>
                           {entry.totalInGroup > 1 && (
                             <>
@@ -274,7 +268,7 @@ export const Portfolio: React.FC<PortfolioProps> = ({
                             </>
                           )}
                         </div>
-                        <h3 className="text-sm font-bold text-white group-hover:text-[#FF5722] transition-colors truncate mt-0.5">
+                        <h3 className="text-sm font-bold text-[#F4F0E8] group-hover:text-[#E4583B] transition-colors truncate mt-0.5">
                           {entry.caption}
                         </h3>
                       </div>
@@ -296,13 +290,12 @@ export const Portfolio: React.FC<PortfolioProps> = ({
                 );
               })
             ) : (
-              <div className="col-span-full p-12 text-center rounded-3xl bg-[#12161A] border border-[#232B33] text-neutral-400 text-sm">
+              <div className="col-span-full p-12 text-center rounded-2xl studio-card text-[#A7A298] text-sm">
                 {ui.projects.emptyPlaceholder}
               </div>
             )}
           </div>
         ) : (
-          /* GROUPED BEHANCE PROJECTS VIEW */
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto mb-12">
             {graphicProjects.length > 0 ? (
               graphicProjects.map((project) => {
@@ -316,12 +309,11 @@ export const Portfolio: React.FC<PortfolioProps> = ({
                   <div
                     key={project.id}
                     onClick={() => onOpenLightbox?.(project, 0)}
-                    className="group relative rounded-3xl bg-[#12161A] border border-[#232B33] hover:border-[#FF5722]/60 overflow-hidden transition-all duration-300 shadow-xl flex flex-col justify-between cursor-pointer"
+                    className="group relative rounded-2xl studio-card overflow-hidden flex flex-col justify-between cursor-pointer"
                   >
-                    {/* Visual Stage with 3D Cursor-Responsive Tilt */}
-                    <div className="p-2.5 bg-[#0D1115] border-b border-[#232B33]">
-                      <Tilt3DImageStage className="aspect-[16/10] w-full" maxTilt={14} scaleOnHover={1.03}>
-                        <div className="relative w-full h-full rounded-2xl bg-[#181E24] flex items-center justify-center border border-[#232B33]/80 overflow-hidden shadow-xl">
+                    <div className="p-2.5 bg-[#121419]/90 border-b border-[#2B303D]">
+                      <Tilt3DImageStage className="aspect-[16/10] w-full" maxTilt={13} scaleOnHover={1.03}>
+                        <div className="relative w-full h-full rounded-xl bg-[#20242E] flex items-center justify-center border border-[#2B303D] overflow-hidden">
                           {coverPoster && !coverBroken ? (
                             <img
                               src={resolveAssetUrl(coverPoster)}
@@ -331,23 +323,22 @@ export const Portfolio: React.FC<PortfolioProps> = ({
                               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                             />
                           ) : (
-                            <div className="w-full h-full bg-gradient-to-br from-[#141A20] via-[#12161A] to-[#0B0F12] flex flex-col items-center justify-center text-center p-6 space-y-2.5">
-                              <div className="w-12 h-12 rounded-2xl bg-[#0B0F12] border border-[#232B33] flex items-center justify-center text-[#FF5722]">
-                                <Palette className="w-6 h-6" />
+                            <div className="w-full h-full bg-[#181B22] flex flex-col items-center justify-center text-center p-6 space-y-2.5">
+                              <div className="w-11 h-11 rounded-xl bg-[#121419] border border-[#2B303D] flex items-center justify-center text-[#E4583B]">
+                                <Palette className="w-5 h-5" />
                               </div>
-                              <span className="text-xs font-mono text-neutral-300 font-semibold line-clamp-1">
+                              <span className="text-xs font-mono text-[#DDD1BE] font-semibold line-clamp-1">
                                 {loc(project.title)}
                               </span>
-                              <span className="text-[10px] font-mono text-neutral-500">
+                              <span className="text-[10px] font-mono text-[#A7A298]">
                                 {project.behanceUrl ? 'Behance Design Series' : 'Graphic Design'}
                               </span>
                             </div>
                           )}
 
-                          {/* Lightbox Hover Overlay */}
                           <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center z-10 pointer-events-none">
-                            <span className="inline-flex items-center space-x-1.5 rtl:space-x-reverse px-4 py-2 rounded-xl bg-black/85 border border-[#FF5722]/60 text-white text-xs font-mono font-medium shadow-xl">
-                              <Eye className="w-4 h-4 text-[#FF5722]" />
+                            <span className="inline-flex items-center space-x-1.5 rtl:space-x-reverse px-4 py-2 rounded-lg bg-[#121419]/95 border border-[#E4583B]/60 text-[#F4F0E8] text-xs font-mono font-medium">
+                              <Eye className="w-4 h-4 text-[#E4583B]" />
                               <span>
                                 {posters.length > 1
                                   ? language === 'bn'
@@ -362,7 +353,6 @@ export const Portfolio: React.FC<PortfolioProps> = ({
                         </div>
                       </Tilt3DImageStage>
 
-                      {/* Multi-Poster Interactive Strip Inside Project Group */}
                       {posters.length > 1 && (
                         <div className="mt-2.5 px-1 flex items-center gap-2 overflow-x-auto pb-0.5">
                           {posters.slice(0, 6).map((p, idx) => {
@@ -376,7 +366,7 @@ export const Portfolio: React.FC<PortfolioProps> = ({
                                   e.stopPropagation();
                                   onOpenLightbox?.(project, idx);
                                 }}
-                                className="relative w-14 h-14 rounded-xl overflow-hidden bg-[#181E24] border border-[#232B33] hover:border-[#FF5722] shrink-0 transition-all cursor-pointer group/thumb"
+                                className="relative w-14 h-14 rounded-lg overflow-hidden bg-[#20242E] border border-[#2B303D] hover:border-[#E4583B] shrink-0 transition-all cursor-pointer group/thumb"
                                 title={p.caption || `Poster ${idx + 1}`}
                               >
                                 {!brokenImages[thumbKey] ? (
@@ -390,7 +380,7 @@ export const Portfolio: React.FC<PortfolioProps> = ({
                                     className="w-full h-full object-cover group-hover/thumb:scale-110 transition-transform"
                                   />
                                 ) : (
-                                  <div className="w-full h-full flex items-center justify-center text-neutral-500">
+                                  <div className="w-full h-full flex items-center justify-center text-[#A7A298]">
                                     <Grid className="w-4 h-4" />
                                   </div>
                                 )}
@@ -406,12 +396,10 @@ export const Portfolio: React.FC<PortfolioProps> = ({
                       )}
                     </div>
 
-                    {/* Card Body */}
                     <div className="p-6 flex flex-col justify-between flex-1">
                       <div>
-                        {/* Quiet Unboxed Metadata */}
-                        <div className="text-[11px] font-mono text-neutral-400 mb-1.5 flex flex-wrap items-center gap-1.5">
-                          <span className="text-[#FF7043] uppercase tracking-wider font-semibold">
+                        <div className="text-[11px] font-mono text-[#A7A298] mb-1.5 flex flex-wrap items-center gap-1.5">
+                          <span className="text-[#E4583B] uppercase tracking-wider font-semibold">
                             {groupLabel || 'Graphic Design'}
                           </span>
                           {posters.length > 0 && (
@@ -430,17 +418,16 @@ export const Portfolio: React.FC<PortfolioProps> = ({
                           )}
                         </div>
 
-                        <h3 className="text-lg font-bold text-white mb-2 group-hover:text-[#FF5722] transition-colors">
+                        <h3 className="text-lg font-bold text-[#F4F0E8] mb-2 group-hover:text-[#E4583B] transition-colors">
                           {loc(project.title)}
                         </h3>
 
-                        <p className="text-xs sm:text-sm text-neutral-400 leading-relaxed line-clamp-3">
+                        <p className="text-xs sm:text-sm text-[#A7A298] leading-relaxed line-clamp-3">
                           {loc(project.description)}
                         </p>
                       </div>
 
-                      {/* Clean Footer */}
-                      <div className="mt-5 pt-4 border-t border-[#1D232A] flex items-center justify-between text-xs font-mono">
+                      <div className="mt-5 pt-4 border-t border-[#2B303D] flex items-center justify-between text-xs font-mono">
                         <div className="flex items-center space-x-3 rtl:space-x-reverse">
                           {project.behanceUrl && (
                             <a
@@ -461,15 +448,15 @@ export const Portfolio: React.FC<PortfolioProps> = ({
                               target="_blank"
                               rel="noopener noreferrer"
                               onClick={(e) => e.stopPropagation()}
-                              className="inline-flex items-center space-x-1 rtl:space-x-reverse text-neutral-300 hover:text-white transition-colors"
+                              className="inline-flex items-center space-x-1 rtl:space-x-reverse text-[#DDD1BE] hover:text-white transition-colors"
                             >
                               <span>Link</span>
-                              <ExternalLink className="w-3 h-3 text-[#FF5722]" />
+                              <ExternalLink className="w-3 h-3 text-[#E4583B]" />
                             </a>
                           )}
                         </div>
 
-                        <span className="inline-flex items-center space-x-1.5 rtl:space-x-reverse text-neutral-400 group-hover:text-[#FF5722] transition-colors font-semibold">
+                        <span className="inline-flex items-center space-x-1.5 rtl:space-x-reverse text-[#A7A298] group-hover:text-[#E4583B] transition-colors font-semibold">
                           <span>{posters.length > 1 ? 'Open Group' : 'Preview'}</span>
                           <Eye className="w-3.5 h-3.5" />
                         </span>
@@ -479,7 +466,7 @@ export const Portfolio: React.FC<PortfolioProps> = ({
                 );
               })
             ) : (
-              <div className="col-span-2 p-12 text-center rounded-3xl bg-[#12161A] border border-[#232B33] text-neutral-400 text-sm">
+              <div className="col-span-2 p-12 text-center rounded-2xl studio-card text-[#A7A298] text-sm">
                 {ui.projects.emptyPlaceholder}
               </div>
             )}

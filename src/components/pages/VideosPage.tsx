@@ -62,12 +62,12 @@ export const VideosPage: React.FC<VideosPageProps> = ({ onOpenVideo }) => {
 
       {/* Platform Filter Toolbar (only shown when > 1 real platform option exists) */}
       {availablePlatforms.length > 1 && (
-        <div className="bg-[#0B0F12] border-b border-[#1D232A] py-4">
+        <div className="bg-[#121419]/85 border-b border-[#2B303D] py-4">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-wrap items-center justify-between gap-4">
-            <span className="text-xs font-mono text-neutral-400 uppercase tracking-wider">
+            <span className="text-xs font-mono text-[#A7A298] uppercase tracking-wider">
               {language === 'bn' ? 'প্ল্যাটফর্ম ফিল্টার' : language === 'ar' ? 'تصفية حسب المنصة' : 'Filter by Source'}
             </span>
-            <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-xl bg-[#12161A] border border-[#232B33]">
+            <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-xl bg-[#181B22] border border-[#2B303D]">
               {availablePlatforms.map((plat) => (
                 <button
                   key={plat.id}
@@ -75,8 +75,8 @@ export const VideosPage: React.FC<VideosPageProps> = ({ onOpenVideo }) => {
                   onClick={() => setPlatformFilter(plat.id)}
                   className={`px-3.5 py-1.5 rounded-lg text-xs font-mono font-semibold transition-colors whitespace-nowrap cursor-pointer ${
                     platformFilter === plat.id
-                      ? 'bg-[#FF5722] text-white'
-                      : 'text-neutral-400 hover:text-white'
+                      ? 'bg-[#E4583B] text-white'
+                      : 'text-[#A7A298] hover:text-[#F4F0E8]'
                   }`}
                 >
                   {plat.label}

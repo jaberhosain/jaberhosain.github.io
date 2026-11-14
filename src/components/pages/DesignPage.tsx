@@ -99,11 +99,11 @@ export const DesignPage: React.FC<DesignPageProps> = ({ onOpenLightbox }) => {
       <PageHeader meta={meta} summaryText={summaryText} />
 
       {/* Interactive Filter + View Mode Bar */}
-      <div className="bg-[#0B0F12] border-b border-[#1D232A] py-4">
+      <div className="bg-[#121419]/85 border-b border-[#2B303D] py-4">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-3">
           <div className="flex flex-wrap items-center justify-between gap-3">
             {/* Primary Section Tabs */}
-            <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-xl bg-[#12161A] border border-[#232B33]">
+            <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-xl bg-[#181B22] border border-[#2B303D]">
               {filterTabs.map((tab) => (
                 <button
                   key={tab.id}
@@ -114,8 +114,8 @@ export const DesignPage: React.FC<DesignPageProps> = ({ onOpenLightbox }) => {
                   }}
                   className={`px-3.5 py-1.5 rounded-lg text-xs font-mono font-semibold transition-colors whitespace-nowrap tabular-nums cursor-pointer ${
                     filter === tab.id
-                      ? 'bg-[#FF5722] text-white'
-                      : 'text-neutral-400 hover:text-white'
+                      ? 'bg-[#E4583B] text-white'
+                      : 'text-[#A7A298] hover:text-[#F4F0E8]'
                   }`}
                 >
                   {tab.label} ({tab.count})
@@ -125,17 +125,17 @@ export const DesignPage: React.FC<DesignPageProps> = ({ onOpenLightbox }) => {
 
             {/* View Style Switcher: Grouped Projects vs All Individual Posters */}
             {filter !== 'best' && (
-              <div className="flex items-center gap-1 p-1 rounded-xl bg-[#12161A] border border-[#232B33]">
+              <div className="flex items-center gap-1 p-1 rounded-xl bg-[#181B22] border border-[#2B303D]">
                 <button
                   type="button"
                   onClick={() => setViewStyle('groups')}
                   className={`inline-flex items-center space-x-1.5 rtl:space-x-reverse px-3 py-1.5 rounded-lg text-xs font-mono font-semibold transition-colors cursor-pointer ${
                     viewStyle === 'groups'
-                      ? 'bg-[#1E2630] text-white border border-[#2F3A45]'
-                      : 'text-neutral-400 hover:text-white'
+                      ? 'bg-[#20242E] text-[#F4F0E8] border border-[#2B303D]'
+                      : 'text-[#A7A298] hover:text-[#F4F0E8]'
                   }`}
                 >
-                  <Layers className="w-3.5 h-3.5 text-[#FF5722]" />
+                  <Layers className="w-3.5 h-3.5 text-[#E4583B]" />
                   <span>{language === 'bn' ? 'গ্রুপ ওয়াইজ' : 'Grouped Projects'}</span>
                 </button>
                 <button
@@ -143,21 +143,21 @@ export const DesignPage: React.FC<DesignPageProps> = ({ onOpenLightbox }) => {
                   onClick={() => setViewStyle('posters')}
                   className={`inline-flex items-center space-x-1.5 rtl:space-x-reverse px-3 py-1.5 rounded-lg text-xs font-mono font-semibold transition-colors cursor-pointer ${
                     viewStyle === 'posters'
-                      ? 'bg-[#1E2630] text-white border border-[#2F3A45]'
-                      : 'text-neutral-400 hover:text-white'
+                      ? 'bg-[#20242E] text-[#F4F0E8] border border-[#2B303D]'
+                      : 'text-[#A7A298] hover:text-[#F4F0E8]'
                   }`}
                 >
-                  <LayoutGrid className="w-3.5 h-3.5 text-[#FF5722]" />
+                  <LayoutGrid className="w-3.5 h-3.5 text-[#E4583B]" />
                   <span>{language === 'bn' ? 'সব পোস্টার' : 'All Posters'}</span>
                 </button>
               </div>
             )}
           </div>
 
-          {/* Group Filter Row (shown whenever there are project groups) */}
+          {/* Group Filter Row */}
           {groupNames.length > 0 && filter !== 'best' && (
             <div className="flex flex-wrap items-center gap-2 pt-1">
-              <span className="text-[11px] font-mono text-neutral-500 uppercase tracking-wider mr-1">
+              <span className="text-[11px] font-mono text-[#A7A298] uppercase tracking-wider mr-1">
                 {language === 'bn' ? 'প্রজেক্ট গ্রুপ:' : 'Groups:'}
               </span>
               <button
@@ -165,8 +165,8 @@ export const DesignPage: React.FC<DesignPageProps> = ({ onOpenLightbox }) => {
                 onClick={() => setGroupFilter('all')}
                 className={`px-3 py-1 rounded-lg text-xs font-mono transition-colors cursor-pointer ${
                   groupFilter === 'all'
-                    ? 'bg-[#FF5722]/15 text-[#FF7043] border border-[#FF5722]/40 font-semibold'
-                    : 'bg-[#12161A] text-neutral-400 hover:text-white border border-[#232B33]'
+                    ? 'bg-[#E4583B]/15 text-[#F07C63] border border-[#E4583B]/40 font-semibold'
+                    : 'bg-[#181B22] text-[#A7A298] hover:text-[#F4F0E8] border border-[#2B303D]'
                 }`}
               >
                 {language === 'bn' ? 'সব গ্রুপ' : 'All Groups'}
@@ -181,8 +181,8 @@ export const DesignPage: React.FC<DesignPageProps> = ({ onOpenLightbox }) => {
                   }}
                   className={`px-3 py-1 rounded-lg text-xs font-mono transition-colors cursor-pointer tabular-nums ${
                     groupFilter === g.name
-                      ? 'bg-[#FF5722]/15 text-[#FF7043] border border-[#FF5722]/40 font-semibold'
-                      : 'bg-[#12161A] text-neutral-400 hover:text-white border border-[#232B33]'
+                      ? 'bg-[#E4583B]/15 text-[#F07C63] border border-[#E4583B]/40 font-semibold'
+                      : 'bg-[#181B22] text-[#A7A298] hover:text-[#F4F0E8] border border-[#2B303D]'
                   }`}
                 >
                   {g.name} ({g.count})

@@ -1,8 +1,8 @@
 import React from 'react';
-import { 
-  Facebook, 
-  Send, 
-  Globe, 
+import {
+  Facebook,
+  Send,
+  Globe,
   ArrowUp,
   Youtube,
   Instagram,
@@ -28,7 +28,6 @@ export const Footer: React.FC<FooterProps> = ({ onOpenAdmin }) => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Resolve active social links (only enabled ones with non-empty URLs)
   const activeSocialLinks = (portfolio.socialLinks && portfolio.socialLinks.length > 0)
     ? portfolio.socialLinks.filter(s => s.enabled !== false && Boolean(s.url && s.url.trim()))
     : [
@@ -81,12 +80,12 @@ export const Footer: React.FC<FooterProps> = ({ onOpenAdmin }) => {
   };
 
   return (
-    <footer className="bg-[#070A0C] border-t border-[#1D232A] text-neutral-400 py-12">
+    <footer className="bg-[#121419]/92 border-t border-[#2B303D] text-[#A7A298] py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center text-center space-y-6">
 
         {/* Page Directory Links */}
         {isMultiPageEnabled && (
-          <nav aria-label="Footer Pages" className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 pb-4 border-b border-[#1D232A]/70 w-full max-w-2xl">
+          <nav aria-label="Footer Pages" className="flex flex-wrap items-center justify-center gap-x-7 gap-y-2 pb-5 border-b border-[#2B303D]/80 w-full max-w-2xl">
             {pages.map((p) => {
               const active = currentPage === p.id;
               return (
@@ -97,8 +96,8 @@ export const Footer: React.FC<FooterProps> = ({ onOpenAdmin }) => {
                     e.preventDefault();
                     navigateTo(p.id);
                   }}
-                  className={`text-xs font-mono uppercase tracking-wider transition-colors whitespace-nowrap ${
-                    active ? 'text-[#FF5722] font-bold' : 'text-neutral-400 hover:text-white'
+                  className={`text-xs font-mono uppercase tracking-[0.15em] transition-colors whitespace-nowrap ${
+                    active ? 'text-[#E4583B] font-bold' : 'text-[#A7A298] hover:text-[#F4F0E8]'
                   }`}
                 >
                   {p.label[language] || p.label.en}
@@ -107,13 +106,13 @@ export const Footer: React.FC<FooterProps> = ({ onOpenAdmin }) => {
             })}
           </nav>
         )}
-        
+
         {/* Connect Title */}
-        <div className="text-xs font-mono uppercase tracking-widest text-neutral-400">
+        <div className="text-[11px] font-mono uppercase tracking-[0.22em] text-[#A7A298]">
           {footerConfig?.connectTitle ? loc(footerConfig.connectTitle) : ui.footer.connect}
         </div>
 
-        {/* Social Icons with theme-aware hover glow and accent fill */}
+        {/* Social Icons */}
         <div className="flex flex-wrap items-center justify-center gap-3">
           {activeSocialLinks.map((item) => (
             <a
@@ -121,7 +120,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenAdmin }) => {
               href={item.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="social-icon-btn w-10 h-10 rounded-xl bg-[#12161A] border border-[#232B33] flex items-center justify-center text-neutral-300"
+              className="social-icon-btn w-10 h-10 rounded-lg bg-[#181B22] border border-[#2B303D] flex items-center justify-center text-[#DDD1BE]"
               title={item.name || item.platform}
               aria-label={item.name || item.platform}
             >
@@ -132,31 +131,31 @@ export const Footer: React.FC<FooterProps> = ({ onOpenAdmin }) => {
 
         {/* Language switch */}
         <div className="flex items-center space-x-2 rtl:space-x-reverse text-xs">
-          <Globe className="w-3.5 h-3.5 text-[#FF5722]" />
+          <Globe className="w-3.5 h-3.5 text-[#E4583B]" />
           <button
             onClick={() => setLanguage('en')}
-            className={`px-2 py-0.5 rounded ${language === 'en' ? 'bg-[#FF5722] text-white font-bold' : 'hover:text-white'}`}
+            className={`px-2 py-0.5 rounded transition-colors cursor-pointer ${language === 'en' ? 'bg-[#E4583B] text-white font-bold' : 'hover:text-[#F4F0E8]'}`}
           >
             English
           </button>
-          <span>•</span>
+          <span aria-hidden="true">·</span>
           <button
             onClick={() => setLanguage('bn')}
-            className={`px-2 py-0.5 rounded ${language === 'bn' ? 'bg-[#FF5722] text-white font-bold' : 'hover:text-white'}`}
+            className={`px-2 py-0.5 rounded transition-colors cursor-pointer ${language === 'bn' ? 'bg-[#E4583B] text-white font-bold' : 'hover:text-[#F4F0E8]'}`}
           >
             বাংলা
           </button>
-          <span>•</span>
+          <span aria-hidden="true">·</span>
           <button
             onClick={() => setLanguage('ar')}
-            className={`px-2 py-0.5 rounded ${language === 'ar' ? 'bg-[#FF5722] text-white font-bold' : 'hover:text-white'}`}
+            className={`px-2 py-0.5 rounded transition-colors cursor-pointer ${language === 'ar' ? 'bg-[#E4583B] text-white font-bold' : 'hover:text-[#F4F0E8]'}`}
           >
             العربية
           </button>
         </div>
 
-        {/* Copyright matching screenshot */}
-        <div className="text-xs font-mono text-neutral-500 pt-4 border-t border-[#1D232A] w-full flex flex-col sm:flex-row items-center justify-between gap-4">
+        {/* Copyright */}
+        <div className="text-xs font-mono text-[#A7A298] pt-5 border-t border-[#2B303D]/80 w-full flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center space-x-2">
             <span>© 2026 MD JABER HOSAIN. {footerConfig?.copyrightText ? loc(footerConfig.copyrightText) : ui.footer.rights}</span>
             <a
@@ -167,7 +166,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenAdmin }) => {
                 onOpenAdmin?.();
               }}
               title="Admin Panel"
-              className="text-neutral-700 hover:text-[#FF5722] transition-colors p-1 rounded inline-flex items-center"
+              className="text-neutral-600 hover:text-[#E4583B] transition-colors p-1 rounded inline-flex items-center"
               aria-label="Admin Login"
             >
               <Lock className="w-3 h-3" />
@@ -176,7 +175,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenAdmin }) => {
 
           <button
             onClick={scrollToTop}
-            className="inline-flex items-center space-x-1.5 rtl:space-x-reverse text-neutral-400 hover:text-[#FF5722] transition-colors"
+            className="inline-flex items-center space-x-1.5 rtl:space-x-reverse text-[#A7A298] hover:text-[#E4583B] transition-colors cursor-pointer"
           >
             <span>{footerConfig?.backToTopText ? loc(footerConfig.backToTopText) : 'Back to top'}</span>
             <ArrowUp className="w-3.5 h-3.5" />

@@ -28,16 +28,15 @@ export const Skills: React.FC = () => {
   }, [skills, selectedTool]);
 
   return (
-    <section id="skills" className="py-24 bg-[#0B0F12] border-t border-[#1D232A] relative">
+    <section id="skills" className="py-24 bg-[#14171E]/80 border-t border-[#2B303D] relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
+
         {/* Section Header */}
         <div className="flex flex-col items-center text-center mb-10">
-          <div className="inline-flex items-center space-x-2 rtl:space-x-reverse px-3 py-1 rounded-md bg-[#181E24] border border-[#232B33] text-xs font-mono text-[#FF5722] mb-3">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#FF5722]" />
-            <span>{ui.skills.sectionTag}</span>
-          </div>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight uppercase">
+          <p className="text-[11px] font-mono tracking-[0.22em] uppercase text-[#E4583B] mb-3">
+            {ui.skills.sectionTag}
+          </p>
+          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#F4F0E8] tracking-tight uppercase">
             {ui.skills.title}
           </h2>
         </div>
@@ -50,8 +49,8 @@ export const Skills: React.FC = () => {
               onClick={() => setSelectedTool('ALL')}
               className={`px-3.5 py-1.5 rounded-lg text-xs font-mono font-semibold transition-colors whitespace-nowrap cursor-pointer ${
                 selectedTool === 'ALL'
-                  ? 'bg-[#FF5722] text-white'
-                  : 'bg-[#12161A] border border-[#232B33] text-neutral-400 hover:text-white'
+                  ? 'bg-[#E4583B] text-[#F4F0E8]'
+                  : 'bg-[#181B22] border border-[#2B303D] text-[#A7A298] hover:text-[#F4F0E8]'
               }`}
             >
               {language === 'bn' ? 'সব টুলস' : language === 'ar' ? 'كل الأدوات' : 'All Tools'} ({skills.length})
@@ -63,8 +62,8 @@ export const Skills: React.FC = () => {
                 onClick={() => setSelectedTool((prev) => (prev === tool ? 'ALL' : tool))}
                 className={`px-3.5 py-1.5 rounded-lg text-xs font-mono font-semibold transition-colors whitespace-nowrap cursor-pointer ${
                   selectedTool === tool
-                    ? 'bg-[#FF5722] text-white'
-                    : 'bg-[#12161A] border border-[#232B33] text-neutral-400 hover:text-white'
+                    ? 'bg-[#E4583B] text-[#F4F0E8]'
+                    : 'bg-[#181B22] border border-[#2B303D] text-[#A7A298] hover:text-[#F4F0E8]'
                 }`}
               >
                 {tool}
@@ -80,18 +79,18 @@ export const Skills: React.FC = () => {
             return (
               <div
                 key={skill.id}
-                className="p-6 rounded-2xl bg-[#12161A] border border-[#232B33] hover:border-[#FF5722]/60 transition-all duration-300 hover:shadow-xl group"
+                className="studio-card p-6 rounded-2xl hover:border-[#E4583B]/55 transition-all duration-300 group"
               >
                 <div className="flex items-center space-x-3 rtl:space-x-reverse mb-3">
-                  <div className="w-10 h-10 rounded-xl bg-[#181E24] border border-[#232B33] flex items-center justify-center text-[#FF5722] group-hover:scale-105 transition-transform">
+                  <div className="w-10 h-10 rounded-xl bg-[#20242E] border border-[#2B303D] flex items-center justify-center text-[#E4583B] group-hover:scale-105 transition-transform">
                     <Icon className="w-5 h-5" />
                   </div>
-                  <h3 className="text-base sm:text-lg font-bold text-white uppercase tracking-wide">
+                  <h3 className="font-display text-base sm:text-lg font-bold text-[#F4F0E8] uppercase tracking-wide">
                     {loc(skill.title)}
                   </h3>
                 </div>
 
-                <p className="text-xs sm:text-sm text-neutral-400 mb-5 leading-relaxed">
+                <p className="text-xs sm:text-sm text-[#A7A298] mb-5 leading-relaxed">
                   {loc(skill.description)}
                 </p>
 
@@ -104,8 +103,8 @@ export const Skills: React.FC = () => {
                       onClick={() => setSelectedTool((prev) => (prev === tool ? 'ALL' : tool))}
                       className={`px-3 py-1 rounded-lg text-xs font-mono border transition-colors cursor-pointer ${
                         selectedTool === tool
-                          ? 'bg-[#FF5722]/20 text-[#FF5722] border-[#FF5722]'
-                          : 'bg-[#181E24] text-neutral-200 border-[#232B33] group-hover:border-[#FF5722]/30'
+                          ? 'bg-[#E4583B]/15 text-[#E4583B] border-[#E4583B]'
+                          : 'bg-[#20242E] text-[#F4F0E8] border-[#2B303D] group-hover:border-[#E4583B]/35'
                       }`}
                     >
                       {tool}
@@ -119,9 +118,9 @@ export const Skills: React.FC = () => {
 
         {/* Section: MY CREATIVE WORKFLOW */}
         {showWorkflow !== false && workflow.length > 0 && (
-          <div className="pt-8 border-t border-[#1D232A]">
+          <div className="pt-8 border-t border-[#2B303D]">
             <div className="flex flex-col items-center text-center mb-12">
-              <h3 className="text-2xl sm:text-3xl font-extrabold text-white uppercase tracking-wider">
+              <h3 className="font-display text-2xl sm:text-3xl font-extrabold text-[#F4F0E8] uppercase tracking-wider">
                 {ui.workflow.title}
               </h3>
             </div>
@@ -130,12 +129,12 @@ export const Skills: React.FC = () => {
               {workflow.map((item, idx) => (
                 <div
                   key={item.id || item.step || idx}
-                  className="flex flex-col items-center text-center p-5 rounded-2xl bg-[#12161A] border border-[#232B33] hover:border-[#FF5722] transition-colors"
+                  className="studio-card flex flex-col items-center text-center p-5 rounded-2xl hover:border-[#E4583B]/60 transition-colors"
                 >
-                  <div className="w-12 h-12 rounded-full bg-[#181E24] border-2 border-[#FF5722] flex items-center justify-center text-sm font-mono font-bold text-[#FF5722] mb-3 shadow-md">
+                  <div className="w-12 h-12 rounded-full bg-[#20242E] border border-[#E4583B]/70 flex items-center justify-center text-sm font-mono font-bold text-[#E4583B] mb-3">
                     {item.step}
                   </div>
-                  <div className="font-bold text-sm text-white">
+                  <div className="font-semibold text-sm text-[#F4F0E8]">
                     {loc(item.title)}
                   </div>
                 </div>

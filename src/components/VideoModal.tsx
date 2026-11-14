@@ -101,9 +101,9 @@ export const VideoModal: React.FC<VideoModalProps> = ({ video, onClose }) => {
     >
       <div
         ref={modalContainerRef}
-        className={`relative flex flex-col w-full bg-[#12161A] border border-[#232B33] rounded-2xl overflow-hidden shadow-2xl transition-all ${
-          isFullscreen 
-            ? 'h-full w-full max-w-none max-h-none rounded-none' 
+        className={`relative flex flex-col w-full bg-[#181B22] border border-[#2B303D] rounded-2xl overflow-hidden shadow-2xl transition-all ${
+          isFullscreen
+            ? 'h-full w-full max-w-none max-h-none rounded-none'
             : isVertical
             ? 'max-w-xl max-h-[96vh]'
             : 'max-w-6xl max-h-[96vh]'
@@ -111,14 +111,14 @@ export const VideoModal: React.FC<VideoModalProps> = ({ video, onClose }) => {
         onClick={(e) => e.stopPropagation()}
       >
         {/* Top Header */}
-        <div className="flex items-center justify-between px-4 py-3 sm:px-6 sm:py-3.5 border-b border-[#232B33] bg-[#0B0F12]">
+        <div className="flex items-center justify-between px-4 py-3 sm:px-6 sm:py-3.5 border-b border-[#2B303D] bg-[#121419]">
           <div className="flex items-center space-x-2.5 rtl:space-x-reverse min-w-0 pr-3">
-            <span className={`w-2.5 h-2.5 rounded-full animate-pulse shrink-0 ${isVimeo ? 'bg-[#1AB7EA]' : 'bg-[#FF5722]'}`} />
-            <h3 className="font-semibold text-sm sm:text-base text-white truncate">
+            <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${isVimeo ? 'bg-[#1AB7EA]' : 'bg-[#E4583B]'}`} />
+            <h3 className="font-semibold text-sm sm:text-base text-[#F4F0E8] truncate">
               {videoTitle}
             </h3>
             {isVertical && (
-              <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#FF5722]/15 text-[#FF5722] border border-[#FF5722]/30">
+              <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#E4583B]/15 text-[#E4583B] border border-[#E4583B]/30">
                 Portrait / Reel
               </span>
             )}
@@ -128,7 +128,7 @@ export const VideoModal: React.FC<VideoModalProps> = ({ video, onClose }) => {
             {/* Fullscreen Button */}
             <button
               onClick={toggleFullscreen}
-              className="p-2 text-neutral-300 hover:text-white bg-[#181E24] hover:bg-[#202830] border border-[#232B33] rounded-xl transition-colors min-h-[40px] min-w-[40px] flex items-center justify-center"
+              className="p-2 text-[#DDD1BE] hover:text-[#F4F0E8] bg-[#20242E] hover:bg-[#2B303D] border border-[#2B303D] rounded-xl transition-colors min-h-[40px] min-w-[40px] flex items-center justify-center cursor-pointer"
               aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
               title={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
             >
@@ -138,7 +138,7 @@ export const VideoModal: React.FC<VideoModalProps> = ({ video, onClose }) => {
             {/* Clear Close Button */}
             <button
               onClick={onClose}
-              className="p-2 text-neutral-300 hover:text-white bg-[#181E24] hover:bg-[#202830] border border-[#232B33] rounded-xl transition-colors min-h-[40px] min-w-[40px] flex items-center justify-center"
+              className="p-2 text-[#DDD1BE] hover:text-[#F4F0E8] bg-[#20242E] hover:bg-[#2B303D] border border-[#2B303D] rounded-xl transition-colors min-h-[40px] min-w-[40px] flex items-center justify-center cursor-pointer"
               aria-label="Close video"
               title="Close modal"
             >
@@ -231,9 +231,9 @@ export const VideoModal: React.FC<VideoModalProps> = ({ video, onClose }) => {
           </div>
         </div>
         {/* Footer info & Action buttons */}
-        <div className="flex flex-col sm:flex-row items-center justify-between px-5 py-3.5 sm:px-6 sm:py-4 bg-[#0B0F12] border-t border-[#232B33] text-xs sm:text-sm text-neutral-400 gap-3">
+        <div className="flex flex-col sm:flex-row items-center justify-between px-5 py-3.5 sm:px-6 sm:py-4 bg-[#121419] border-t border-[#2B303D] text-xs sm:text-sm text-[#A7A298] gap-3">
           <div className="flex items-center space-x-3 rtl:space-x-reverse w-full sm:w-auto justify-between sm:justify-start">
-            <span className="inline-flex items-center space-x-1.5 rtl:space-x-reverse px-2.5 py-1 rounded-md bg-[#181E24] border border-[#232B33] text-[11px] font-mono">
+            <span className="inline-flex items-center space-x-1.5 rtl:space-x-reverse px-2.5 py-1 rounded-md bg-[#20242E] border border-[#2B303D] text-[11px] font-mono">
               {isVimeo ? (
                 <>
                   <VimeoIcon className="w-3.5 h-3.5 text-[#1AB7EA]" />
@@ -251,8 +251,8 @@ export const VideoModal: React.FC<VideoModalProps> = ({ video, onClose }) => {
                 </>
               ) : (
                 <>
-                  <Play className="w-3 h-3 fill-current text-[#FF5722]" />
-                  <span className="text-[#FF5722]">Video Clip</span>
+                  <Play className="w-3 h-3 fill-current text-[#E4583B]" />
+                  <span className="text-[#E4583B]">Video Clip</span>
                 </>
               )}
             </span>

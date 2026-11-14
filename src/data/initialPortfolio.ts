@@ -846,14 +846,14 @@ export const initialPortfolioData: PortfolioConfig = {
 };
 
 export const defaultThemeColors = {
-  background: '#0B0F12',
-  surface: '#12161A',
-  primary: '#FF5722',
-  secondary: '#181E24',
-  accent: '#FF5722',
-  text: '#F3F4F6',
-  textMuted: '#9CA3AF',
-  border: '#232B33'
+  background: '#121419',
+  surface: '#181B22',
+  primary: '#E4583B',
+  secondary: '#20242E',
+  accent: '#F07C63',
+  text: '#F4F0E8',
+  textMuted: '#A7A298',
+  border: '#2B303D'
 };
 
 export const defaultThemeFonts = {

@@ -891,18 +891,21 @@ export const PortfolioProvider: React.FC<{ children: ReactNode }> = ({ children 
 
     if (activeThemeId === 'dark') {
       const colors = activePortfolio.theme?.colors || defaultThemeColors;
-      if (colors.background) root.style.setProperty('--brand-black', colors.background);
-      if (colors.surface) root.style.setProperty('--brand-dark', colors.surface);
-      if (colors.secondary) root.style.setProperty('--brand-surface', colors.secondary);
-      if (colors.border) {
-        root.style.setProperty('--brand-border', colors.border);
-        root.style.setProperty('--brand-border-subtle', colors.border);
-      }
-      if (colors.primary) {
-        root.style.setProperty('--brand-orange', colors.primary);
-        root.style.setProperty('--brand-orange-hover', colors.primary);
-      }
-      if (colors.accent) root.style.setProperty('--brand-orange-light', colors.accent);
+      const bg = colors.background && colors.background.toUpperCase() !== '#0B0F12' ? colors.background : defaultThemeColors.background;
+      const surf = colors.surface && colors.surface.toUpperCase() !== '#12161A' ? colors.surface : defaultThemeColors.surface;
+      const sec = colors.secondary && colors.secondary.toUpperCase() !== '#181E24' ? colors.secondary : defaultThemeColors.secondary;
+      const brd = colors.border && colors.border.toUpperCase() !== '#232B33' ? colors.border : defaultThemeColors.border;
+      const pri = colors.primary && colors.primary.toUpperCase() !== '#FF5722' ? colors.primary : defaultThemeColors.primary;
+      const acc = colors.accent && colors.accent.toUpperCase() !== '#FF5722' ? colors.accent : defaultThemeColors.accent;
+
+      root.style.setProperty('--brand-black', bg);
+      root.style.setProperty('--brand-dark', surf);
+      root.style.setProperty('--brand-surface', sec);
+      root.style.setProperty('--brand-border', brd);
+      root.style.setProperty('--brand-border-subtle', brd);
+      root.style.setProperty('--brand-orange', pri);
+      root.style.setProperty('--brand-orange-hover', pri);
+      root.style.setProperty('--brand-orange-light', acc);
     } else {
       root.style.removeProperty('--brand-black');
       root.style.removeProperty('--brand-dark');
