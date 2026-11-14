@@ -4,31 +4,26 @@ import { usePortfolio } from '../context/PortfolioContext';
 
 export const WelcomeSalamToast: React.FC = () => {
   const { portfolio, language, loc } = usePortfolio();
-  const [visible, setVisible] = useState(false);
+  const [visible, setVisible] = useState(true);
   const [progressActive, setProgressActive] = useState(false);
   const [exiting, setExiting] = useState(false);
 
   const ownerName = loc(portfolio.hero?.name) || 'MD. Jaber Hosain';
 
   useEffect(() => {
-    const enterTimer = setTimeout(() => {
-      setVisible(true);
-    }, 200);
-
     const barTimer = setTimeout(() => {
       setProgressActive(true);
-    }, 280);
+    }, 80);
 
     const exitTimer = setTimeout(() => {
       setExiting(true);
-    }, 4800);
+    }, 3600);
 
     const hideTimer = setTimeout(() => {
       setVisible(false);
-    }, 5200);
+    }, 4100);
 
     return () => {
-      clearTimeout(enterTimer);
       clearTimeout(barTimer);
       clearTimeout(exitTimer);
       clearTimeout(hideTimer);
@@ -36,8 +31,9 @@ export const WelcomeSalamToast: React.FC = () => {
   }, []);
 
   const handleDismiss = () => {
+    if (exiting) return;
     setExiting(true);
-    setTimeout(() => setVisible(false), 300);
+    setTimeout(() => setVisible(false), 450);
   };
 
   if (!visible) return null;
@@ -51,54 +47,66 @@ export const WelcomeSalamToast: React.FC = () => {
 
   const subtitleText =
     language === 'en'
-      ? `Welcome to ${ownerName}'s official portfolio.`
+      ? `Welcome to ${ownerName}'s official portfolio`
       : language === 'ar'
-      ? `أهلاً بك في المعرض الرسمي لـ ${ownerName}.`
-      : `${ownerName}-এর পোর্টফোলিও ওয়েবসাইটে আপনাকে স্বাগতম।`;
+      ? `أهلاً بك في المعرض الرسمي لـ ${ownerName}`
+      : `${ownerName}-এর পোর্টফোলিও ওয়েবসাইটে আপনাকে স্বাগতম`;
 
   return (
     <div
       role="status"
       aria-live="polite"
-      className={`fixed top-20 left-1/2 -translate-x-1/2 z-[60] w-[calc(100vw-2rem)] max-w-md transition-all duration-300 pointer-events-auto ${
+      onClick={handleDismiss}
+      className={`fixed inset-0 z-[100] flex items-center justify-center p-4 transition-all duration-500 cursor-pointer ${
         exiting
-          ? 'opacity-0 -translate-y-3 scale-95'
-          : 'opacity-100 translate-y-0 scale-100 animate-in fade-in slide-in-from-top-4 duration-300'
+          ? 'bg-black/0 backdrop-blur-none opacity-0 pointer-events-none'
+          : 'bg-black/65 backdrop-blur-md opacity-100'
       }`}
     >
-      <div className="relative overflow-hidden rounded-2xl bg-[#12161A]/95 backdrop-blur-xl border border-[#FF5722]/45 shadow-2xl px-4 py-3.5 flex items-center justify-between gap-3">
-        <div className="flex items-center space-x-3.5 rtl:space-x-reverse min-w-0">
-          {/* Emblem */}
-          <div className="w-10 h-10 rounded-xl bg-[#FF5722]/15 border border-[#FF5722]/40 flex items-center justify-center text-[#FF5722] shrink-0 font-serif text-base font-bold">
-            سلام
-          </div>
+      {/* Centered Salam Card */}
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className={`relative w-full max-w-md overflow-hidden rounded-3xl bg-[#12161A]/95 border border-[#FF5722]/45 shadow-[0_25px_70px_-15px_rgba(0,0,0,0.9),0_0_40px_-10px_rgba(255,87,34,0.28)] px-6 py-7 text-center transition-all duration-500 cursor-default ${
+          exiting
+            ? 'opacity-0 scale-95 -translate-y-3'
+            : 'opacity-100 scale-100 translate-y-0 animate-in fade-in zoom-in-95 duration-300'
+        }`}
+      >
+        {/* Subtle Ambient Glow */}
+        <div className="absolute -top-16 left-1/2 -translate-x-1/2 w-56 h-32 bg-[#FF5722]/20 rounded-full blur-3xl pointer-events-none" />
 
-          <div className="min-w-0">
-            <p className="text-sm sm:text-base font-bold text-white leading-snug truncate">
-              {greetingTitle}
-            </p>
-            <p className="text-xs text-neutral-300 mt-0.5 truncate">
-              {subtitleText}
-            </p>
-          </div>
-        </div>
-
+        {/* Close Button */}
         <button
           type="button"
           onClick={handleDismiss}
           aria-label="Close greeting"
-          className="p-1.5 rounded-lg text-neutral-400 hover:text-white hover:bg-white/5 transition-colors shrink-0 cursor-pointer"
+          className="absolute top-3.5 right-3.5 p-2 rounded-xl text-neutral-400 hover:text-white hover:bg-white/5 transition-colors cursor-pointer"
         >
           <X className="w-4 h-4" />
         </button>
 
-        {/* Auto-hide progress indicator */}
-        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#1D232A] overflow-hidden">
+        {/* Arabic Calligraphy Greeting Emblem */}
+        <div className="inline-flex items-center justify-center px-4 py-1.5 rounded-2xl bg-[#FF5722]/15 border border-[#FF5722]/35 text-[#FF7043] font-serif text-base sm:text-lg font-bold tracking-wide mb-4">
+          السلام عليكم ورحمة الله
+        </div>
+
+        {/* Main Salam Headline */}
+        <h2 className="text-xl sm:text-2xl font-extrabold text-white leading-snug tracking-tight mb-2">
+          {greetingTitle}
+        </h2>
+
+        {/* Welcome Subtitle */}
+        <p className="text-xs sm:text-sm font-mono text-neutral-300 leading-relaxed">
+          {subtitleText}
+        </p>
+
+        {/* Auto-hide countdown progress bar */}
+        <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#1D232A] overflow-hidden">
           <div
-            className="h-full bg-[#FF5722] transition-all ease-linear"
+            className="h-full bg-gradient-to-r from-[#FF5722] to-[#FF7043] transition-all ease-linear"
             style={{
               width: progressActive ? '0%' : '100%',
-              transitionDuration: '4500ms'
+              transitionDuration: '3500ms'
             }}
           />
         </div>
