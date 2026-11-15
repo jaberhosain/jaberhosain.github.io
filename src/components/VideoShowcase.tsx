@@ -2,6 +2,7 @@ import React from 'react';
 import { usePortfolio } from '../context/PortfolioContext';
 import { VideoShowcaseItem } from '../types/portfolio';
 import { VideoCardGrid } from './VideoCardGrid';
+import { Reveal3D } from './common/Reveal3D';
 
 interface VideoShowcaseProps {
   onOpenVideo?: (video: VideoShowcaseItem) => void;
@@ -46,7 +47,7 @@ export const VideoShowcase: React.FC<VideoShowcaseProps> = ({
       className="py-24 bg-[#121419]/75 border-t border-[#2B303D] relative overflow-hidden"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="flex flex-col items-center text-center mb-12">
+        <Reveal3D direction="up" className="flex flex-col items-center text-center mb-12">
           <span className="text-xs font-mono text-[#E4583B] uppercase tracking-[0.2em] mb-2.5">
             {sectionTag}
           </span>
@@ -66,7 +67,7 @@ export const VideoShowcase: React.FC<VideoShowcaseProps> = ({
                 : 'Scroll through curated best video editing works and click any project to watch in full player.'}
             </p>
           )}
-        </div>
+        </Reveal3D>
 
         <VideoCardGrid videos={sortedVideos} onOpenVideo={onOpenVideo} />
       </div>

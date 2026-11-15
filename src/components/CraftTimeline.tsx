@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Layers, Sparkles, Sliders, Volume2, Film, CheckCircle2, Play, Pause } from 'lucide-react';
 import { usePortfolio } from '../context/PortfolioContext';
+import { Reveal3D } from './common/Reveal3D';
 
 export const CraftTimeline: React.FC = () => {
   const { language } = usePortfolio();
@@ -57,7 +58,7 @@ export const CraftTimeline: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
 
         {/* Section Heading */}
-        <div className="flex flex-col items-center text-center mb-16">
+        <Reveal3D direction="up" className="flex flex-col items-center text-center mb-16">
           <p className="inline-flex items-center space-x-2 rtl:space-x-reverse text-[11px] font-mono tracking-[0.22em] uppercase text-[#E4583B] mb-3">
             <Film className="w-3.5 h-3.5 text-[#E4583B]" />
             <span>BEHIND THE TIMELINE</span>
@@ -74,10 +75,11 @@ export const CraftTimeline: React.FC = () => {
               ? 'প্রিমিয়ার প্রো এবং আফটার ইফেক্টসের পেশাদার টাইমলাইনে প্রতিটি লেয়ার, কি-ফ্রেম এবং সাউন্ড ডিজাইন সমন্বিত করে সর্বোচ্চ অডিয়েন্স রিটেনশন নিশ্চিত করা হয়।'
               : 'Every cut is calculated. Every sound hit is placed on the exact frame. Layered timeline architecture built for maximum retention.'}
           </p>
-        </div>
+        </Reveal3D>
 
         {/* Studio NLE Timeline Workspace */}
-        <div className="studio-card rounded-3xl overflow-hidden mb-10 transition-all duration-300">
+        <Reveal3D direction="depth" delay={90}>
+          <div className="studio-card rounded-3xl overflow-hidden mb-10 transition-all duration-300">
 
           {/* Architectural Sequence Header */}
           <div className="px-5 py-3.5 bg-[#1E222B] border-b border-[#2B303D] flex flex-wrap items-center justify-between gap-3">
@@ -251,7 +253,8 @@ export const CraftTimeline: React.FC = () => {
               <span>{currentTab.metric}</span>
             </div>
           </div>
-        </div>
+          </div>
+        </Reveal3D>
 
         {/* 4 Interactive Selector Tabs */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

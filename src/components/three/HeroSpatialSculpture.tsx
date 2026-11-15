@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import {
@@ -13,13 +13,27 @@ interface HeroSpatialSculptureProps {
   className?: string;
 }
 
+type RigPreset = 'wide' | 'optics' | 'orbit';
+
+const RIG_CAMERA_PRESETS: Record<RigPreset, { x: number; y: number; z: number; yaw: number; pitch: number }> = {
+  wide: { x: 0, y: 0.12, z: 6.1, yaw: 0, pitch: 0 },
+  optics: { x: 0.25, y: 0.06, z: 4.55, yaw: 0.28, pitch: -0.06 },
+  orbit: { x: -0.9, y: 0.72, z: 5.5, yaw: -0.45, pitch: 0.34 }
+};
+
 /**
  * Interactive Hero 3D Sculpture:
- * A multi-part procedural Cinema Anamorphic Lens + Orbital Storyboard Gate Assembly
- * built with PBR metallic/glass material contrast and interactive drag/hover rotation.
+ * Multi-part procedural Cinema Anamorphic Lens + Dual Orbital Storyboard Frames (16:9 + 4:5)
+ * with interactive pointer drag, exponential spring damping, and 3-angle camera presets.
  */
 export const HeroSpatialSculpture: React.FC<HeroSpatialSculptureProps> = ({ className = '' }) => {
   const mountRef = useRef<HTMLDivElement>(null);
+  const [preset, setPreset] = useState<RigPreset>('wide');
+  const presetRef = useRef<RigPreset>('wide');
+
+  useEffect(() => {
+    presetRef.current = preset;
+  }, [preset]);
 
   useEffect(() => {
     const container = mountRef.current;
@@ -46,7 +60,7 @@ export const HeroSpatialSculpture: React.FC<HeroSpatialSculptureProps> = ({ clas
     renderer.setSize(width, height);
     renderer.setClearColor(0x000000, 0);
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.15;
+    renderer.toneMappingExposure = 1.18;
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     container.appendChild(renderer.domElement);
 
@@ -54,7 +68,7 @@ export const HeroSpatialSculpture: React.FC<HeroSpatialSculptureProps> = ({ clas
     const scene = new THREE.Scene();
 
     const camera = new THREE.PerspectiveCamera(36, width / height, 0.1, 40);
-    camera.position.set(0, 0.1, 6.1);
+    camera.position.set(0, 0.12, 6.1);
 
     const pmremGenerator = new THREE.PMREMGenerator(renderer);
     const roomEnv = new RoomEnvironment();
@@ -62,31 +76,29 @@ export const HeroSpatialSculpture: React.FC<HeroSpatialSculptureProps> = ({ clas
     scene.environment = envTarget.texture;
     roomEnv.dispose();
 
-    // Three-point studio lighting
-    const hemi = new THREE.HemisphereLight(palette.rimLight, palette.metal, 0.9);
+    const hemi = new THREE.HemisphereLight(palette.rimLight, palette.metal, 0.95);
     scene.add(hemi);
 
-    const keyLight = new THREE.DirectionalLight(0xfff5ea, 1.9);
+    const keyLight = new THREE.DirectionalLight(0xfff5ea, 1.95);
     keyLight.position.set(4.5, 5.5, 6);
     scene.add(keyLight);
 
-    const rimLight = new THREE.PointLight(palette.accent, 18, 20, 1.4);
+    const rimLight = new THREE.PointLight(palette.accent, 20, 22, 1.4);
     rimLight.position.set(-4.2, -2.2, 2.5);
     scene.add(rimLight);
 
     // =========================================================================
-    // COMPOSITE 10-PART CINEMA OPTICS & DESIGN PRISM ASSEMBLY (THREE.Group)
+    // COMPOSITE 12-PART CINEMA OPTICS & DUAL STORYBOARD ASSEMBLY (THREE.Group)
     // =========================================================================
     const assembly = new THREE.Group();
     scene.add(assembly);
 
     const dialTex = createStudioDialTexture('#E4583B');
 
-    // Materials (roughness/metalness separation >= 0.25)
     const anodizedBodyMat = new THREE.MeshStandardMaterial({
       color: 0x1a1e26,
-      metalness: 0.78,
-      roughness: 0.44
+      metalness: 0.8,
+      roughness: 0.42
     });
 
     const brushedTitaniumMat = new THREE.MeshStandardMaterial({
@@ -98,15 +110,15 @@ export const HeroSpatialSculpture: React.FC<HeroSpatialSculptureProps> = ({ clas
     const dialCollarMat = new THREE.MeshStandardMaterial({
       map: dialTex,
       metalness: 0.65,
-      roughness: 0.36
+      roughness: 0.34
     });
 
     const accentRingMat = new THREE.MeshStandardMaterial({
       color: palette.accent,
-      metalness: 0.85,
+      metalness: 0.86,
       roughness: 0.22,
       emissive: palette.accent,
-      emissiveIntensity: 0.25
+      emissiveIntensity: 0.28
     });
 
     const opticalGlassMat = new THREE.MeshPhysicalMaterial({
@@ -126,16 +138,15 @@ export const HeroSpatialSculpture: React.FC<HeroSpatialSculptureProps> = ({ clas
       metalness: 0.08,
       roughness: 0.12,
       transparent: true,
-      opacity: 0.28,
+      opacity: 0.26,
       reflectivity: 0.9
     });
 
-    // Core Lens Group rotated toward viewer
+    // Core Lens Group
     const lensGroup = new THREE.Group();
     lensGroup.rotation.set(0.24, -0.38, 0.08);
     assembly.add(lensGroup);
 
-    // Part 1: Main anodized barrel cylinder
     const barrelMesh = new THREE.Mesh(
       new THREE.CylinderGeometry(1.06, 1.02, 1.05, 48, 1, false),
       anodizedBodyMat
@@ -143,7 +154,6 @@ export const HeroSpatialSculpture: React.FC<HeroSpatialSculptureProps> = ({ clas
     barrelMesh.rotation.x = Math.PI / 2;
     lensGroup.add(barrelMesh);
 
-    // Part 2: Engraved optical focal collar
     const dialMesh = new THREE.Mesh(
       new THREE.CylinderGeometry(1.11, 1.11, 0.34, 48, 1, true),
       dialCollarMat
@@ -152,7 +162,6 @@ export const HeroSpatialSculpture: React.FC<HeroSpatialSculptureProps> = ({ clas
     dialMesh.position.z = 0.06;
     lensGroup.add(dialMesh);
 
-    // Part 3: Brushed titanium rear bayonet flange
     const flangeMesh = new THREE.Mesh(
       new THREE.CylinderGeometry(1.16, 1.12, 0.14, 48),
       brushedTitaniumMat
@@ -161,7 +170,6 @@ export const HeroSpatialSculpture: React.FC<HeroSpatialSculptureProps> = ({ clas
     flangeMesh.position.z = -0.52;
     lensGroup.add(flangeMesh);
 
-    // Part 4: Recessed anodized front lens hood lip
     const hoodRing = new THREE.Mesh(
       new THREE.TorusGeometry(1.05, 0.065, 20, 64),
       anodizedBodyMat
@@ -169,7 +177,6 @@ export const HeroSpatialSculpture: React.FC<HeroSpatialSculptureProps> = ({ clas
     hoodRing.position.z = 0.53;
     lensGroup.add(hoodRing);
 
-    // Part 5: Copper/vermilion studio signature accent trim ring
     const accentTrim = new THREE.Mesh(
       new THREE.TorusGeometry(1.12, 0.022, 16, 64),
       accentRingMat
@@ -177,7 +184,7 @@ export const HeroSpatialSculpture: React.FC<HeroSpatialSculptureProps> = ({ clas
     accentTrim.position.z = 0.32;
     lensGroup.add(accentTrim);
 
-    // Part 6: 8 Radial Aperture Iris Blades inside the barrel
+    // 8 Radial Aperture Iris Blades
     const irisGroup = new THREE.Group();
     irisGroup.position.z = 0.22;
     const bladeGeo = new THREE.BoxGeometry(0.42, 0.22, 0.015);
@@ -190,7 +197,7 @@ export const HeroSpatialSculpture: React.FC<HeroSpatialSculptureProps> = ({ clas
     }
     lensGroup.add(irisGroup);
 
-    // Part 7: Front Convex Optical Glass Element
+    // Front Convex Optical Glass Element
     const frontGlass = new THREE.Mesh(
       new THREE.SphereGeometry(0.88, 36, 24, 0, Math.PI * 2, 0, Math.PI * 0.38),
       opticalGlassMat
@@ -199,28 +206,47 @@ export const HeroSpatialSculpture: React.FC<HeroSpatialSculptureProps> = ({ clas
     frontGlass.position.z = 0.18;
     lensGroup.add(frontGlass);
 
-    // Part 8 & 9: Orbital Architectural Aspect-Ratio Storyboard Frames (16:9 + 4:5)
+    // 16:9 Cinema Storyboard Gate
     const wideGateGroup = new THREE.Group();
     const wideFrameBorder = new THREE.LineSegments(
       new THREE.EdgesGeometry(new THREE.BoxGeometry(2.65, 1.5, 0.02)),
-      new THREE.LineBasicMaterial({ color: palette.secondary, transparent: true, opacity: 0.45 })
+      new THREE.LineBasicMaterial({ color: palette.secondary, transparent: true, opacity: 0.48 })
     );
     const wideGlass = new THREE.Mesh(new THREE.PlaneGeometry(2.62, 1.47), prismGlassMat);
     wideGateGroup.add(wideFrameBorder, wideGlass);
-    wideGateGroup.position.set(0.15, -0.05, -0.35);
+    wideGateGroup.position.set(0.18, -0.05, -0.4);
     wideGateGroup.rotation.set(0.12, 0.25, -0.08);
     assembly.add(wideGateGroup);
 
-    // Part 10: Outer Gimbal Orbital Arc
+    // 4:5 Poster Frame Monolith orbiting cleanly alongside the cinema gate
+    const posterGateGroup = new THREE.Group();
+    const posterBorder = new THREE.LineSegments(
+      new THREE.EdgesGeometry(new THREE.BoxGeometry(1.12, 1.42, 0.02)),
+      new THREE.LineBasicMaterial({ color: palette.accent, transparent: true, opacity: 0.55 })
+    );
+    const posterGlass = new THREE.Mesh(new THREE.PlaneGeometry(1.08, 1.38), prismGlassMat);
+    posterGateGroup.add(posterBorder, posterGlass);
+    posterGateGroup.position.set(-0.98, 0.28, -0.82);
+    posterGateGroup.rotation.set(-0.14, 0.42, 0.1);
+    assembly.add(posterGateGroup);
+
+    // Outer Gimbal Orbital Arc + Secondary Counter-Arc
     const gimbalArc = new THREE.Mesh(
-      new THREE.TorusGeometry(1.78, 0.016, 14, 96, Math.PI * 1.45),
+      new THREE.TorusGeometry(1.82, 0.016, 14, 96, Math.PI * 1.45),
       brushedTitaniumMat
     );
     gimbalArc.rotation.set(0.65, 0.3, -0.4);
     assembly.add(gimbalArc);
 
+    const counterArc = new THREE.Mesh(
+      new THREE.TorusGeometry(2.05, 0.011, 12, 96, Math.PI * 0.9),
+      accentRingMat
+    );
+    counterArc.rotation.set(-0.55, 0.45, 0.35);
+    assembly.add(counterArc);
+
     // =========================================================================
-    // INTERACTIVE POINTER DRAG + HOVER PARALLAX
+    // INTERACTIVE POINTER DRAG + HOVER PARALLAX + PRESET DAMPING
     // =========================================================================
     let isDragging = false;
     let prevPointerX = 0;
@@ -229,6 +255,7 @@ export const HeroSpatialSculpture: React.FC<HeroSpatialSculptureProps> = ({ clas
     let userPitch = 0;
     let hoverNormX = 0;
     let hoverNormY = 0;
+    let isContextLost = false;
 
     const canvasEl = renderer.domElement;
 
@@ -250,14 +277,16 @@ export const HeroSpatialSculpture: React.FC<HeroSpatialSculptureProps> = ({ clas
       const dy = e.clientY - prevPointerY;
       prevPointerX = e.clientX;
       prevPointerY = e.clientY;
-      userYaw = THREE.MathUtils.clamp(userYaw + dx * 0.0085, -1.1, 1.1);
-      userPitch = THREE.MathUtils.clamp(userPitch + dy * 0.0085, -0.75, 0.75);
+      userYaw = THREE.MathUtils.clamp(userYaw + dx * 0.0085, -1.25, 1.25);
+      userPitch = THREE.MathUtils.clamp(userPitch + dy * 0.0085, -0.85, 0.85);
     };
 
     const onPointerUp = (e: PointerEvent) => {
       isDragging = false;
       canvasEl.releasePointerCapture?.(e.pointerId);
     };
+
+    const heightFallback = (val: number) => (val > 0 ? val : 420);
 
     const onResize = () => {
       const w = container.clientWidth || 360;
@@ -268,7 +297,14 @@ export const HeroSpatialSculpture: React.FC<HeroSpatialSculptureProps> = ({ clas
       renderer.setSize(w, h);
     };
 
-    const heightFallback = (val: number) => (val > 0 ? val : 420);
+    const onContextLost = (e: Event) => {
+      e.preventDefault();
+      isContextLost = true;
+    };
+
+    const onContextRestored = () => {
+      isContextLost = false;
+    };
 
     const syncTheme = () => {
       const next = getThemeThreePalette();
@@ -284,6 +320,8 @@ export const HeroSpatialSculpture: React.FC<HeroSpatialSculptureProps> = ({ clas
       attributeFilter: ['data-theme', 'style']
     });
 
+    canvasEl.addEventListener('webglcontextlost', onContextLost, false);
+    canvasEl.addEventListener('webglcontextrestored', onContextRestored, false);
     canvasEl.addEventListener('pointerdown', onPointerDown);
     window.addEventListener('pointermove', onPointerMove, { passive: true });
     window.addEventListener('pointerup', onPointerUp, { passive: true });
@@ -299,7 +337,7 @@ export const HeroSpatialSculpture: React.FC<HeroSpatialSculptureProps> = ({ clas
       if (isSoftware) {
         setTimeout(() => {
           if (!isDisposed) rafId = requestAnimationFrame(fn);
-        }, 16);
+        }, 40);
       } else {
         rafId = requestAnimationFrame(fn);
       }
@@ -310,28 +348,39 @@ export const HeroSpatialSculpture: React.FC<HeroSpatialSculptureProps> = ({ clas
       const dt = Math.min(0.05, Math.max(0.001, (now - lastTime) / 1000));
       lastTime = now;
 
+      if (isContextLost) {
+        afterDraw(tick);
+        return;
+      }
+
       if (!reducedMotion) {
         elapsed += dt;
       }
 
-      // Gently spring user drag rotation back when released
       if (!isDragging) {
         userYaw = THREE.MathUtils.damp(userYaw, 0, 1.8, dt);
         userPitch = THREE.MathUtils.damp(userPitch, 0, 1.8, dt);
       }
 
-      const targetRotY = userYaw + hoverNormX * 0.28 + Math.sin(elapsed * 0.45) * 0.14;
-      const targetRotX = userPitch - hoverNormY * 0.2 + Math.cos(elapsed * 0.35) * 0.08;
+      const camTarget = RIG_CAMERA_PRESETS[presetRef.current] || RIG_CAMERA_PRESETS.wide;
+      camera.position.x = THREE.MathUtils.damp(camera.position.x, camTarget.x, 4.5, dt);
+      camera.position.y = THREE.MathUtils.damp(camera.position.y, camTarget.y, 4.5, dt);
+      camera.position.z = THREE.MathUtils.damp(camera.position.z, camTarget.z, 4.5, dt);
+      camera.lookAt(0, 0, 0);
+
+      const targetRotY = camTarget.yaw + userYaw + hoverNormX * 0.28 + Math.sin(elapsed * 0.45) * 0.14;
+      const targetRotX = camTarget.pitch + userPitch - hoverNormY * 0.2 + Math.cos(elapsed * 0.35) * 0.08;
 
       assembly.rotation.y = THREE.MathUtils.damp(assembly.rotation.y, targetRotY, 6, dt);
       assembly.rotation.x = THREE.MathUtils.damp(assembly.rotation.x, targetRotX, 6, dt);
       assembly.position.y = Math.sin(elapsed * 0.85) * 0.08;
 
-      // Subtle mechanical iris & dial micro-motion
-      irisGroup.rotation.z = Math.sin(elapsed * 0.6) * 0.18;
+      irisGroup.rotation.z = Math.sin(elapsed * 0.6) * 0.2;
       dialMesh.rotation.y = Math.sin(elapsed * 0.4) * 0.25;
       gimbalArc.rotation.z = -0.4 + elapsed * 0.28;
+      counterArc.rotation.z = 0.35 - elapsed * 0.22;
       wideGateGroup.rotation.z = -0.08 + Math.sin(elapsed * 0.5) * 0.04;
+      posterGateGroup.position.y = 0.28 + Math.cos(elapsed * 0.65) * 0.07;
 
       renderer.render(scene, camera);
 
@@ -350,6 +399,8 @@ export const HeroSpatialSculpture: React.FC<HeroSpatialSculptureProps> = ({ clas
       isDisposed = true;
       cancelAnimationFrame(rafId);
       themeObserver.disconnect();
+      canvasEl.removeEventListener('webglcontextlost', onContextLost);
+      canvasEl.removeEventListener('webglcontextrestored', onContextRestored);
       canvasEl.removeEventListener('pointerdown', onPointerDown);
       window.removeEventListener('pointermove', onPointerMove);
       window.removeEventListener('pointerup', onPointerUp);
@@ -365,10 +416,35 @@ export const HeroSpatialSculpture: React.FC<HeroSpatialSculptureProps> = ({ clas
   }, []);
 
   return (
-    <div
-      ref={mountRef}
-      className={`cursor-grab active:cursor-grabbing touch-none ${className}`}
-      aria-label="Interactive 3D Cinema Optics Sculpture"
-    />
+    <div className={`relative ${className}`}>
+      <div
+        ref={mountRef}
+        className="w-full h-full cursor-grab active:cursor-grabbing touch-none"
+        aria-label="Interactive 3D Cinema Optics Sculpture"
+      />
+      {/* Compact Camera Angle Presets along bottom edge */}
+      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-20 inline-flex items-center gap-1 p-1 rounded-lg bg-[#121419]/92 border border-[#2B303D]">
+        {(
+          [
+            { id: 'wide', label: 'Wide' },
+            { id: 'optics', label: 'Optics' },
+            { id: 'orbit', label: 'Top Orbit' }
+          ] as const
+        ).map((item) => (
+          <button
+            key={item.id}
+            type="button"
+            onClick={() => setPreset(item.id)}
+            className={`px-2.5 py-1 rounded text-[10px] font-mono uppercase tracking-wider transition-colors cursor-pointer ${
+              preset === item.id
+                ? 'bg-[#E4583B] text-white font-bold'
+                : 'text-[#A7A298] hover:text-[#F4F0E8]'
+            }`}
+          >
+            {item.label}
+          </button>
+        ))}
+      </div>
+    </div>
   );
 };

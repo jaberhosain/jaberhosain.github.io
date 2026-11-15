@@ -11,7 +11,7 @@ interface HomePageProps {
 
 export const HomePage: React.FC<HomePageProps> = ({ onOpenLightbox, onOpenVideo }) => {
   return (
-    <div className="animate-in fade-in duration-300">
+    <div className="animate-page-enter-3d">
       <Hero />
       <HomeHighlights onOpenLightbox={onOpenLightbox} onOpenVideo={onOpenVideo} />
       <PagePagination currentPageId="home" />

@@ -493,36 +493,62 @@ export const VideoParallaxCarousel: React.FC<VideoParallaxCarouselProps> = ({
         </div>
       </div>
 
-      {/* Carousel Arrow Navigation */}
-      <div className="mt-6 flex items-center justify-center space-x-5 sm:space-x-10 max-w-3xl mx-auto px-2">
-        <button
-          type="button"
-          onClick={handlePrev}
-          className="w-11 h-11 rounded-full bg-[#181B22] hover:bg-[#20242E] active:scale-95 text-[#F4F0E8] border border-[#2B303D] hover:border-[#E4583B] flex items-center justify-center shadow-lg transition-all group shrink-0 cursor-pointer"
-          aria-label="Previous video slide"
-        >
-          <ChevronLeft className="w-5 h-5 text-[#DDD1BE] group-hover:text-[#E4583B] group-hover:-translate-x-0.5 transition-transform" />
-        </button>
+      {/* Carousel Arrow Navigation + Interactive Slide Scrubber Dots */}
+      <div className="mt-6 max-w-3xl mx-auto px-2 space-y-4">
+        <div className="flex items-center justify-center space-x-5 sm:space-x-10">
+          <button
+            type="button"
+            onClick={handlePrev}
+            className="w-11 h-11 rounded-full bg-[#181B22] hover:bg-[#20242E] active:scale-95 text-[#F4F0E8] border border-[#2B303D] hover:border-[#E4583B] flex items-center justify-center shadow-lg transition-all group shrink-0 cursor-pointer"
+            aria-label="Previous video slide"
+          >
+            <ChevronLeft className="w-5 h-5 text-[#DDD1BE] group-hover:text-[#E4583B] group-hover:-translate-x-0.5 transition-transform" />
+          </button>
 
-        <div className="flex-1 text-center min-w-0">
-          <p className="font-editorial italic text-lg sm:text-2xl text-[#F4F0E8] truncate">
-            {activeVideoTitle}
-            {activeVideoDesc ? (
-              <span className="text-[#A7A298] font-sans not-italic text-xs sm:text-sm">
-                {' '}— {activeVideoDesc}
-              </span>
-            ) : null}
-          </p>
+          <div className="flex-1 text-center min-w-0">
+            <p className="font-editorial italic text-lg sm:text-2xl text-[#F4F0E8] truncate">
+              {activeVideoTitle}
+              {activeVideoDesc ? (
+                <span className="text-[#A7A298] font-sans not-italic text-xs sm:text-sm">
+                  {' '}— {activeVideoDesc}
+                </span>
+              ) : null}
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleNext}
+            className="w-11 h-11 rounded-full bg-[#181B22] hover:bg-[#20242E] active:scale-95 text-[#F4F0E8] border border-[#2B303D] hover:border-[#E4583B] flex items-center justify-center shadow-lg transition-all group shrink-0 cursor-pointer"
+            aria-label="Next video slide"
+          >
+            <ChevronRight className="w-5 h-5 text-[#DDD1BE] group-hover:text-[#E4583B] group-hover:translate-x-0.5 transition-transform" />
+          </button>
         </div>
 
-        <button
-          type="button"
-          onClick={handleNext}
-          className="w-11 h-11 rounded-full bg-[#181B22] hover:bg-[#20242E] active:scale-95 text-[#F4F0E8] border border-[#2B303D] hover:border-[#E4583B] flex items-center justify-center shadow-lg transition-all group shrink-0 cursor-pointer"
-          aria-label="Next video slide"
-        >
-          <ChevronRight className="w-5 h-5 text-[#DDD1BE] group-hover:text-[#E4583B] group-hover:translate-x-0.5 transition-transform" />
-        </button>
+        {/* Interactive Slide Scrubber Dots */}
+        {total > 1 && (
+          <div className="flex items-center justify-center gap-2 pt-1" role="tablist" aria-label="Slide navigation">
+            {videos.map((v, idx) => {
+              const isActive = idx === activeIndex;
+              return (
+                <button
+                  key={v.id || `dot-${idx}`}
+                  type="button"
+                  onClick={() => setActiveIndex(idx)}
+                  aria-label={`Go to slide ${idx + 1}`}
+                  aria-selected={isActive}
+                  role="tab"
+                  className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${
+                    isActive
+                      ? 'w-8 bg-[#E4583B]'
+                      : 'w-2.5 bg-[#2B303D] hover:bg-[#A7A298]'
+                  }`}
+                />
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );

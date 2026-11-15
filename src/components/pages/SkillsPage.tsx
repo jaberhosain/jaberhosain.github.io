@@ -24,7 +24,7 @@ export const SkillsPage: React.FC = () => {
       : `${skillsCount} Skill Areas · ${linkedCount} Linked Channels`;
 
   return (
-    <div className="animate-in fade-in duration-300">
+    <div className="animate-page-enter-3d">
       <PageHeader meta={meta} summaryText={summaryText} />
       <Services />
       <Skills />

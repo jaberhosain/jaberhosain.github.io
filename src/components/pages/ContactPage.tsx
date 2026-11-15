@@ -8,7 +8,7 @@ export const ContactPage: React.FC = () => {
   const meta = PORTFOLIO_PAGES.find((p) => p.id === 'contact')!;
 
   return (
-    <div className="animate-in fade-in duration-300">
+    <div className="animate-page-enter-3d">
       <PageHeader meta={meta} />
       <Contact />
       <PagePagination currentPageId="contact" />

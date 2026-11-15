@@ -7,6 +7,7 @@ import { getProjectPosters } from '../lib/imageUrlResolver';
 import { EditableElement } from './common/EditableElement';
 import { VideoCardGrid } from './VideoCardGrid';
 import { Tilt3DImageStage } from './common/Tilt3DImageStage';
+import { Reveal3D } from './common/Reveal3D';
 
 interface PortfolioProps {
   onOpenLightbox?: (project: ProjectItem, initialIndex?: number) => void;
@@ -142,7 +143,7 @@ export const Portfolio: React.FC<PortfolioProps> = ({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* Section Header */}
-        <div className="flex flex-col items-center text-center mb-12">
+        <Reveal3D direction="up" className="flex flex-col items-center text-center mb-12">
           <span className="text-xs font-mono text-[#E4583B] uppercase tracking-[0.2em] mb-2.5">
             {mode === 'graphic'
               ? viewStyle === 'posters'
@@ -171,7 +172,7 @@ export const Portfolio: React.FC<PortfolioProps> = ({
                 : ui.projects.title}
             </span>
           </EditableElement>
-        </div>
+        </Reveal3D>
 
         {/* Mode Tabs */}
         {mode === 'all' && (
@@ -217,76 +218,79 @@ export const Portfolio: React.FC<PortfolioProps> = ({
         ) : viewStyle === 'posters' ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
             {flattenedPosters.length > 0 ? (
-              flattenedPosters.map((entry) => {
+              flattenedPosters.map((entry, idx) => {
                 const isBroken = brokenImages[entry.key];
+                const col = idx % 3;
+                const dir = col === 0 ? 'tilt-left' : col === 2 ? 'tilt-right' : 'up';
                 return (
-                  <div
-                    key={entry.key}
-                    onClick={() => onOpenLightbox?.(entry.project, entry.indexInProject)}
-                    className="group rounded-2xl studio-card overflow-hidden cursor-pointer flex flex-col justify-between hover:-translate-y-1"
-                  >
-                    <div className="p-2.5 bg-[#121419]/90 border-b border-[#2B303D]">
-                      <Tilt3DImageStage className="aspect-[4/5] w-full" maxTilt={11} scaleOnHover={1.02}>
-                        <div className="relative w-full h-full rounded-xl bg-[#0E1015] overflow-hidden flex items-center justify-center">
-                          {entry.url && !isBroken ? (
-                            <img
-                              src={resolveAssetUrl(entry.url)}
-                              alt={entry.caption}
-                              referrerPolicy="no-referrer"
-                              onError={() => setBrokenImages((prev) => ({ ...prev, [entry.key]: true }))}
-                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                              loading="lazy"
-                            />
-                          ) : (
-                            <div className="flex flex-col items-center justify-center p-6 text-center">
-                              <Palette className="w-8 h-8 text-[#E4583B] mb-2" />
-                              <span className="text-xs font-mono text-[#DDD1BE]">{entry.caption}</span>
-                            </div>
-                          )}
+                  <Reveal3D key={entry.key} direction={dir} delay={col * 80}>
+                    <div
+                      onClick={() => onOpenLightbox?.(entry.project, entry.indexInProject)}
+                      className="h-full group rounded-2xl studio-card overflow-hidden cursor-pointer flex flex-col justify-between hover:-translate-y-1"
+                    >
+                      <div className="p-2.5 bg-[#121419]/90 border-b border-[#2B303D]">
+                        <Tilt3DImageStage className="aspect-[4/5] w-full" maxTilt={11} scaleOnHover={1.02}>
+                          <div className="relative w-full h-full rounded-xl bg-[#0E1015] overflow-hidden flex items-center justify-center">
+                            {entry.url && !isBroken ? (
+                              <img
+                                src={resolveAssetUrl(entry.url)}
+                                alt={entry.caption}
+                                referrerPolicy="no-referrer"
+                                onError={() => setBrokenImages((prev) => ({ ...prev, [entry.key]: true }))}
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                loading="lazy"
+                              />
+                            ) : (
+                              <div className="flex flex-col items-center justify-center p-6 text-center">
+                                <Palette className="w-8 h-8 text-[#E4583B] mb-2" />
+                                <span className="text-xs font-mono text-[#DDD1BE]">{entry.caption}</span>
+                              </div>
+                            )}
 
-                          <div className="absolute inset-0 bg-black/45 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
-                            <span className="inline-flex items-center space-x-1.5 rtl:space-x-reverse px-4 py-2 rounded-lg bg-[#121419]/95 border border-[#E4583B]/60 text-[#F4F0E8] text-xs font-mono">
-                              <Eye className="w-4 h-4 text-[#E4583B]" />
-                              <span>{language === 'bn' ? 'পোস্টার দেখুন' : 'Inspect Poster'}</span>
-                            </span>
-                          </div>
-                        </div>
-                      </Tilt3DImageStage>
-                    </div>
-
-                    <div className="p-4 flex items-center justify-between gap-3">
-                      <div className="min-w-0">
-                        <div className="text-[11px] font-mono text-[#A7A298] flex items-center gap-1.5 truncate">
-                          <Layers className="w-3 h-3 text-[#E4583B] shrink-0" />
-                          <span className="truncate">{entry.groupLabel}</span>
-                          {entry.totalInGroup > 1 && (
-                            <>
-                              <span aria-hidden="true">·</span>
-                              <span className="tabular-nums shrink-0">
-                                {entry.posterNumber}/{entry.totalInGroup}
+                            <div className="absolute inset-0 bg-black/45 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
+                              <span className="inline-flex items-center space-x-1.5 rtl:space-x-reverse px-4 py-2 rounded-lg bg-[#121419]/95 border border-[#E4583B]/60 text-[#F4F0E8] text-xs font-mono">
+                                <Eye className="w-4 h-4 text-[#E4583B]" />
+                                <span>{language === 'bn' ? 'পোস্টার দেখুন' : 'Inspect Poster'}</span>
                               </span>
-                            </>
-                          )}
-                        </div>
-                        <h3 className="text-sm font-bold text-[#F4F0E8] group-hover:text-[#E4583B] transition-colors truncate mt-0.5">
-                          {entry.caption}
-                        </h3>
+                            </div>
+                          </div>
+                        </Tilt3DImageStage>
                       </div>
 
-                      {entry.project.behanceUrl && (
-                        <a
-                          href={entry.project.behanceUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          onClick={(e) => e.stopPropagation()}
-                          className="text-xs font-mono font-bold text-[#60A5FA] hover:text-white shrink-0"
-                          title="Open Behance Project"
-                        >
-                          Bē
-                        </a>
-                      )}
+                      <div className="p-4 flex items-center justify-between gap-3">
+                        <div className="min-w-0">
+                          <div className="text-[11px] font-mono text-[#A7A298] flex items-center gap-1.5 truncate">
+                            <Layers className="w-3 h-3 text-[#E4583B] shrink-0" />
+                            <span className="truncate">{entry.groupLabel}</span>
+                            {entry.totalInGroup > 1 && (
+                              <>
+                                <span aria-hidden="true">·</span>
+                                <span className="tabular-nums shrink-0">
+                                  {entry.posterNumber}/{entry.totalInGroup}
+                                </span>
+                              </>
+                            )}
+                          </div>
+                          <h3 className="text-sm font-bold text-[#F4F0E8] group-hover:text-[#E4583B] transition-colors truncate mt-0.5">
+                            {entry.caption}
+                          </h3>
+                        </div>
+
+                        {entry.project.behanceUrl && (
+                          <a
+                            href={entry.project.behanceUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={(e) => e.stopPropagation()}
+                            className="text-xs font-mono font-bold text-[#60A5FA] hover:text-white shrink-0"
+                            title="Open Behance Project"
+                          >
+                            Bē
+                          </a>
+                        )}
+                      </div>
                     </div>
-                  </div>
+                  </Reveal3D>
                 );
               })
             ) : (
@@ -298,7 +302,7 @@ export const Portfolio: React.FC<PortfolioProps> = ({
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto mb-12">
             {graphicProjects.length > 0 ? (
-              graphicProjects.map((project) => {
+              graphicProjects.map((project, projIdx) => {
                 const posters = getProjectPosters(project);
                 const coverPoster = posters[0]?.url || '';
                 const coverKey = `${project.id}-cover`;
@@ -306,163 +310,168 @@ export const Portfolio: React.FC<PortfolioProps> = ({
                 const groupLabel = loc(project.groupName);
 
                 return (
-                  <div
+                  <Reveal3D
                     key={project.id}
-                    onClick={() => onOpenLightbox?.(project, 0)}
-                    className="group relative rounded-2xl studio-card overflow-hidden flex flex-col justify-between cursor-pointer"
+                    direction={projIdx % 2 === 0 ? 'tilt-left' : 'tilt-right'}
+                    delay={(projIdx % 2) * 95}
                   >
-                    <div className="p-2.5 bg-[#121419]/90 border-b border-[#2B303D]">
-                      <Tilt3DImageStage className="aspect-[16/10] w-full" maxTilt={13} scaleOnHover={1.03}>
-                        <div className="relative w-full h-full rounded-xl bg-[#20242E] flex items-center justify-center border border-[#2B303D] overflow-hidden">
-                          {coverPoster && !coverBroken ? (
-                            <img
-                              src={resolveAssetUrl(coverPoster)}
-                              alt={loc(project.title)}
-                              referrerPolicy="no-referrer"
-                              onError={() => setBrokenImages((prev) => ({ ...prev, [coverKey]: true }))}
-                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                            />
-                          ) : (
-                            <div className="w-full h-full bg-[#181B22] flex flex-col items-center justify-center text-center p-6 space-y-2.5">
-                              <div className="w-11 h-11 rounded-xl bg-[#121419] border border-[#2B303D] flex items-center justify-center text-[#E4583B]">
-                                <Palette className="w-5 h-5" />
+                    <div
+                      onClick={() => onOpenLightbox?.(project, 0)}
+                      className="h-full group relative rounded-2xl studio-card overflow-hidden flex flex-col justify-between cursor-pointer hover:-translate-y-1"
+                    >
+                      <div className="p-2.5 bg-[#121419]/90 border-b border-[#2B303D]">
+                        <Tilt3DImageStage className="aspect-[16/10] w-full" maxTilt={13} scaleOnHover={1.03}>
+                          <div className="relative w-full h-full rounded-xl bg-[#20242E] flex items-center justify-center border border-[#2B303D] overflow-hidden">
+                            {coverPoster && !coverBroken ? (
+                              <img
+                                src={resolveAssetUrl(coverPoster)}
+                                alt={loc(project.title)}
+                                referrerPolicy="no-referrer"
+                                onError={() => setBrokenImages((prev) => ({ ...prev, [coverKey]: true }))}
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                              />
+                            ) : (
+                              <div className="w-full h-full bg-[#181B22] flex flex-col items-center justify-center text-center p-6 space-y-2.5">
+                                <div className="w-11 h-11 rounded-xl bg-[#121419] border border-[#2B303D] flex items-center justify-center text-[#E4583B]">
+                                  <Palette className="w-5 h-5" />
+                                </div>
+                                <span className="text-xs font-mono text-[#DDD1BE] font-semibold line-clamp-1">
+                                  {loc(project.title)}
+                                </span>
+                                <span className="text-[10px] font-mono text-[#A7A298]">
+                                  {project.behanceUrl ? 'Behance Design Series' : 'Graphic Design'}
+                                </span>
                               </div>
-                              <span className="text-xs font-mono text-[#DDD1BE] font-semibold line-clamp-1">
-                                {loc(project.title)}
-                              </span>
-                              <span className="text-[10px] font-mono text-[#A7A298]">
-                                {project.behanceUrl ? 'Behance Design Series' : 'Graphic Design'}
+                            )}
+
+                            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center z-10 pointer-events-none">
+                              <span className="inline-flex items-center space-x-1.5 rtl:space-x-reverse px-4 py-2 rounded-lg bg-[#121419]/95 border border-[#E4583B]/60 text-[#F4F0E8] text-xs font-mono font-medium">
+                                <Eye className="w-4 h-4 text-[#E4583B]" />
+                                <span>
+                                  {posters.length > 1
+                                    ? language === 'bn'
+                                      ? `সব ${posters.length}টি পোস্টার দেখুন`
+                                      : `Browse ${posters.length} Posters`
+                                    : language === 'bn'
+                                    ? 'বড় করে দেখুন'
+                                    : 'Preview in Lightbox'}
+                                </span>
                               </span>
                             </div>
-                          )}
-
-                          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center z-10 pointer-events-none">
-                            <span className="inline-flex items-center space-x-1.5 rtl:space-x-reverse px-4 py-2 rounded-lg bg-[#121419]/95 border border-[#E4583B]/60 text-[#F4F0E8] text-xs font-mono font-medium">
-                              <Eye className="w-4 h-4 text-[#E4583B]" />
-                              <span>
-                                {posters.length > 1
-                                  ? language === 'bn'
-                                    ? `সব ${posters.length}টি পোস্টার দেখুন`
-                                    : `Browse ${posters.length} Posters`
-                                  : language === 'bn'
-                                  ? 'বড় করে দেখুন'
-                                  : 'Preview in Lightbox'}
-                              </span>
-                            </span>
                           </div>
-                        </div>
-                      </Tilt3DImageStage>
+                        </Tilt3DImageStage>
 
-                      {posters.length > 1 && (
-                        <div className="mt-2.5 px-1 flex items-center gap-2 overflow-x-auto pb-0.5">
-                          {posters.slice(0, 6).map((p, idx) => {
-                            const thumbKey = `${project.id}-t-${idx}`;
-                            const isOverflowBadge = idx === 5 && posters.length > 6;
-                            return (
-                              <button
-                                key={thumbKey}
-                                type="button"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  onOpenLightbox?.(project, idx);
-                                }}
-                                className="relative w-14 h-14 rounded-lg overflow-hidden bg-[#20242E] border border-[#2B303D] hover:border-[#E4583B] shrink-0 transition-all cursor-pointer group/thumb"
-                                title={p.caption || `Poster ${idx + 1}`}
+                        {posters.length > 1 && (
+                          <div className="mt-2.5 px-1 flex items-center gap-2 overflow-x-auto pb-0.5">
+                            {posters.slice(0, 6).map((p, idx) => {
+                              const thumbKey = `${project.id}-t-${idx}`;
+                              const isOverflowBadge = idx === 5 && posters.length > 6;
+                              return (
+                                <button
+                                  key={thumbKey}
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    onOpenLightbox?.(project, idx);
+                                  }}
+                                  className="relative w-14 h-14 rounded-lg overflow-hidden bg-[#20242E] border border-[#2B303D] hover:border-[#E4583B] shrink-0 transition-all cursor-pointer group/thumb"
+                                  title={p.caption || `Poster ${idx + 1}`}
+                                >
+                                  {!brokenImages[thumbKey] ? (
+                                    <img
+                                      src={resolveAssetUrl(p.url)}
+                                      alt={p.caption || `Poster ${idx + 1}`}
+                                      referrerPolicy="no-referrer"
+                                      onError={() =>
+                                        setBrokenImages((prev) => ({ ...prev, [thumbKey]: true }))
+                                      }
+                                      className="w-full h-full object-cover group-hover/thumb:scale-110 transition-transform"
+                                    />
+                                  ) : (
+                                    <div className="w-full h-full flex items-center justify-center text-[#A7A298]">
+                                      <Grid className="w-4 h-4" />
+                                    </div>
+                                  )}
+                                  {isOverflowBadge && (
+                                    <div className="absolute inset-0 bg-black/75 flex items-center justify-center text-[11px] font-mono font-bold text-white">
+                                      +{posters.length - 5}
+                                    </div>
+                                  )}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="p-6 flex flex-col justify-between flex-1">
+                        <div>
+                          <div className="text-[11px] font-mono text-[#A7A298] mb-1.5 flex flex-wrap items-center gap-1.5">
+                            <span className="text-[#E4583B] uppercase tracking-wider font-semibold">
+                              {groupLabel || 'Graphic Design'}
+                            </span>
+                            {posters.length > 0 && (
+                              <>
+                                <span aria-hidden="true">·</span>
+                                <span className="tabular-nums">
+                                  {posters.length} {posters.length === 1 ? 'Poster' : 'Posters'}
+                                </span>
+                              </>
+                            )}
+                            {project.behanceUrl && (
+                              <>
+                                <span aria-hidden="true">·</span>
+                                <span>Behance</span>
+                              </>
+                            )}
+                          </div>
+
+                          <h3 className="text-lg font-bold text-[#F4F0E8] mb-2 group-hover:text-[#E4583B] transition-colors">
+                            {loc(project.title)}
+                          </h3>
+
+                          <p className="text-xs sm:text-sm text-[#A7A298] leading-relaxed line-clamp-3">
+                            {loc(project.description)}
+                          </p>
+                        </div>
+
+                        <div className="mt-5 pt-4 border-t border-[#2B303D] flex items-center justify-between text-xs font-mono">
+                          <div className="flex items-center space-x-3 rtl:space-x-reverse">
+                            {project.behanceUrl && (
+                              <a
+                                href={project.behanceUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                onClick={(e) => e.stopPropagation()}
+                                className="inline-flex items-center space-x-1 rtl:space-x-reverse text-[#60A5FA] hover:text-white font-bold transition-colors"
                               >
-                                {!brokenImages[thumbKey] ? (
-                                  <img
-                                    src={resolveAssetUrl(p.url)}
-                                    alt={p.caption || `Poster ${idx + 1}`}
-                                    referrerPolicy="no-referrer"
-                                    onError={() =>
-                                      setBrokenImages((prev) => ({ ...prev, [thumbKey]: true }))
-                                    }
-                                    className="w-full h-full object-cover group-hover/thumb:scale-110 transition-transform"
-                                  />
-                                ) : (
-                                  <div className="w-full h-full flex items-center justify-center text-[#A7A298]">
-                                    <Grid className="w-4 h-4" />
-                                  </div>
-                                )}
-                                {isOverflowBadge && (
-                                  <div className="absolute inset-0 bg-black/75 flex items-center justify-center text-[11px] font-mono font-bold text-white">
-                                    +{posters.length - 5}
-                                  </div>
-                                )}
-                              </button>
-                            );
-                          })}
-                        </div>
-                      )}
-                    </div>
+                                <span>Bē</span>
+                                <span>Behance</span>
+                                <ExternalLink className="w-3 h-3" />
+                              </a>
+                            )}
+                            {project.externalUrl && (
+                              <a
+                                href={project.externalUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                onClick={(e) => e.stopPropagation()}
+                                className="inline-flex items-center space-x-1 rtl:space-x-reverse text-[#DDD1BE] hover:text-white transition-colors"
+                              >
+                                <span>Link</span>
+                                <ExternalLink className="w-3 h-3 text-[#E4583B]" />
+                              </a>
+                            )}
+                          </div>
 
-                    <div className="p-6 flex flex-col justify-between flex-1">
-                      <div>
-                        <div className="text-[11px] font-mono text-[#A7A298] mb-1.5 flex flex-wrap items-center gap-1.5">
-                          <span className="text-[#E4583B] uppercase tracking-wider font-semibold">
-                            {groupLabel || 'Graphic Design'}
+                          <span className="inline-flex items-center space-x-1.5 rtl:space-x-reverse text-[#A7A298] group-hover:text-[#E4583B] transition-colors font-semibold">
+                            <span>{posters.length > 1 ? 'Open Group' : 'Preview'}</span>
+                            <Eye className="w-3.5 h-3.5" />
                           </span>
-                          {posters.length > 0 && (
-                            <>
-                              <span aria-hidden="true">·</span>
-                              <span className="tabular-nums">
-                                {posters.length} {posters.length === 1 ? 'Poster' : 'Posters'}
-                              </span>
-                            </>
-                          )}
-                          {project.behanceUrl && (
-                            <>
-                              <span aria-hidden="true">·</span>
-                              <span>Behance</span>
-                            </>
-                          )}
                         </div>
-
-                        <h3 className="text-lg font-bold text-[#F4F0E8] mb-2 group-hover:text-[#E4583B] transition-colors">
-                          {loc(project.title)}
-                        </h3>
-
-                        <p className="text-xs sm:text-sm text-[#A7A298] leading-relaxed line-clamp-3">
-                          {loc(project.description)}
-                        </p>
-                      </div>
-
-                      <div className="mt-5 pt-4 border-t border-[#2B303D] flex items-center justify-between text-xs font-mono">
-                        <div className="flex items-center space-x-3 rtl:space-x-reverse">
-                          {project.behanceUrl && (
-                            <a
-                              href={project.behanceUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              onClick={(e) => e.stopPropagation()}
-                              className="inline-flex items-center space-x-1 rtl:space-x-reverse text-[#60A5FA] hover:text-white font-bold transition-colors"
-                            >
-                              <span>Bē</span>
-                              <span>Behance</span>
-                              <ExternalLink className="w-3 h-3" />
-                            </a>
-                          )}
-                          {project.externalUrl && (
-                            <a
-                              href={project.externalUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              onClick={(e) => e.stopPropagation()}
-                              className="inline-flex items-center space-x-1 rtl:space-x-reverse text-[#DDD1BE] hover:text-white transition-colors"
-                            >
-                              <span>Link</span>
-                              <ExternalLink className="w-3 h-3 text-[#E4583B]" />
-                            </a>
-                          )}
-                        </div>
-
-                        <span className="inline-flex items-center space-x-1.5 rtl:space-x-reverse text-[#A7A298] group-hover:text-[#E4583B] transition-colors font-semibold">
-                          <span>{posters.length > 1 ? 'Open Group' : 'Preview'}</span>
-                          <Eye className="w-3.5 h-3.5" />
-                        </span>
                       </div>
                     </div>
-                  </div>
+                  </Reveal3D>
                 );
               })
             ) : (

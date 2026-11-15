@@ -95,12 +95,12 @@ export const DesignPage: React.FC<DesignPageProps> = ({ onOpenLightbox }) => {
       : `${projectCount} Groups · ${totalPostersCount} Posters & Works`;
 
   return (
-    <div className="animate-in fade-in duration-300">
+    <div className="animate-page-enter-3d">
       <PageHeader meta={meta} summaryText={summaryText} />
 
-      {/* Interactive Filter + View Mode Bar */}
-      <div className="bg-[#121419]/85 border-b border-[#2B303D] py-4">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-3">
+      {/* Sticky Mobbin-Style Gallery Filter & View Mode Toolbar (solid opaque bg over WebGL) */}
+      <div className="sticky top-[64px] z-30 bg-[#121419]/96 border-b border-[#2B303D] py-3.5 shadow-lg">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-2.5">
           <div className="flex flex-wrap items-center justify-between gap-3">
             {/* Primary Section Tabs */}
             <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-xl bg-[#181B22] border border-[#2B303D]">

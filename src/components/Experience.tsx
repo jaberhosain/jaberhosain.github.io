@@ -2,6 +2,7 @@ import React from 'react';
 import { GraduationCap, Award, CheckCircle, Sparkles } from 'lucide-react';
 import { usePortfolio } from '../context/PortfolioContext';
 import { EditableElement } from './common/EditableElement';
+import { Reveal3D } from './common/Reveal3D';
 
 export const Experience: React.FC = () => {
   const { portfolio, ui, loc } = usePortfolio();
@@ -15,7 +16,7 @@ export const Experience: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* Section Header */}
-        <div className="flex flex-col items-center text-center mb-16">
+        <Reveal3D direction="up" className="flex flex-col items-center text-center mb-16">
           <div className="text-xs font-mono text-[#E4583B] uppercase tracking-[0.2em] mb-2.5">
             {ui.education.sectionTag}
           </div>
@@ -24,7 +25,7 @@ export const Experience: React.FC = () => {
               {ui.education.title}
             </span>
           </EditableElement>
-        </div>
+        </Reveal3D>
 
         {/* 1. Academic Background */}
         <div className="mb-16">
@@ -36,34 +37,33 @@ export const Experience: React.FC = () => {
           </h3>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {academicRecords?.map((record) => (
-              <div
-                key={record.id}
-                className="p-6 rounded-2xl studio-card flex flex-col justify-between"
-              >
-                <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="year-badge px-2.5 py-1 rounded text-xs font-mono font-bold bg-[#E4583B]/12 text-[#E4583B] border border-[#E4583B]/30">
-                      {record.year}
-                    </span>
-                    <span className={`status-badge text-[11px] font-mono font-medium px-2 py-0.5 rounded ${
-                      record.status.en === 'Completed'
-                        ? 'status-badge-completed text-emerald-400 bg-emerald-950/40 border border-emerald-500/20'
-                        : 'status-badge-studying text-amber-400 bg-amber-950/40 border border-amber-500/20'
-                    }`}>
-                      {loc(record.status)}
-                    </span>
+            {academicRecords?.map((record, recIdx) => (
+              <Reveal3D key={record.id} direction={recIdx % 2 === 0 ? 'left' : 'right'} delay={(recIdx % 2) * 90}>
+                <div className="h-full p-6 rounded-2xl studio-card flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="year-badge px-2.5 py-1 rounded text-xs font-mono font-bold bg-[#E4583B]/12 text-[#E4583B] border border-[#E4583B]/30">
+                        {record.year}
+                      </span>
+                      <span className={`status-badge text-[11px] font-mono font-medium px-2 py-0.5 rounded ${
+                        record.status.en === 'Completed'
+                          ? 'status-badge-completed text-emerald-400 bg-emerald-950/40 border border-emerald-500/20'
+                          : 'status-badge-studying text-amber-400 bg-amber-950/40 border border-amber-500/20'
+                      }`}>
+                        {loc(record.status)}
+                      </span>
+                    </div>
+
+                    <h4 className="text-base sm:text-lg font-bold text-[#F4F0E8] mb-2">
+                      {loc(record.title)}
+                    </h4>
+
+                    <p className="text-xs sm:text-sm text-[#A7A298] leading-relaxed">
+                      {loc(record.description)}
+                    </p>
                   </div>
-
-                  <h4 className="text-base sm:text-lg font-bold text-[#F4F0E8] mb-2">
-                    {loc(record.title)}
-                  </h4>
-
-                  <p className="text-xs sm:text-sm text-[#A7A298] leading-relaxed">
-                    {loc(record.description)}
-                  </p>
                 </div>
-              </div>
+              </Reveal3D>
             ))}
           </div>
         </div>
@@ -80,7 +80,8 @@ export const Experience: React.FC = () => {
 
             <div className="space-y-8">
               {institutes.map((inst, instIdx) => (
-                <div key={inst.id || instIdx} className="p-8 rounded-2xl studio-card">
+                <Reveal3D key={inst.id || instIdx} direction="depth" delay={instIdx * 100}>
+                  <div className="p-8 rounded-2xl studio-card">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-[#2B303D] gap-4 mb-6">
                     <div>
                       <span className="text-[11px] font-mono text-[#A7A298] uppercase tracking-widest block mb-1">
@@ -140,7 +141,8 @@ export const Experience: React.FC = () => {
                       )}
                     </div>
                   )}
-                </div>
+                  </div>
+                </Reveal3D>
               ))}
             </div>
           </div>

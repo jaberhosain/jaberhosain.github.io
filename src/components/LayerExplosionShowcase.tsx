@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { Layers, Sparkles, Volume2, Film, Type, Eye, ArrowRight } from 'lucide-react';
 import { usePortfolio } from '../context/PortfolioContext';
 import { resolveAssetUrl } from '../utils/assetUrl';
+import { Reveal3D } from './common/Reveal3D';
 
 export const LayerExplosionShowcase: React.FC = () => {
   const { portfolio, loc, language } = usePortfolio();
@@ -73,7 +74,7 @@ export const LayerExplosionShowcase: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
 
         {/* Section Header with 3D Explode Toggle */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16 pb-8 border-b border-[#2B303D]">
+        <Reveal3D direction="up" className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16 pb-8 border-b border-[#2B303D]">
           <div>
             <p className="inline-flex items-center space-x-2 rtl:space-x-reverse text-[11px] font-mono tracking-[0.22em] uppercase text-[#E4583B] mb-3">
               <Layers className="w-3.5 h-3.5 text-[#E4583B]" />
@@ -114,18 +115,19 @@ export const LayerExplosionShowcase: React.FC = () => {
               <span>{language === 'bn' ? '◼ সমবেত ফাইনাল' : '◼ Assembled Final'}</span>
             </button>
           </div>
-        </div>
+        </Reveal3D>
 
         {/* 3D Stage & Layer Cards Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
 
           {/* Left Column: Interactive 3D Perspective Sandwich View */}
-          <div
-            ref={containerRef}
-            onMouseMove={handleMouseMove}
-            onMouseLeave={handleMouseLeave}
-            className="lg:col-span-7 h-[460px] sm:h-[540px] relative flex items-center justify-center perspective-1200 cursor-grab active:cursor-grabbing select-none"
-          >
+          <Reveal3D direction="left" className="lg:col-span-7">
+            <div
+              ref={containerRef}
+              onMouseMove={handleMouseMove}
+              onMouseLeave={handleMouseLeave}
+              className="h-[460px] sm:h-[540px] relative flex items-center justify-center perspective-1200 cursor-grab active:cursor-grabbing select-none"
+            >
             <div
               className="relative w-[300px] sm:w-[420px] aspect-[16/10] preserve-3d transition-transform duration-200 ease-out"
               style={{
@@ -241,10 +243,11 @@ export const LayerExplosionShowcase: React.FC = () => {
               })}
 
             </div>
-          </div>
+            </div>
+          </Reveal3D>
 
           {/* Right Column: Layer Info Cards */}
-          <div className="lg:col-span-5 space-y-3">
+          <Reveal3D direction="right" delay={120} className="lg:col-span-5 space-y-3">
             <span className="text-xs font-mono text-[#A7A298] uppercase tracking-widest block mb-1">
               {language === 'bn' ? 'লেয়ার স্পেসিফিকেশন' : 'LAYER ARCHITECTURE'}
             </span>
@@ -298,7 +301,7 @@ export const LayerExplosionShowcase: React.FC = () => {
                 </div>
               );
             })}
-          </div>
+          </Reveal3D>
 
         </div>
 

@@ -648,21 +648,46 @@ svg.lucide,
 
 @keyframes marquee-scroll {
   0% {
-    transform: translateX(0%);
+    transform: translate3d(0%, 0, 0);
   }
   100% {
-    transform: translateX(-50%);
+    transform: translate3d(-50%, 0, 0);
   }
 }
 
 .animate-marquee {
   display: flex;
   width: max-content;
-  animation: marquee-scroll 32s linear infinite;
+  will-change: transform;
+  animation: marquee-scroll 34s linear infinite;
 }
 
 .animate-marquee:hover {
   animation-play-state: paused;
+}
+
+@keyframes page-enter-3d {
+  0% {
+    opacity: 0;
+    transform: perspective(1400px) translate3d(0, 24px, -40px) rotateX(2.5deg);
+  }
+  100% {
+    opacity: 1;
+    transform: perspective(1400px) translate3d(0, 0, 0) rotateX(0deg);
+  }
+}
+
+.animate-page-enter-3d {
+  animation: page-enter-3d 620ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee {
+    animation: none;
+  }
+  .animate-page-enter-3d {
+    animation: none;
+  }
 }
 
 @keyframes waveform-bounce {

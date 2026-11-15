@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Video, Palette, Sparkles, TrendingUp, Layers, PenTool } from 'lucide-react';
 import { usePortfolio } from '../context/PortfolioContext';
+import { Reveal3D } from './common/Reveal3D';
 
 const iconMap: Record<string, React.ElementType> = {
   Video,
@@ -74,44 +75,43 @@ export const Skills: React.FC = () => {
 
         {/* Skill Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-24">
-          {filteredSkills.map((skill) => {
+          {filteredSkills.map((skill, sIdx) => {
             const Icon = iconMap[skill.icon] || Sparkles;
             return (
-              <div
-                key={skill.id}
-                className="studio-card p-6 rounded-2xl hover:border-[#E4583B]/55 transition-all duration-300 group"
-              >
-                <div className="flex items-center space-x-3 rtl:space-x-reverse mb-3">
-                  <div className="w-10 h-10 rounded-xl bg-[#20242E] border border-[#2B303D] flex items-center justify-center text-[#E4583B] group-hover:scale-105 transition-transform">
-                    <Icon className="w-5 h-5" />
+              <Reveal3D key={skill.id} direction={sIdx % 2 === 0 ? 'left' : 'right'} delay={(sIdx % 2) * 85}>
+                <div className="h-full studio-card p-6 rounded-2xl hover:border-[#E4583B]/55 transition-all duration-300 group">
+                  <div className="flex items-center space-x-3 rtl:space-x-reverse mb-3">
+                    <div className="w-10 h-10 rounded-xl bg-[#20242E] border border-[#2B303D] flex items-center justify-center text-[#E4583B] group-hover:scale-105 transition-transform">
+                      <Icon className="w-5 h-5" />
+                    </div>
+                    <h3 className="font-display text-base sm:text-lg font-bold text-[#F4F0E8] uppercase tracking-wide">
+                      {loc(skill.title)}
+                    </h3>
                   </div>
-                  <h3 className="font-display text-base sm:text-lg font-bold text-[#F4F0E8] uppercase tracking-wide">
-                    {loc(skill.title)}
-                  </h3>
-                </div>
 
-                <p className="text-xs sm:text-sm text-[#A7A298] mb-5 leading-relaxed">
-                  {loc(skill.description)}
-                </p>
+                  <p className="text-xs sm:text-sm text-[#A7A298] mb-5 leading-relaxed">
+                    {loc(skill.description)}
+                  </p>
 
-                {/* Tool Badges */}
-                <div className="flex flex-wrap gap-2">
-                  {skill.tools.map((tool, idx) => (
-                    <button
-                      type="button"
-                      key={idx}
-                      onClick={() => setSelectedTool((prev) => (prev === tool ? 'ALL' : tool))}
-                      className={`px-3 py-1 rounded-lg text-xs font-mono border transition-colors cursor-pointer ${
-                        selectedTool === tool
-                          ? 'bg-[#E4583B]/15 text-[#E4583B] border-[#E4583B]'
-                          : 'bg-[#20242E] text-[#F4F0E8] border-[#2B303D] group-hover:border-[#E4583B]/35'
-                      }`}
-                    >
-                      {tool}
-                    </button>
-                  ))}
+                  {/* Tool Badges */}
+                  <div className="flex flex-wrap gap-2">
+                    {skill.tools.map((tool, idx) => (
+                      <button
+                        type="button"
+                        key={idx}
+                        onClick={() => setSelectedTool((prev) => (prev === tool ? 'ALL' : tool))}
+                        className={`px-3 py-1 rounded-lg text-xs font-mono border transition-colors cursor-pointer ${
+                          selectedTool === tool
+                            ? 'bg-[#E4583B]/15 text-[#E4583B] border-[#E4583B]'
+                            : 'bg-[#20242E] text-[#F4F0E8] border-[#2B303D] group-hover:border-[#E4583B]/35'
+                        }`}
+                      >
+                        {tool}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              </Reveal3D>
             );
           })}
         </div>
@@ -119,25 +119,24 @@ export const Skills: React.FC = () => {
         {/* Section: MY CREATIVE WORKFLOW */}
         {showWorkflow !== false && workflow.length > 0 && (
           <div className="pt-8 border-t border-[#2B303D]">
-            <div className="flex flex-col items-center text-center mb-12">
+            <Reveal3D direction="up" className="flex flex-col items-center text-center mb-12">
               <h3 className="font-display text-2xl sm:text-3xl font-extrabold text-[#F4F0E8] uppercase tracking-wider">
                 {ui.workflow.title}
               </h3>
-            </div>
+            </Reveal3D>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
               {workflow.map((item, idx) => (
-                <div
-                  key={item.id || item.step || idx}
-                  className="studio-card flex flex-col items-center text-center p-5 rounded-2xl hover:border-[#E4583B]/60 transition-colors"
-                >
-                  <div className="w-12 h-12 rounded-full bg-[#20242E] border border-[#E4583B]/70 flex items-center justify-center text-sm font-mono font-bold text-[#E4583B] mb-3">
-                    {item.step}
+                <Reveal3D key={item.id || item.step || idx} direction="up" delay={idx * 65}>
+                  <div className="h-full studio-card flex flex-col items-center text-center p-5 rounded-2xl hover:border-[#E4583B]/60 transition-colors">
+                    <div className="w-12 h-12 rounded-full bg-[#20242E] border border-[#E4583B]/70 flex items-center justify-center text-sm font-mono font-bold text-[#E4583B] mb-3">
+                      {item.step}
+                    </div>
+                    <div className="font-semibold text-sm text-[#F4F0E8]">
+                      {loc(item.title)}
+                    </div>
                   </div>
-                  <div className="font-semibold text-sm text-[#F4F0E8]">
-                    {loc(item.title)}
-                  </div>
-                </div>
+                </Reveal3D>
               ))}
             </div>
           </div>

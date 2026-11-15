@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Mail, Facebook, Send, CheckCircle2, AlertCircle, MessageSquare, Youtube, Copy, Check } from 'lucide-react';
 import { usePortfolio } from '../context/PortfolioContext';
 import { EditableElement } from './common/EditableElement';
+import { Reveal3D } from './common/Reveal3D';
 
 export const Contact: React.FC = () => {
   const { portfolio, ui, loc, language, submitContactLead } = usePortfolio();
@@ -71,42 +72,45 @@ export const Contact: React.FC = () => {
     <div id="advice" className="py-24 bg-[#121419]/80 border-t border-[#2B303D]">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-20">
         {/* Quick Availability & Email Copy Strip (sourced from real portfolio hero/contact data) */}
-        <div className="studio-card p-5 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="text-xs font-mono text-[#DDD1BE]">
-            <span className="text-[#E4583B] font-bold uppercase tracking-wider">
-              {loc(portfolio.hero.badge)}
-            </span>
-            {portfolio.contact?.email && (
-              <>
-                <span className="mx-2 text-[#A7A298]" aria-hidden="true">·</span>
-                <span className="text-[#A7A298] break-all">{portfolio.contact.email}</span>
-              </>
-            )}
-          </div>
-
-          {portfolio.contact?.email && (
-            <button
-              type="button"
-              onClick={handleCopyEmail}
-              className="inline-flex items-center space-x-2 rtl:space-x-reverse px-4 py-2 rounded-xl bg-[#20242E] hover:bg-[#272C38] border border-[#2B303D] text-xs font-mono font-semibold text-[#F4F0E8] transition-colors self-start sm:self-auto shrink-0 cursor-pointer"
-            >
-              {copiedEmail ? (
+        <Reveal3D direction="up">
+          <div className="studio-card p-5 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="text-xs font-mono text-[#DDD1BE]">
+              <span className="text-[#E4583B] font-bold uppercase tracking-wider">
+                {loc(portfolio.hero.badge)}
+              </span>
+              {portfolio.contact?.email && (
                 <>
-                  <Check className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>{language === 'bn' ? 'কপি হয়েছে' : 'Copied'}</span>
-                </>
-              ) : (
-                <>
-                  <Copy className="w-3.5 h-3.5 text-[#E4583B]" />
-                  <span>{language === 'bn' ? 'ইমেইল কপি করুন' : 'Copy Email'}</span>
+                  <span className="mx-2 text-[#A7A298]" aria-hidden="true">·</span>
+                  <span className="text-[#A7A298] break-all">{portfolio.contact.email}</span>
                 </>
               )}
-            </button>
-          )}
-        </div>
+            </div>
+
+            {portfolio.contact?.email && (
+              <button
+                type="button"
+                onClick={handleCopyEmail}
+                className="inline-flex items-center space-x-2 rtl:space-x-reverse px-4 py-2 rounded-xl bg-[#20242E] hover:bg-[#272C38] border border-[#2B303D] text-xs font-mono font-semibold text-[#F4F0E8] transition-colors self-start sm:self-auto shrink-0 cursor-pointer"
+              >
+                {copiedEmail ? (
+                  <>
+                    <Check className="w-3.5 h-3.5 text-emerald-400" />
+                    <span>{language === 'bn' ? 'কপি হয়েছে' : 'Copied'}</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-3.5 h-3.5 text-[#E4583B]" />
+                    <span>{language === 'bn' ? 'ইমেইল কপি করুন' : 'Copy Email'}</span>
+                  </>
+                )}
+              </button>
+            )}
+          </div>
+        </Reveal3D>
 
         {/* 1. GIVE ME YOUR ADVICE FORM */}
-        <div>
+        <Reveal3D direction="depth" delay={80}>
+          <div>
           <div className="text-center mb-10">
             <EditableElement id="contact.title" label="Advice Form Title" as="h2" className="mb-3">
               <span className="font-display text-2xl sm:text-3xl font-extrabold text-[#F4F0E8] tracking-tight uppercase">
@@ -202,9 +206,11 @@ export const Contact: React.FC = () => {
             </div>
           </form>
         </div>
+        </Reveal3D>
 
         {/* 2. HAVE A PROJECT IN MIND? (Editorial Studio Seal) */}
-        <div className="studio-card relative text-center p-10 sm:p-14 rounded-3xl overflow-hidden">
+        <Reveal3D direction="up" delay={100}>
+          <div className="studio-card relative text-center p-10 sm:p-14 rounded-3xl overflow-hidden">
           <div className="relative z-10 max-w-xl mx-auto">
             {/* Architectural Studio Monogram Seal */}
             <div className="inline-flex flex-col items-center px-7 py-4 mb-7 rounded-2xl bg-[#14171E] border border-[#2B303D]">
@@ -245,6 +251,7 @@ export const Contact: React.FC = () => {
             </div>
           </div>
         </div>
+        </Reveal3D>
 
         {/* 3. GET IN TOUCH */}
         <div id="contact">

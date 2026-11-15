@@ -6,6 +6,7 @@ import { resolveAssetUrl } from '../utils/assetUrl';
 import { normalizeDirectImageUrl } from '../lib/imageUrlResolver';
 import { EditableElement } from './common/EditableElement';
 import { Tilt3DImageStage } from './common/Tilt3DImageStage';
+import { Reveal3D } from './common/Reveal3D';
 
 const iconMap: Record<string, React.ElementType> = {
   GraduationCap,
@@ -28,7 +29,7 @@ export const About: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center mb-24">
 
           {/* Left: Authentic Portrait in 3D Stage */}
-          <div className="lg:col-span-5 flex justify-center">
+          <Reveal3D direction="left" className="lg:col-span-5 flex justify-center">
             <Tilt3DImageStage className="w-full max-w-sm aspect-[3/4]" maxTilt={14} scaleOnHover={1.02}>
               <div className="relative w-full h-full rounded-2xl overflow-hidden border border-[#2B303D] bg-[#181B22] shadow-2xl">
                 <img
@@ -54,10 +55,10 @@ export const About: React.FC = () => {
                 <div className="absolute inset-0 bg-gradient-to-t from-[#121419]/60 via-transparent to-transparent" />
               </div>
             </Tilt3DImageStage>
-          </div>
+          </Reveal3D>
 
           {/* Right: Bio Text */}
-          <div className="lg:col-span-7 flex flex-col items-start text-left rtl:items-start rtl:text-right">
+          <Reveal3D direction="right" delay={110} className="lg:col-span-7 flex flex-col items-start text-left rtl:items-start rtl:text-right">
             <div className="text-xs font-mono text-[#E4583B] uppercase tracking-[0.2em] mb-3">
               {ui.about.sectionTag}
             </div>
@@ -73,7 +74,7 @@ export const About: React.FC = () => {
                 {loc(about.bio)}
               </EditableElement>
             </div>
-          </div>
+          </Reveal3D>
         </div>
 
         {/* Section: WHAT YOU'LL FIND HERE */}
@@ -90,44 +91,47 @@ export const About: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {overviewCards?.map((card) => {
+            {overviewCards?.map((card, idx) => {
               const Icon = iconMap[card.icon] || Award;
+              const col = idx % 3;
+              const dir = col === 0 ? 'tilt-left' : col === 2 ? 'tilt-right' : 'up';
               return (
-                <a
-                  key={card.id}
-                  href={card.linkTarget}
-                  onClick={(e) => {
-                    if (isMultiPageEnabled) {
-                      e.preventDefault();
-                      if (card.icon === 'Palette' || card.id === 'ov-4') {
-                        navigateTo('design');
-                      } else if (card.icon === 'Video' || card.id === 'ov-3') {
-                        navigateTo('videos');
-                      } else {
-                        navigateTo(card.linkTarget);
+                <Reveal3D key={card.id} direction={dir} delay={col * 85}>
+                  <a
+                    href={card.linkTarget}
+                    onClick={(e) => {
+                      if (isMultiPageEnabled) {
+                        e.preventDefault();
+                        if (card.icon === 'Palette' || card.id === 'ov-4') {
+                          navigateTo('design');
+                        } else if (card.icon === 'Video' || card.id === 'ov-3') {
+                          navigateTo('videos');
+                        } else {
+                          navigateTo(card.linkTarget);
+                        }
                       }
-                    }
-                  }}
-                  className="group p-6 rounded-2xl studio-card hover:-translate-y-1 flex flex-col justify-between"
-                >
-                  <div>
-                    <div className="w-11 h-11 rounded-lg bg-[#20242E] border border-[#2B303D] flex items-center justify-center text-[#E4583B] mb-4 group-hover:scale-105 transition-transform">
-                      <Icon className="w-5 h-5" />
+                    }}
+                    className="h-full group p-6 rounded-2xl studio-card hover:-translate-y-1 flex flex-col justify-between"
+                  >
+                    <div>
+                      <div className="w-11 h-11 rounded-lg bg-[#20242E] border border-[#2B303D] flex items-center justify-center text-[#E4583B] mb-4 group-hover:scale-105 transition-transform">
+                        <Icon className="w-5 h-5" />
+                      </div>
+
+                      <h4 className="text-base sm:text-lg font-bold text-[#F4F0E8] mb-2 group-hover:text-[#E4583B] transition-colors">
+                        {loc(card.title)}
+                      </h4>
+
+                      <p className="text-xs sm:text-sm text-[#A7A298] mb-6 leading-relaxed">
+                        {loc(card.description)}
+                      </p>
                     </div>
 
-                    <h4 className="text-base sm:text-lg font-bold text-[#F4F0E8] mb-2 group-hover:text-[#E4583B] transition-colors">
-                      {loc(card.title)}
-                    </h4>
-
-                    <p className="text-xs sm:text-sm text-[#A7A298] mb-6 leading-relaxed">
-                      {loc(card.description)}
-                    </p>
-                  </div>
-
-                  <div className="inline-flex items-center space-x-1.5 rtl:space-x-reverse text-xs font-semibold text-[#E4583B] group-hover:underline">
-                    <span>{loc(card.linkText)}</span>
-                  </div>
-                </a>
+                    <div className="inline-flex items-center space-x-1.5 rtl:space-x-reverse text-xs font-semibold text-[#E4583B] group-hover:underline">
+                      <span>{loc(card.linkText)}</span>
+                    </div>
+                  </a>
+                </Reveal3D>
               );
             })}
           </div>

@@ -306,6 +306,51 @@ export const Hero: React.FC = () => {
             <ArrowDown className="w-3.5 h-3.5 text-[#E4583B]" />
           </button>
         </div>
+
+        {/* Equinox-Inspired Continuous Studio Discipline Ribbon */}
+        <div className="mt-6 overflow-hidden border-y border-[#2B303D]/70 bg-[#14171E]/85 py-3 select-none">
+          <div className="animate-marquee flex items-center whitespace-nowrap">
+            {[0, 1].map((dup) => (
+              <div key={dup} className="flex items-center">
+                {(language === 'bn'
+                  ? [
+                      'ভিডিও এডিটিং ও স্টোরিটেলিং',
+                      'সিনেমাটিক কালার গ্রেডিং',
+                      'কাইনেটিক মোশন গ্রাফিক্স',
+                      'গ্রাফিক ও ব্র্যান্ড পোস্টার',
+                      'বিহ্যান্স ভিজ্যুয়াল সিরিজ',
+                      'সাউন্ড ডিজাইন ও পেসিং'
+                    ]
+                  : language === 'ar'
+                  ? [
+                      'مونتاج الفيديو والسرد البصري',
+                      'تصحيح الألوان السينمائي',
+                      'موشن جرافيك وتايبوغرافي',
+                      'تصميم الهويات والبوسترات',
+                      'مشاريع بيهانس المصنفة',
+                      'هندسة الصوت والإيقاع'
+                    ]
+                  : [
+                      'Video Editing & Pacing',
+                      'Cinematic Color Grading',
+                      'Kinetic Motion Graphics',
+                      'Graphic & Poster Systems',
+                      'Behance Curated Series',
+                      'Sound Design & Foley'
+                    ]
+                ).map((label, idx) => (
+                  <span
+                    key={`${dup}-${idx}`}
+                    className="inline-flex items-center text-[11px] font-mono uppercase tracking-[0.22em] text-[#DDD1BE]"
+                  >
+                    <span className="px-6">{label}</span>
+                    <span className="text-[#E4583B]" aria-hidden="true">·</span>
+                  </span>
+                ))}
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </section>
   );

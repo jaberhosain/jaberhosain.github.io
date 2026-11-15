@@ -26,7 +26,7 @@ export const AboutPage: React.FC = () => {
       : `${academicCount} Academic · ${instituteCount} Training`;
 
   return (
-    <div className="animate-in fade-in duration-300">
+    <div className="animate-page-enter-3d">
       <PageHeader meta={meta} summaryText={summaryText} />
       <About />
       <Experience />
