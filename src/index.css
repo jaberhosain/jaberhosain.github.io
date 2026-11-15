@@ -861,3 +861,90 @@ svg.lucide,
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+/* ==========================================================================
+   MONUMENTAL 3D SCULPTED FOOTER WORDMARK (BLENDED OBSIDIAN RELIEF)
+   ========================================================================== */
+.footer-wordmark-mask {
+  -webkit-mask-image: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 1) 0%,
+    rgba(0, 0, 0, 0.94) 56%,
+    rgba(0, 0, 0, 0.14) 100%
+  );
+  mask-image: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 1) 0%,
+    rgba(0, 0, 0, 0.94) 56%,
+    rgba(0, 0, 0, 0.14) 100%
+  );
+}
+
+.footer-wordmark-shadow {
+  color: rgba(0, 0, 0, 0.92);
+}
+
+.footer-wordmark-extrude-deep {
+  color: rgba(8, 9, 12, 0.95);
+}
+
+.footer-wordmark-extrude-mid {
+  color: rgba(13, 15, 19, 0.95);
+}
+
+.footer-wordmark-extrude-near {
+  color: rgba(18, 20, 26, 0.96);
+}
+
+.footer-wordmark-face {
+  background-image: linear-gradient(
+    180deg,
+    rgba(46, 49, 58, 0.68) 0%,
+    rgba(25, 27, 33, 0.56) 52%,
+    rgba(13, 14, 18, 0.22) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  -webkit-text-stroke: 1px rgba(255, 255, 255, 0.068);
+}
+
+.footer-wordmark-sheen {
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Light Theme Override — Warm Sculpted Travertine Low-Relief */
+[data-theme="light"] .footer-wordmark-shadow {
+  color: rgba(23, 25, 30, 0.12);
+}
+
+[data-theme="light"] .footer-wordmark-extrude-deep {
+  color: rgba(212, 205, 192, 0.55);
+}
+
+[data-theme="light"] .footer-wordmark-extrude-mid {
+  color: rgba(224, 218, 207, 0.72);
+}
+
+[data-theme="light"] .footer-wordmark-extrude-near {
+  color: rgba(235, 230, 220, 0.85);
+}
+
+[data-theme="light"] .footer-wordmark-face {
+  background-image: linear-gradient(
+    180deg,
+    rgba(23, 25, 30, 0.14) 0%,
+    rgba(23, 25, 30, 0.07) 58%,
+    rgba(23, 25, 30, 0.01) 100%
+  );
+  -webkit-text-stroke: 1px rgba(23, 25, 30, 0.09);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .footer-wordmark-3d-wrap {
+    transform: none !important;
+    transition: none !important;
+  }
+}

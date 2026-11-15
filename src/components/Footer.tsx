@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { usePortfolio } from '../context/PortfolioContext';
 import { useNavigation } from '../context/NavigationContext';
+import { FooterWordmark3D } from './common/FooterWordmark3D';
 
 interface FooterProps {
   onOpenAdmin?: () => void;
@@ -80,7 +81,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenAdmin }) => {
   };
 
   return (
-    <footer className="bg-[#0B0C10]/92 backdrop-blur-md border-t border-white/[0.08] text-[#A7A298] py-12">
+    <footer className="bg-[#0B0C10]/92 backdrop-blur-md border-t border-white/[0.08] text-[#A7A298] pt-12 pb-3 overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center text-center space-y-6">
 
         {/* Page Directory Links */}
@@ -191,6 +192,9 @@ export const Footer: React.FC<FooterProps> = ({ onOpenAdmin }) => {
         </div>
 
       </div>
+
+      {/* Monumental 3D Sculpted Name Signature Blended Into Floor (All Pages) */}
+      <FooterWordmark3D />
     </footer>
   );
 };
