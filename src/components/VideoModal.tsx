@@ -101,7 +101,7 @@ export const VideoModal: React.FC<VideoModalProps> = ({ video, onClose }) => {
     >
       <div
         ref={modalContainerRef}
-        className={`relative flex flex-col w-full bg-[#181B22] border border-[#2B303D] rounded-2xl overflow-hidden shadow-2xl transition-all ${
+        className={`relative flex flex-col w-full glass-showcase-card rounded-[24px] overflow-hidden shadow-2xl transition-all ${
           isFullscreen
             ? 'h-full w-full max-w-none max-h-none rounded-none'
             : isVertical
@@ -111,38 +111,36 @@ export const VideoModal: React.FC<VideoModalProps> = ({ video, onClose }) => {
         onClick={(e) => e.stopPropagation()}
       >
         {/* Top Header */}
-        <div className="flex items-center justify-between px-4 py-3 sm:px-6 sm:py-3.5 border-b border-[#2B303D] bg-[#121419]">
+        <div className="flex items-center justify-between px-4 py-3 sm:px-6 sm:py-3.5 border-b border-white/[0.08]">
           <div className="flex items-center space-x-2.5 rtl:space-x-reverse min-w-0 pr-3">
-            <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${isVimeo ? 'bg-[#1AB7EA]' : 'bg-[#E4583B]'}`} />
+            <span className={`w-2 h-2 rounded-full shrink-0 ${isVimeo ? 'bg-[#1AB7EA]' : 'bg-[#E4583B]'}`} />
             <h3 className="font-semibold text-sm sm:text-base text-[#F4F0E8] truncate">
               {videoTitle}
             </h3>
             {isVertical && (
-              <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#E4583B]/15 text-[#E4583B] border border-[#E4583B]/30">
-                Portrait / Reel
+              <span className="hidden sm:inline-flex items-center px-2.5 py-0.5 rounded-full glass-pill-ghost text-[10px] font-medium text-[#DDD1BE]">
+                Portrait · Reel
               </span>
             )}
           </div>
 
           <div className="flex items-center space-x-2 rtl:space-x-reverse shrink-0">
-            {/* Fullscreen Button */}
             <button
               onClick={toggleFullscreen}
-              className="p-2 text-[#DDD1BE] hover:text-[#F4F0E8] bg-[#20242E] hover:bg-[#2B303D] border border-[#2B303D] rounded-xl transition-colors min-h-[40px] min-w-[40px] flex items-center justify-center cursor-pointer"
+              className="w-9 h-9 rounded-full glass-icon-disc flex items-center justify-center cursor-pointer"
               aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
               title={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
             >
-              {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+              {isFullscreen ? <Minimize2 className="w-4 h-4" strokeWidth={1.35} /> : <Maximize2 className="w-4 h-4" strokeWidth={1.35} />}
             </button>
 
-            {/* Clear Close Button */}
             <button
               onClick={onClose}
-              className="p-2 text-[#DDD1BE] hover:text-[#F4F0E8] bg-[#20242E] hover:bg-[#2B303D] border border-[#2B303D] rounded-xl transition-colors min-h-[40px] min-w-[40px] flex items-center justify-center cursor-pointer"
+              className="w-9 h-9 rounded-full glass-icon-disc flex items-center justify-center cursor-pointer"
               aria-label="Close video"
               title="Close modal"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4" strokeWidth={1.35} />
             </button>
           </div>
         </div>
@@ -231,32 +229,32 @@ export const VideoModal: React.FC<VideoModalProps> = ({ video, onClose }) => {
           </div>
         </div>
         {/* Footer info & Action buttons */}
-        <div className="flex flex-col sm:flex-row items-center justify-between px-5 py-3.5 sm:px-6 sm:py-4 bg-[#121419] border-t border-[#2B303D] text-xs sm:text-sm text-[#A7A298] gap-3">
+        <div className="flex flex-col sm:flex-row items-center justify-between px-5 py-3.5 sm:px-6 sm:py-4 border-t border-white/[0.08] text-xs sm:text-sm text-[#A7A298] gap-3">
           <div className="flex items-center space-x-3 rtl:space-x-reverse w-full sm:w-auto justify-between sm:justify-start">
-            <span className="inline-flex items-center space-x-1.5 rtl:space-x-reverse px-2.5 py-1 rounded-md bg-[#20242E] border border-[#2B303D] text-[11px] font-mono">
+            <span className="inline-flex items-center space-x-1.5 rtl:space-x-reverse px-3 py-1 rounded-full glass-pill-ghost text-[11px] font-medium">
               {isVimeo ? (
                 <>
                   <VimeoIcon className="w-3.5 h-3.5 text-[#1AB7EA]" />
-                  <span className="text-[#1AB7EA]">Vimeo Video</span>
+                  <span className="text-[#EAE5DC]">Vimeo Video</span>
                 </>
               ) : isYouTube ? (
                 <>
-                  <Youtube className="w-3.5 h-3.5 text-[#FF0000]" />
-                  <span className="text-[#FF0000]">YouTube Video</span>
+                  <Youtube className="w-3.5 h-3.5 text-[#FF0000]" strokeWidth={1.5} />
+                  <span className="text-[#EAE5DC]">YouTube Video</span>
                 </>
               ) : isFacebook ? (
                 <>
-                  <Facebook className="w-3.5 h-3.5 text-[#1877F2]" />
-                  <span className="text-[#1877F2]">Facebook Video</span>
+                  <Facebook className="w-3.5 h-3.5 text-[#1877F2]" strokeWidth={1.5} />
+                  <span className="text-[#EAE5DC]">Facebook Video</span>
                 </>
               ) : (
                 <>
                   <Play className="w-3 h-3 fill-current text-[#E4583B]" />
-                  <span className="text-[#E4583B]">Video Clip</span>
+                  <span className="text-[#EAE5DC]">Video Clip</span>
                 </>
               )}
             </span>
-            {video.duration && <span className="font-mono text-xs">Duration: {video.duration}</span>}
+            {video.duration && <span className="text-xs text-[#A7A298] tabular-nums">Duration: {video.duration}</span>}
           </div>
 
           <div className="flex items-center space-x-2 rtl:space-x-reverse w-full sm:w-auto justify-end">
@@ -265,11 +263,11 @@ export const VideoModal: React.FC<VideoModalProps> = ({ video, onClose }) => {
                 href={video.videoUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center justify-center space-x-2 rtl:space-x-reverse px-4 py-2 rounded-xl text-xs font-bold text-white bg-[#1AB7EA] hover:bg-[#169AC4] transition-all shadow-md group w-full sm:w-auto"
+                className="inline-flex items-center justify-center space-x-2 rtl:space-x-reverse px-4 py-2 rounded-full glass-pill-cta text-xs font-semibold transition-all group w-full sm:w-auto"
               >
                 <VimeoIcon className="w-3.5 h-3.5 fill-current" />
                 <span>{ui.projects?.watchOnVimeo || 'Watch on Vimeo'}</span>
-                <ExternalLink className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+                <ExternalLink className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" strokeWidth={1.5} />
               </a>
             )}
 
@@ -278,11 +276,11 @@ export const VideoModal: React.FC<VideoModalProps> = ({ video, onClose }) => {
                 href={video.videoUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center justify-center space-x-2 rtl:space-x-reverse px-4 py-2 rounded-xl text-xs font-bold text-white bg-[#FF0000] hover:bg-[#D90000] transition-all shadow-md group w-full sm:w-auto"
+                className="inline-flex items-center justify-center space-x-2 rtl:space-x-reverse px-4 py-2 rounded-full glass-pill-cta text-xs font-semibold transition-all group w-full sm:w-auto"
               >
-                <Youtube className="w-3.5 h-3.5 fill-current" />
+                <Youtube className="w-3.5 h-3.5" strokeWidth={1.5} />
                 <span>{ui.projects?.watchOnYouTube || 'Watch on YouTube'}</span>
-                <ExternalLink className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+                <ExternalLink className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" strokeWidth={1.5} />
               </a>
             )}
 
@@ -291,11 +289,11 @@ export const VideoModal: React.FC<VideoModalProps> = ({ video, onClose }) => {
                 href={video.videoUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center justify-center space-x-2 rtl:space-x-reverse px-4 py-2 rounded-xl text-xs font-bold text-white bg-[#1877F2] hover:bg-[#166FE5] transition-all shadow-md group w-full sm:w-auto"
+                className="inline-flex items-center justify-center space-x-2 rtl:space-x-reverse px-4 py-2 rounded-full glass-pill-cta text-xs font-semibold transition-all group w-full sm:w-auto"
               >
-                <Facebook className="w-3.5 h-3.5 fill-current" />
+                <Facebook className="w-3.5 h-3.5" strokeWidth={1.5} />
                 <span>Watch on Facebook</span>
-                <ExternalLink className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+                <ExternalLink className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" strokeWidth={1.5} />
               </a>
             )}
           </div>

@@ -98,12 +98,12 @@ export const DesignPage: React.FC<DesignPageProps> = ({ onOpenLightbox }) => {
     <div className="animate-page-enter-3d">
       <PageHeader meta={meta} summaryText={summaryText} />
 
-      {/* Sticky Mobbin-Style Gallery Filter & View Mode Toolbar (solid opaque bg over WebGL) */}
-      <div className="sticky top-[64px] z-30 bg-[#121419]/96 border-b border-[#2B303D] py-3.5 shadow-lg">
+      {/* Frosted Gallery Filter & View Mode Toolbar */}
+      <div className="sticky top-[64px] z-30 bg-[#0D0E12]/90 backdrop-blur-md border-b border-white/[0.08] py-3.5 shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-2.5">
           <div className="flex flex-wrap items-center justify-between gap-3">
             {/* Primary Section Tabs */}
-            <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-xl bg-[#181B22] border border-[#2B303D]">
+            <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-full glass-showcase-inner">
               {filterTabs.map((tab) => (
                 <button
                   key={tab.id}
@@ -112,9 +112,9 @@ export const DesignPage: React.FC<DesignPageProps> = ({ onOpenLightbox }) => {
                     setFilter(tab.id);
                     if (tab.id === 'best') setGroupFilter('all');
                   }}
-                  className={`px-3.5 py-1.5 rounded-lg text-xs font-mono font-semibold transition-colors whitespace-nowrap tabular-nums cursor-pointer ${
+                  className={`px-4 py-1.5 rounded-full text-xs font-medium transition-all whitespace-nowrap tabular-nums cursor-pointer ${
                     filter === tab.id
-                      ? 'bg-[#E4583B] text-white'
+                      ? 'glass-pill-cta font-semibold'
                       : 'text-[#A7A298] hover:text-[#F4F0E8]'
                   }`}
                 >
@@ -125,29 +125,29 @@ export const DesignPage: React.FC<DesignPageProps> = ({ onOpenLightbox }) => {
 
             {/* View Style Switcher: Grouped Projects vs All Individual Posters */}
             {filter !== 'best' && (
-              <div className="flex items-center gap-1 p-1 rounded-xl bg-[#181B22] border border-[#2B303D]">
+              <div className="flex items-center gap-1 p-1 rounded-full glass-showcase-inner">
                 <button
                   type="button"
                   onClick={() => setViewStyle('groups')}
-                  className={`inline-flex items-center space-x-1.5 rtl:space-x-reverse px-3 py-1.5 rounded-lg text-xs font-mono font-semibold transition-colors cursor-pointer ${
+                  className={`inline-flex items-center space-x-1.5 rtl:space-x-reverse px-3.5 py-1.5 rounded-full text-xs font-medium transition-all cursor-pointer ${
                     viewStyle === 'groups'
-                      ? 'bg-[#20242E] text-[#F4F0E8] border border-[#2B303D]'
+                      ? 'glass-pill-cta font-semibold'
                       : 'text-[#A7A298] hover:text-[#F4F0E8]'
                   }`}
                 >
-                  <Layers className="w-3.5 h-3.5 text-[#E4583B]" />
+                  <Layers className="w-3.5 h-3.5" strokeWidth={1.35} />
                   <span>{language === 'bn' ? 'গ্রুপ ওয়াইজ' : 'Grouped Projects'}</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setViewStyle('posters')}
-                  className={`inline-flex items-center space-x-1.5 rtl:space-x-reverse px-3 py-1.5 rounded-lg text-xs font-mono font-semibold transition-colors cursor-pointer ${
+                  className={`inline-flex items-center space-x-1.5 rtl:space-x-reverse px-3.5 py-1.5 rounded-full text-xs font-medium transition-all cursor-pointer ${
                     viewStyle === 'posters'
-                      ? 'bg-[#20242E] text-[#F4F0E8] border border-[#2B303D]'
+                      ? 'glass-pill-cta font-semibold'
                       : 'text-[#A7A298] hover:text-[#F4F0E8]'
                   }`}
                 >
-                  <LayoutGrid className="w-3.5 h-3.5 text-[#E4583B]" />
+                  <LayoutGrid className="w-3.5 h-3.5" strokeWidth={1.35} />
                   <span>{language === 'bn' ? 'সব পোস্টার' : 'All Posters'}</span>
                 </button>
               </div>
@@ -157,16 +157,16 @@ export const DesignPage: React.FC<DesignPageProps> = ({ onOpenLightbox }) => {
           {/* Group Filter Row */}
           {groupNames.length > 0 && filter !== 'best' && (
             <div className="flex flex-wrap items-center gap-2 pt-1">
-              <span className="text-[11px] font-mono text-[#A7A298] uppercase tracking-wider mr-1">
+              <span className="text-[11px] font-medium text-[#A7A298] tracking-wide mr-1">
                 {language === 'bn' ? 'প্রজেক্ট গ্রুপ:' : 'Groups:'}
               </span>
               <button
                 type="button"
                 onClick={() => setGroupFilter('all')}
-                className={`px-3 py-1 rounded-lg text-xs font-mono transition-colors cursor-pointer ${
+                className={`px-3.5 py-1 rounded-full text-xs transition-all cursor-pointer ${
                   groupFilter === 'all'
-                    ? 'bg-[#E4583B]/15 text-[#F07C63] border border-[#E4583B]/40 font-semibold'
-                    : 'bg-[#181B22] text-[#A7A298] hover:text-[#F4F0E8] border border-[#2B303D]'
+                    ? 'glass-pill-cta font-semibold'
+                    : 'glass-pill-ghost text-[#A7A298] hover:text-[#F4F0E8]'
                 }`}
               >
                 {language === 'bn' ? 'সব গ্রুপ' : 'All Groups'}
@@ -179,10 +179,10 @@ export const DesignPage: React.FC<DesignPageProps> = ({ onOpenLightbox }) => {
                     setGroupFilter(g.name);
                     if (filter === 'all' || filter === 'behance') setFilter('projects');
                   }}
-                  className={`px-3 py-1 rounded-lg text-xs font-mono transition-colors cursor-pointer tabular-nums ${
+                  className={`px-3.5 py-1 rounded-full text-xs transition-all cursor-pointer tabular-nums ${
                     groupFilter === g.name
-                      ? 'bg-[#E4583B]/15 text-[#F07C63] border border-[#E4583B]/40 font-semibold'
-                      : 'bg-[#181B22] text-[#A7A298] hover:text-[#F4F0E8] border border-[#2B303D]'
+                      ? 'glass-pill-cta font-semibold'
+                      : 'glass-pill-ghost text-[#A7A298] hover:text-[#F4F0E8]'
                   }`}
                 >
                   {g.name} ({g.count})

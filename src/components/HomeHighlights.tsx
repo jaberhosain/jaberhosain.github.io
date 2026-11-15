@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import {
   Video,
   Palette,
-  ArrowRight,
   Eye,
   GraduationCap,
   Award,
@@ -17,6 +16,7 @@ import { normalizeDirectImageUrl } from '../lib/imageUrlResolver';
 import { Tilt3DImageStage } from './common/Tilt3DImageStage';
 import { Reveal3D } from './common/Reveal3D';
 import { VideoParallaxCarousel } from './VideoParallaxCarousel';
+import { StudioArrowRight, StudioGlassIcon } from './common/StudioIcon';
 
 interface HomeHighlightsProps {
   onOpenLightbox?: (project: ProjectItem, initialIndex?: number) => void;
@@ -86,42 +86,37 @@ export const HomeHighlights: React.FC<HomeHighlightsProps> = ({
       : visibleBestVideos;
 
   return (
-    <div className="bg-transparent border-t border-[#2B303D]">
-      {/* 1. Video Portfolio 3D Parallax Slide Showcase */}
+    <div className="bg-transparent border-t border-white/[0.08]">
+      {/* 1. Video Portfolio Smoked-Glass 3D Slide Showcase */}
       {activeSlideVideos.length > 0 && (
-        <section className="py-20 sm:py-24 bg-[#121419]/75 relative overflow-hidden">
+        <section className="py-20 sm:py-24 bg-[#0D0E12]/78 relative overflow-hidden">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
               <Reveal3D direction="left">
-                <div className="text-xs font-mono text-[#E4583B] uppercase tracking-[0.2em] mb-2.5">
+                <div className="text-[11px] font-sans uppercase tracking-[0.24em] text-[#9A958C] mb-2">
                   {ui.videos.sectionTag}
                 </div>
-                <h2 className="font-display text-3xl sm:text-5xl font-extrabold text-[#F4F0E8] tracking-tight leading-[1.08]">
+                <h2 className="font-display text-3xl sm:text-5xl font-bold text-[#F4F0E8] tracking-tight leading-[1.08]">
                   {language === 'bn'
-                    ? 'ভিডিও পোর্টফোলিও'
+                    ? 'ভিডিও এডিটিং'
                     : language === 'ar'
                     ? 'معرض الفيديو'
-                    : 'Video Portfolio'}{' '}
-                  <span className="font-editorial italic lowercase font-normal text-[#DDD1BE] block sm:inline mt-1 sm:mt-0">
-                    3D parallax.
+                    : 'Selected Reels'}{' '}
+                  <span className="font-editorial italic font-normal text-[#DDD1BE] block sm:inline mt-1 sm:mt-0">
+                    {language === 'bn' ? 'শোকেস' : '& motion cuts.'}
                   </span>
                 </h2>
-                <p className="mt-2.5 text-xs sm:text-sm text-[#A7A298] max-w-2xl leading-relaxed">
-                  {language === 'bn'
-                    ? 'স্পিড কন্ট্রোল ব্যবহার করে থ্রিডি স্লাইডে ভিডিও দেখুন, অথবা সব ভিডিও একসাথে দেখতে ভিডিও পেজে যান।'
-                    : 'Browse cuts inside the 3D parallax carousel with speed controls, or explore the full video catalog.'}
-                </p>
               </Reveal3D>
 
               <Reveal3D direction="right" delay={100} className="flex flex-wrap items-center gap-3 shrink-0">
                 {visibleVideos.length > 0 && visibleBestVideos.length > 0 && (
-                  <div className="inline-flex items-center p-1 rounded-lg bg-[#181B22] border border-[#2B303D]">
+                  <div className="inline-flex items-center p-1 rounded-full glass-pill-ghost">
                     <button
                       type="button"
                       onClick={() => setSlideSource('projects')}
-                      className={`px-3 py-1.5 rounded-md text-xs font-mono font-bold transition-colors whitespace-nowrap cursor-pointer ${
+                      className={`px-3.5 py-1 rounded-full text-xs font-medium transition-colors whitespace-nowrap cursor-pointer ${
                         slideSource === 'projects'
-                          ? 'bg-[#E4583B] text-white'
+                          ? 'bg-[#F4F0E8] text-[#111318]'
                           : 'text-[#A7A298] hover:text-[#F4F0E8]'
                       }`}
                     >
@@ -130,9 +125,9 @@ export const HomeHighlights: React.FC<HomeHighlightsProps> = ({
                     <button
                       type="button"
                       onClick={() => setSlideSource('best')}
-                      className={`px-3 py-1.5 rounded-md text-xs font-mono font-bold transition-colors whitespace-nowrap cursor-pointer ${
+                      className={`px-3.5 py-1 rounded-full text-xs font-medium transition-colors whitespace-nowrap cursor-pointer ${
                         slideSource === 'best'
-                          ? 'bg-[#E4583B] text-white'
+                          ? 'bg-[#F4F0E8] text-[#111318]'
                           : 'text-[#A7A298] hover:text-[#F4F0E8]'
                       }`}
                     >
@@ -144,18 +139,17 @@ export const HomeHighlights: React.FC<HomeHighlightsProps> = ({
                 <button
                   type="button"
                   onClick={() => navigateTo('videos')}
-                  className="inline-flex items-center space-x-2 rtl:space-x-reverse px-4 py-2.5 rounded-lg bg-[#181B22] border border-[#2B303D] hover:border-[#E4583B] text-xs font-mono font-bold text-[#F4F0E8] transition-colors whitespace-nowrap cursor-pointer"
+                  className="inline-flex items-center space-x-2 rtl:space-x-reverse px-4 py-2 rounded-full glass-pill-ghost text-xs font-medium transition-colors whitespace-nowrap cursor-pointer group"
                 >
-                  <Video className="w-3.5 h-3.5 text-[#E4583B]" />
                   <span>
                     {language === 'bn'
-                      ? 'সব ভিডিও দেখুন'
+                      ? 'সব ভিডিও'
                       : language === 'ar'
-                      ? 'عرض جميع الفيديوهات'
-                      : 'All Videos Grid'}
+                      ? 'عرض الكل'
+                      : 'All Reels'}
                   </span>
-                  <span className="text-[#A7A298] tabular-nums">({totalVideoCount})</span>
-                  <ArrowRight className="w-3.5 h-3.5 text-[#E4583B] rtl:rotate-180" />
+                  <span className="text-[#8E8A82] tabular-nums">({totalVideoCount})</span>
+                  <StudioArrowRight className="w-3.5 h-3.5 text-[#EAE5DC] group-hover:translate-x-0.5 transition-transform rtl:rotate-180" />
                 </button>
               </Reveal3D>
             </div>
@@ -171,21 +165,21 @@ export const HomeHighlights: React.FC<HomeHighlightsProps> = ({
         </section>
       )}
 
-      {/* 2. Graphic Design Spotlight Preview (Mobbin-Grade Curation) */}
+      {/* 2. Graphic Design Spotlight Preview */}
       {spotlightGraphics.length > 0 && (
-        <section className="py-20 bg-[#14171E]/80 border-t border-[#2B303D]">
+        <section className="py-20 bg-[#14171E]/80 border-t border-white/[0.07]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-12">
               <Reveal3D direction="left">
-                <span className="text-xs font-mono text-[#E4583B] uppercase tracking-[0.2em] block mb-2">
-                  {language === 'bn' ? 'গ্রাফিক ডিজাইন হাইলাইটস' : language === 'ar' ? 'أبرز أعمال التصميم' : 'Graphic Design Preview'}
+                <span className="text-[11px] font-sans text-[#9A958C] uppercase tracking-[0.22em] block mb-2">
+                  {language === 'bn' ? 'গ্রাফিক ডিজাইন হাইলাইটস' : language === 'ar' ? 'أبرز أعمال التصميم' : 'Visual & Print Direction'}
                 </span>
-                <h2 className="font-display text-2xl sm:text-4xl font-extrabold text-[#F4F0E8] tracking-tight">
+                <h2 className="font-display text-2xl sm:text-4xl font-bold text-[#F4F0E8] tracking-tight">
                   {language === 'bn'
                     ? 'ভিজ্যুয়াল ডিজাইন ও পোস্টার'
                     : language === 'ar'
                     ? 'التصميم الجرافيكي والهويات'
-                    : 'Visual & Graphic Design'}
+                    : 'Graphic Design Archive'}
                 </h2>
               </Reveal3D>
 
@@ -193,14 +187,13 @@ export const HomeHighlights: React.FC<HomeHighlightsProps> = ({
                 <button
                   type="button"
                   onClick={() => navigateTo('design')}
-                  className="inline-flex items-center space-x-2 rtl:space-x-reverse px-4 py-2.5 rounded-lg bg-[#181B22] border border-[#2B303D] hover:border-[#E4583B] text-xs font-mono font-bold text-[#F4F0E8] transition-colors self-start md:self-auto whitespace-nowrap cursor-pointer"
+                  className="inline-flex items-center space-x-2 rtl:space-x-reverse px-4 py-2 rounded-full glass-pill-ghost text-xs font-medium self-start md:self-auto whitespace-nowrap cursor-pointer group"
                 >
-                  <Palette className="w-3.5 h-3.5 text-[#E4583B]" />
                   <span>
-                    {language === 'bn' ? 'সব ডিজাইন দেখুন' : language === 'ar' ? 'كل التصاميم' : 'Open Design Gallery'}
+                    {language === 'bn' ? 'সব ডিজাইন' : language === 'ar' ? 'كل التصاميم' : 'Open Gallery'}
                   </span>
-                  <span className="text-[#A7A298] tabular-nums">({totalGraphicCount})</span>
-                  <ArrowRight className="w-3.5 h-3.5 text-[#E4583B] rtl:rotate-180" />
+                  <span className="text-[#8E8A82] tabular-nums">({totalGraphicCount})</span>
+                  <StudioArrowRight className="w-3.5 h-3.5 rtl:rotate-180 group-hover:translate-x-0.5 transition-transform" />
                 </button>
               </Reveal3D>
             </div>
@@ -223,11 +216,11 @@ export const HomeHighlights: React.FC<HomeHighlightsProps> = ({
                     <div
                       onClick={() => onOpenLightbox?.(proj, 0)}
                       data-cursor="view"
-                      className="h-full group rounded-2xl studio-card overflow-hidden cursor-pointer flex flex-col justify-between hover:-translate-y-1"
+                      className="h-full group rounded-[22px] glass-showcase-card overflow-hidden cursor-pointer flex flex-col justify-between hover:-translate-y-1 transition-transform duration-300"
                     >
-                      <div className="p-2.5 bg-[#121419]/90 border-b border-[#2B303D]">
+                      <div className="p-2.5 bg-[#0D0E12]/70 border-b border-white/[0.07]">
                         <Tilt3DImageStage className="aspect-[16/10] w-full" maxTilt={13} scaleOnHover={1.03}>
-                          <div className="relative w-full h-full rounded-xl bg-[#20242E] overflow-hidden flex items-center justify-center">
+                          <div className="relative w-full h-full rounded-[14px] bg-[#14171E] overflow-hidden flex items-center justify-center">
                             {cleanCover && !hasBroken ? (
                               <img
                                 src={resolveAssetUrl(cleanCover)}
@@ -237,40 +230,40 @@ export const HomeHighlights: React.FC<HomeHighlightsProps> = ({
                                 onError={() => setBrokenGraphicIds((prev) => ({ ...prev, [imgKey]: true }))}
                               />
                             ) : (
-                              <div className="w-full h-full flex flex-col items-center justify-center text-center p-5 bg-[#181B22]">
-                                <div className="w-11 h-11 rounded-xl bg-[#20242E] border border-[#2B303D] flex items-center justify-center text-[#E4583B] mb-2">
-                                  <Palette className="w-5 h-5" />
-                                </div>
-                                <span className="text-xs font-mono text-[#DDD1BE] font-semibold line-clamp-1">
+                              <div className="w-full h-full flex flex-col items-center justify-center text-center p-5 bg-[#14171E]">
+                                <StudioGlassIcon size="md" className="mb-2">
+                                  <Palette className="w-4 h-4" strokeWidth={1.35} />
+                                </StudioGlassIcon>
+                                <span className="text-xs text-[#DDD1BE] font-medium line-clamp-1">
                                   {loc(proj.title)}
                                 </span>
-                                <span className="text-[10px] font-mono text-[#A7A298] mt-0.5">
+                                <span className="text-[10px] text-[#8E8A82] mt-0.5">
                                   {proj.behanceUrl ? 'Behance Visual Project' : 'Graphic Design'}
                                 </span>
                               </div>
                             )}
-                            <div className="absolute inset-0 bg-black/45 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                              <span className="inline-flex items-center space-x-1.5 rtl:space-x-reverse px-4 py-2 rounded-lg bg-[#121419]/95 border border-[#E4583B]/60 text-[#F4F0E8] text-xs font-mono">
-                                <Eye className="w-4 h-4 text-[#E4583B]" />
-                                <span>{language === 'bn' ? 'বড় করে দেখুন' : 'Preview'}</span>
+                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                              <span className="inline-flex items-center space-x-1.5 rtl:space-x-reverse px-4 py-1.5 rounded-full glass-pill-ghost text-xs font-medium">
+                                <Eye className="w-3.5 h-3.5" strokeWidth={1.4} />
+                                <span>{language === 'bn' ? 'দেখুন' : 'Preview'}</span>
                               </span>
                             </div>
                           </div>
                         </Tilt3DImageStage>
                       </div>
 
-                      <div className="p-6 flex items-center justify-between gap-4">
+                      <div className="p-5 flex items-center justify-between gap-4">
                         <div className="min-w-0">
-                          <div className="text-xs font-mono text-[#A7A298] mb-1 flex items-center gap-1.5">
+                          <div className="text-xs text-[#8E8A82] mb-1 flex items-center gap-1.5">
                             <span>{loc(proj.groupName) || (language === 'bn' ? 'গ্রাফিক ডিজাইন' : 'Graphic Design')}</span>
                             {posterCount > 1 && (
                               <>
                                 <span aria-hidden="true">·</span>
-                                <span className="text-[#E4583B] tabular-nums">{posterCount} Posters</span>
+                                <span className="text-[#EAE5DC] tabular-nums">{posterCount} Posters</span>
                               </>
                             )}
                           </div>
-                          <h3 className="text-base sm:text-lg font-bold text-[#F4F0E8] group-hover:text-[#E4583B] transition-colors truncate">
+                          <h3 className="text-base sm:text-lg font-semibold text-[#F4F0E8] group-hover:text-white transition-colors truncate">
                             {loc(proj.title)}
                           </h3>
                         </div>
@@ -281,10 +274,10 @@ export const HomeHighlights: React.FC<HomeHighlightsProps> = ({
                             e.stopPropagation();
                             navigateTo('design');
                           }}
-                          className="text-xs font-mono font-semibold text-[#E4583B] hover:underline whitespace-nowrap shrink-0 inline-flex items-center space-x-1 rtl:space-x-reverse"
+                          className="w-9 h-9 rounded-full glass-icon-disc flex items-center justify-center shrink-0"
+                          aria-label={language === 'bn' ? 'গ্যালারি' : 'Gallery'}
                         >
-                          <span>{language === 'bn' ? 'গ্যালারি' : 'Gallery'}</span>
-                          <ArrowRight className="w-3.5 h-3.5 rtl:rotate-180" />
+                          <StudioArrowRight className="w-3.5 h-3.5 rtl:rotate-180" />
                         </button>
                       </div>
                     </div>
@@ -298,14 +291,14 @@ export const HomeHighlights: React.FC<HomeHighlightsProps> = ({
 
       {/* 3. Page Directory Gateway */}
       {overviewCards.length > 0 && (
-        <section className="py-20 bg-[#121419]/75 border-t border-[#2B303D]">
+        <section className="py-20 bg-[#121419]/75 border-t border-white/[0.07]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-12">
               <Reveal3D direction="left">
-                <span className="text-xs font-mono text-[#E4583B] uppercase tracking-[0.2em] block mb-2">
-                  {language === 'bn' ? 'পোর্টফোলিও ডিরেক্টরি' : language === 'ar' ? 'أقسام الموقع' : 'Explore Sections'}
+                <span className="text-[11px] font-sans text-[#9A958C] uppercase tracking-[0.22em] block mb-2">
+                  {language === 'bn' ? 'পোর্টফোলিও ডিরেক্টরি' : language === 'ar' ? 'أقسام الموقع' : 'Explore Studio'}
                 </span>
-                <h2 className="font-display text-2xl sm:text-3xl font-extrabold text-[#F4F0E8] tracking-tight">
+                <h2 className="font-display text-2xl sm:text-3xl font-bold text-[#F4F0E8] tracking-tight">
                   {language === 'bn'
                     ? 'ওয়েবসাইটের প্রতিটি পেজ ভিজিট করুন'
                     : language === 'ar'
@@ -317,10 +310,10 @@ export const HomeHighlights: React.FC<HomeHighlightsProps> = ({
                 <button
                   type="button"
                   onClick={() => navigateTo('about')}
-                  className="text-xs font-mono font-semibold text-[#E4583B] hover:underline inline-flex items-center space-x-1.5 rtl:space-x-reverse self-start sm:self-auto cursor-pointer"
+                  className="text-xs font-medium text-[#EAE5DC] hover:text-white inline-flex items-center space-x-2 rtl:space-x-reverse self-start sm:self-auto cursor-pointer group"
                 >
                   <span>{language === 'bn' ? 'আমার সম্পর্কে বিস্তারিত' : 'Full Bio & Education'}</span>
-                  <ArrowRight className="w-3.5 h-3.5 rtl:rotate-180" />
+                  <StudioArrowRight className="w-3.5 h-3.5 rtl:rotate-180 group-hover:translate-x-0.5 transition-transform" />
                 </button>
               </Reveal3D>
             </div>
@@ -347,21 +340,22 @@ export const HomeHighlights: React.FC<HomeHighlightsProps> = ({
                     <a
                       href={card.linkTarget}
                       onClick={handleCardClick}
-                      className="h-full group p-6 rounded-2xl studio-card hover:-translate-y-1 flex flex-col justify-between"
+                      className="h-full group p-6 rounded-[22px] glass-showcase-card-muted hover:-translate-y-1 flex flex-col justify-between transition-all duration-300"
                     >
                       <div>
-                        <div className="w-10 h-10 rounded-lg bg-[#20242E] border border-[#2B303D] flex items-center justify-center text-[#E4583B] mb-4">
-                          <Icon className="w-5 h-5" />
-                        </div>
-                        <h3 className="text-base sm:text-lg font-bold text-[#F4F0E8] mb-2 group-hover:text-[#E4583B] transition-colors">
+                        <StudioGlassIcon size="md" className="mb-5">
+                          <Icon className="w-4 h-4" strokeWidth={1.35} />
+                        </StudioGlassIcon>
+                        <h3 className="text-base sm:text-lg font-semibold text-[#F4F0E8] mb-2 group-hover:text-white transition-colors">
                           {loc(card.title)}
                         </h3>
                         <p className="text-xs sm:text-sm text-[#A7A298] mb-6 leading-relaxed">
                           {loc(card.description)}
                         </p>
                       </div>
-                      <span className="inline-flex items-center space-x-1.5 rtl:space-x-reverse text-xs font-semibold text-[#E4583B] group-hover:underline">
+                      <span className="inline-flex items-center space-x-2 rtl:space-x-reverse text-xs font-medium text-[#EAE5DC] group-hover:text-white">
                         <span>{loc(card.linkText)}</span>
+                        <StudioArrowRight className="w-3.5 h-3.5 rtl:rotate-180 group-hover:translate-x-0.5 transition-transform" />
                       </span>
                     </a>
                   </Reveal3D>
@@ -373,15 +367,15 @@ export const HomeHighlights: React.FC<HomeHighlightsProps> = ({
       )}
 
       {/* 4. Services & Direct Contact Bridge */}
-      <section className="py-20 bg-[#14171E]/80 border-t border-[#2B303D]">
+      <section className="py-20 bg-[#14171E]/80 border-t border-white/[0.07]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <Reveal3D direction="depth">
-            <div className="p-8 sm:p-12 rounded-2xl studio-card flex flex-col lg:flex-row lg:items-center justify-between gap-8">
+            <div className="p-8 sm:p-12 rounded-[26px] glass-showcase-card flex flex-col lg:flex-row lg:items-center justify-between gap-8">
               <div className="max-w-2xl">
-                <span className="text-xs font-mono text-[#E4583B] uppercase tracking-[0.2em] block mb-2">
+                <span className="text-[11px] font-sans text-[#9A958C] uppercase tracking-[0.22em] block mb-2">
                   {language === 'bn' ? 'সেবা ও সহযোগিতা' : 'Services & Collaboration'}
                 </span>
-                <h2 className="font-display text-2xl sm:text-3xl font-extrabold text-[#F4F0E8] tracking-tight mb-3">
+                <h2 className="font-display text-2xl sm:text-3xl font-bold text-[#F4F0E8] tracking-tight mb-3">
                   {portfolio.contactForm?.projectPitchTitle
                     ? loc(portfolio.contactForm.projectPitchTitle)
                     : language === 'bn'
@@ -397,10 +391,10 @@ export const HomeHighlights: React.FC<HomeHighlightsProps> = ({
                 </p>
 
                 {services.length > 0 && (
-                  <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs font-mono text-[#DDD1BE]">
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-[#DDD1BE]">
                     {services.map((srv, idx) => (
                       <React.Fragment key={srv.id}>
-                        {idx > 0 && <span className="text-[#2B303D]" aria-hidden="true">·</span>}
+                        {idx > 0 && <span className="text-white/20" aria-hidden="true">·</span>}
                         <span>{loc(srv.title)}</span>
                       </React.Fragment>
                     ))}
@@ -412,17 +406,17 @@ export const HomeHighlights: React.FC<HomeHighlightsProps> = ({
                 <button
                   type="button"
                   onClick={() => navigateTo('skills')}
-                  className="px-5 py-3 rounded-lg text-xs font-mono font-bold text-[#F4F0E8] bg-[#20242E] hover:bg-[#2B303D] border border-[#2B303D] transition-colors cursor-pointer"
+                  className="px-5 py-2.5 rounded-full text-xs font-medium glass-pill-ghost cursor-pointer"
                 >
                   {language === 'bn' ? 'দক্ষতা ও সেবা দেখুন' : 'View Skills & Proof'}
                 </button>
                 <button
                   type="button"
                   onClick={() => navigateTo('contact')}
-                  className="inline-flex items-center space-x-2 rtl:space-x-reverse px-6 py-3 rounded-lg text-xs font-mono font-bold text-white bg-[#E4583B] hover:bg-[#D0492D] glow-orange-sm transition-all cursor-pointer"
+                  className="inline-flex items-center space-x-2 rtl:space-x-reverse px-6 py-2.5 rounded-full text-xs font-semibold glass-pill-cta cursor-pointer"
                 >
-                  <MessageSquare className="w-4 h-4" />
-                  <span>{language === 'bn' ? 'যোগাযোগ পেজে যান' : 'Go to Contact Page'}</span>
+                  <MessageSquare className="w-3.5 h-3.5" strokeWidth={1.5} />
+                  <span>{language === 'bn' ? 'যোগাযোগ করুন' : 'Start a Conversation'}</span>
                 </button>
               </div>
             </div>
@@ -432,3 +426,4 @@ export const HomeHighlights: React.FC<HomeHighlightsProps> = ({
     </div>
   );
 };
+

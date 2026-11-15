@@ -226,17 +226,17 @@ export const PortfolioAIAgent: React.FC = () => {
         <div
           role="dialog"
           aria-label="Portfolio AI Assistant"
-          className="mb-3 w-[calc(100vw-2.5rem)] sm:w-[390px] max-h-[78vh] sm:max-h-[560px] rounded-2xl bg-[#161920] border border-[#2B303D] shadow-2xl flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-200"
+          className="mb-3 w-[calc(100vw-2.5rem)] sm:w-[390px] max-h-[78vh] sm:max-h-[560px] rounded-[24px] glass-showcase-card shadow-2xl flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-200"
         >
           {/* Header */}
-          <div className="px-4 py-3.5 bg-[#181B22] border-b border-[#2B303D] flex items-center justify-between gap-2">
+          <div className="px-4 py-3.5 border-b border-white/[0.08] flex items-center justify-between gap-2">
             <div className="flex items-center space-x-2.5 rtl:space-x-reverse min-w-0">
-              <div className="w-9 h-9 rounded-xl bg-[#E4583B]/15 border border-[#E4583B]/45 flex items-center justify-center text-[#E4583B] shrink-0">
+              <div className="w-9 h-9 rounded-full glass-icon-disc flex items-center justify-center text-[#E4583B] shrink-0">
                 <AIAgentEmblem className="w-5 h-5" />
               </div>
               <div className="min-w-0">
                 <div className="flex items-center space-x-1.5 rtl:space-x-reverse">
-                  <h3 className="text-xs sm:text-sm font-bold text-[#F4F0E8] truncate">
+                  <h3 className="text-xs sm:text-sm font-semibold text-[#F4F0E8] truncate">
                     {language === 'bn'
                       ? 'জাবের এআই এজেন্ট'
                       : language === 'ar'
@@ -244,7 +244,7 @@ export const PortfolioAIAgent: React.FC = () => {
                       : 'Jaber AI Agent'}
                   </h3>
                 </div>
-                <p className="text-[11px] font-mono text-[#A7A298] truncate">
+                <p className="text-[11px] text-[#A7A298] truncate">
                   {language === 'bn'
                     ? 'সিভি · অভিজ্ঞতা · পোর্টফোলিও গাইড'
                     : language === 'ar'
@@ -254,28 +254,28 @@ export const PortfolioAIAgent: React.FC = () => {
               </div>
             </div>
 
-            <div className="flex items-center space-x-1 rtl:space-x-reverse shrink-0">
+            <div className="flex items-center space-x-1.5 rtl:space-x-reverse shrink-0">
               <button
                 type="button"
                 onClick={handleReset}
                 title={language === 'bn' ? 'নতুন চ্যাট' : 'Reset Chat'}
-                className="p-2 rounded-lg text-[#A7A298] hover:text-[#F4F0E8] hover:bg-[#20242E] transition-colors cursor-pointer"
+                className="w-8 h-8 rounded-full glass-icon-disc flex items-center justify-center transition-colors cursor-pointer"
               >
-                <RotateCcw className="w-4 h-4" />
+                <RotateCcw className="w-3.5 h-3.5" strokeWidth={1.35} />
               </button>
               <button
                 type="button"
                 onClick={() => setIsOpen(false)}
                 title={language === 'bn' ? 'বন্ধ করুন' : 'Minimize'}
-                className="p-2 rounded-lg text-[#A7A298] hover:text-[#F4F0E8] hover:bg-[#20242E] transition-colors cursor-pointer"
+                className="w-8 h-8 rounded-full glass-icon-disc flex items-center justify-center transition-colors cursor-pointer"
               >
-                <ChevronDown className="w-4 h-4" />
+                <ChevronDown className="w-4 h-4" strokeWidth={1.35} />
               </button>
             </div>
           </div>
 
           {/* Messages Container */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-3.5 max-h-[340px] sm:max-h-[370px] bg-[#121419]">
+          <div className="flex-1 overflow-y-auto p-4 space-y-3.5 max-h-[340px] sm:max-h-[370px] bg-black/30">
             {messages.map((msg) => (
               <div
                 key={msg.id}
@@ -287,7 +287,7 @@ export const PortfolioAIAgent: React.FC = () => {
                   className={`max-w-[88%] px-3.5 py-2.5 rounded-2xl text-xs sm:text-[13px] leading-relaxed whitespace-pre-line ${
                     msg.role === 'user'
                       ? 'bg-[#E4583B] text-[#F4F0E8] rounded-br-sm font-medium'
-                      : 'bg-[#1E222B] text-[#F4F0E8] border border-[#2B303D] rounded-bl-sm'
+                      : 'glass-showcase-inner text-[#F4F0E8] rounded-bl-sm'
                   }`}
                 >
                   {renderFormattedText(msg.text)}
@@ -303,20 +303,20 @@ export const PortfolioAIAgent: React.FC = () => {
                           href={act.target}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center space-x-1 rtl:space-x-reverse px-2.5 py-1.5 rounded-lg bg-[#181B22] hover:bg-[#20242E] border border-[#2B303D] hover:border-[#E4583B]/60 text-[11px] font-mono font-semibold text-[#F07C63] hover:text-[#F4F0E8] transition-colors cursor-pointer"
+                          className="inline-flex items-center space-x-1 rtl:space-x-reverse px-3 py-1 rounded-full glass-pill-ghost text-[11px] font-medium text-[#EAE5DC] hover:text-white transition-colors cursor-pointer"
                         >
                           <span>{act.label}</span>
-                          <ExternalLink className="w-3 h-3" />
+                          <ExternalLink className="w-3 h-3" strokeWidth={1.35} />
                         </a>
                       ) : (
                         <button
                           key={`${msg.id}-act-${idx}`}
                           type="button"
                           onClick={() => navigateTo(act.target)}
-                          className="inline-flex items-center space-x-1 rtl:space-x-reverse px-2.5 py-1.5 rounded-lg bg-[#181B22] hover:bg-[#20242E] border border-[#2B303D] hover:border-[#E4583B]/60 text-[11px] font-mono font-semibold text-[#F07C63] hover:text-[#F4F0E8] transition-colors cursor-pointer"
+                          className="inline-flex items-center space-x-1 rtl:space-x-reverse px-3 py-1 rounded-full glass-pill-ghost text-[11px] font-medium text-[#EAE5DC] hover:text-white transition-colors cursor-pointer"
                         >
                           <span>{act.label}</span>
-                          <ArrowUpRight className="w-3 h-3" />
+                          <ArrowUpRight className="w-3 h-3" strokeWidth={1.35} />
                         </button>
                       )
                     )}
@@ -327,8 +327,8 @@ export const PortfolioAIAgent: React.FC = () => {
 
             {isLoading && (
               <div className="flex items-start">
-                <div className="px-3.5 py-2.5 rounded-2xl rounded-bl-sm bg-[#1E222B] border border-[#2B303D] text-xs font-mono text-[#A7A298] flex items-center space-x-2">
-                  <Loader2 className="w-3.5 h-3.5 text-[#E4583B] animate-spin" />
+                <div className="px-3.5 py-2.5 rounded-2xl rounded-bl-sm glass-showcase-inner text-xs text-[#A7A298] flex items-center space-x-2">
+                  <Loader2 className="w-3.5 h-3.5 text-[#E4583B] animate-spin" strokeWidth={1.5} />
                   <span>{language === 'bn' ? 'উত্তর লিখছে...' : 'Thinking...'}</span>
                 </div>
               </div>
@@ -338,14 +338,14 @@ export const PortfolioAIAgent: React.FC = () => {
           </div>
 
           {/* Quick Prompt Chips */}
-          <div className="px-3 py-2 bg-[#161920] border-t border-[#2B303D] flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+          <div className="px-3 py-2 border-t border-white/[0.08] flex items-center gap-1.5 overflow-x-auto no-scrollbar">
             {quickPrompts.map((qText, i) => (
               <button
                 key={i}
                 type="button"
                 disabled={isLoading}
                 onClick={() => sendMessage(qText)}
-                className="px-2.5 py-1 rounded-lg bg-[#1E222B] hover:bg-[#262B36] border border-[#2B303D] text-[11px] font-mono text-[#DDD1BE] hover:text-[#F4F0E8] whitespace-nowrap shrink-0 transition-colors cursor-pointer disabled:opacity-50"
+                className="px-3 py-1 rounded-full glass-pill-ghost text-[11px] text-[#DDD1BE] hover:text-white whitespace-nowrap shrink-0 transition-colors cursor-pointer disabled:opacity-50"
               >
                 {qText}
               </button>
@@ -358,7 +358,7 @@ export const PortfolioAIAgent: React.FC = () => {
               e.preventDefault();
               sendMessage(input);
             }}
-            className="p-3 bg-[#181B22] border-t border-[#2B303D] flex items-center gap-2"
+            className="p-3 border-t border-white/[0.08] flex items-center gap-2"
           >
             <input
               ref={inputRef}
@@ -372,15 +372,15 @@ export const PortfolioAIAgent: React.FC = () => {
                   ? 'اكتب سؤالك هنا...'
                   : 'Ask about videos, designs, or hiring...'
               }
-              className="flex-1 px-3.5 py-2.5 rounded-xl bg-[#121419] border border-[#2B303D] text-xs text-[#F4F0E8] placeholder-[#A7A298]/60 focus:border-[#E4583B] focus:outline-none transition-colors"
+              className="flex-1 px-4 py-2.5 rounded-full glass-showcase-inner text-xs text-[#F4F0E8] placeholder-[#A7A298]/60 focus:border-white/30 focus:outline-none transition-colors"
             />
             <button
               type="submit"
               disabled={!input.trim() || isLoading}
               aria-label="Send message"
-              className="p-2.5 rounded-xl bg-[#E4583B] hover:bg-[#D1482D] text-[#F4F0E8] transition-colors disabled:opacity-40 cursor-pointer shrink-0"
+              className="w-9 h-9 rounded-full glass-pill-cta flex items-center justify-center transition-colors disabled:opacity-40 cursor-pointer shrink-0"
             >
-              <Send className="w-4 h-4" />
+              <Send className="w-4 h-4" strokeWidth={1.5} />
             </button>
           </form>
         </div>
@@ -391,10 +391,10 @@ export const PortfolioAIAgent: React.FC = () => {
         type="button"
         onClick={() => setIsOpen((v) => !v)}
         aria-label={isOpen ? 'Close AI Agent' : 'Open Jaber AI Agent'}
-        className="group relative inline-flex items-center space-x-2.5 rtl:space-x-reverse p-1.5 pr-4 rtl:pr-1.5 rtl:pl-4 rounded-2xl bg-[#181B22]/96 hover:bg-[#20242E] text-[#F4F0E8] font-mono text-xs font-bold shadow-[0_18px_44px_-10px_rgba(0,0,0,0.8)] border border-[#2B303D] hover:border-[#E4583B]/70 transition-all duration-250 hover:-translate-y-0.5 cursor-pointer"
+        className="group relative inline-flex items-center space-x-2.5 rtl:space-x-reverse p-1.5 pr-4 rtl:pr-1.5 rtl:pl-4 rounded-full glass-showcase-card text-[#F4F0E8] text-xs font-semibold shadow-[0_18px_44px_-10px_rgba(0,0,0,0.8)] transition-all duration-250 hover:-translate-y-0.5 cursor-pointer"
       >
-        <span className="w-10 h-10 rounded-xl bg-[#E4583B] group-hover:bg-[#D0492D] text-white flex items-center justify-center shadow-lg transition-transform duration-300 group-hover:rotate-6 shrink-0">
-          {isOpen ? <X className="w-4 h-4" /> : <AIAgentEmblem className="w-6 h-6" />}
+        <span className="w-9 h-9 rounded-full bg-[#E4583B] group-hover:bg-[#D0492D] text-white flex items-center justify-center shadow-lg transition-transform duration-300 group-hover:rotate-6 shrink-0">
+          {isOpen ? <X className="w-4 h-4" strokeWidth={1.5} /> : <AIAgentEmblem className="w-5 h-5" />}
         </span>
         <span className="tracking-wide whitespace-nowrap">
           {isOpen

@@ -3,9 +3,10 @@ import React, { useEffect, useRef } from 'react';
 type CursorMode = 'default' | 'pointer' | 'play' | 'view' | 'drag';
 
 /**
- * International Studio Context-Aware Cursor:
- * Spring-damped precision dot + orbital optical reticle that morphs dynamically
- * over interactive links, video reels (PLAY), design galleries (VIEW), and 3D viewports (DRAG).
+ * Monochrome Frosted Optical Studio Cursor:
+ * Crisp circular glass ring with subtle central white focal point matching
+ * international editorial showcase studios, morphing seamlessly into frosted
+ * smoked-glass PLAY / VIEW / 3D reticles over interactive targets.
  * Automatically disabled on touch devices and prefers-reduced-motion.
  */
 export const StudioCursor: React.FC = () => {
@@ -41,30 +42,30 @@ export const StudioCursor: React.FC = () => {
       dot.style.opacity = visible ? (mode === 'play' || mode === 'view' || mode === 'drag' ? '0' : '1') : '0';
       ring.style.opacity = visible ? '1' : '0';
 
-      let size = 32;
+      let size = 34;
       let labelText = '';
-      let bg = 'transparent';
-      let borderColor = 'var(--brand-orange, #E4583B)';
+      let bg = 'rgba(255, 255, 255, 0.04)';
+      let borderColor = 'rgba(255, 255, 255, 0.42)';
 
       if (mode === 'play') {
         size = 64;
         labelText = 'PLAY';
-        bg = 'rgba(228, 88, 59, 0.92)';
-        borderColor = 'var(--brand-orange, #E4583B)';
+        bg = 'rgba(244, 240, 232, 0.94)';
+        borderColor = 'rgba(255, 255, 255, 0.9)';
       } else if (mode === 'view') {
         size = 62;
         labelText = 'VIEW';
-        bg = 'rgba(18, 20, 25, 0.9)';
-        borderColor = 'var(--brand-ivory, #F4F0E8)';
+        bg = 'rgba(18, 20, 25, 0.82)';
+        borderColor = 'rgba(255, 255, 255, 0.55)';
       } else if (mode === 'drag') {
-        size = 60;
+        size = 58;
         labelText = '3D';
-        bg = 'rgba(18, 20, 25, 0.88)';
-        borderColor = 'var(--brand-orange, #E4583B)';
+        bg = 'rgba(18, 20, 25, 0.82)';
+        borderColor = 'rgba(255, 255, 255, 0.5)';
       } else if (mode === 'pointer') {
         size = 44;
-        bg = 'rgba(228, 88, 59, 0.1)';
-        borderColor = 'var(--brand-orange, #E4583B)';
+        bg = 'rgba(255, 255, 255, 0.08)';
+        borderColor = 'rgba(255, 255, 255, 0.72)';
       }
 
       const pressScale = pressed ? 0.84 : 1;
@@ -72,6 +73,7 @@ export const StudioCursor: React.FC = () => {
       ring.style.height = `${size}px`;
       ring.style.backgroundColor = bg;
       ring.style.borderColor = borderColor;
+      ring.style.color = mode === 'play' ? '#111318' : '#F4F0E8';
       ring.dataset.scale = String(pressScale);
 
       if (labelText) {
@@ -139,9 +141,8 @@ export const StudioCursor: React.FC = () => {
       lastTime = now;
 
       if (isVisible) {
-        // High-speed responsive dot + smooth studio lag on outer ring
-        const dotFactor = 1 - Math.exp(-38 * dt);
-        const ringFactor = 1 - Math.exp(-15 * dt);
+        const dotFactor = 1 - Math.exp(-42 * dt);
+        const ringFactor = 1 - Math.exp(-16 * dt);
 
         dotX += (mouseX - dotX) * dotFactor;
         dotY += (mouseY - dotY) * dotFactor;
@@ -177,22 +178,24 @@ export const StudioCursor: React.FC = () => {
 
   return (
     <>
-      {/* Outer Context-Aware Optical Reticle */}
+      {/* Outer Optical Frosted Ring */}
       <div
         ref={ringRef}
         aria-hidden="true"
-        className="fixed top-0 left-0 z-[9998] pointer-events-none rounded-full border-[1.5px] flex items-center justify-center transition-[width,height,background-color,border-color,opacity] duration-200 ease-out"
+        className="fixed top-0 left-0 z-[9998] pointer-events-none rounded-full border flex items-center justify-center transition-[width,height,background-color,border-color,opacity,color] duration-200 ease-out"
         style={{
-          width: '32px',
-          height: '32px',
+          width: '34px',
+          height: '34px',
           opacity: 0,
-          borderColor: 'var(--brand-orange, #E4583B)',
+          borderColor: 'rgba(255, 255, 255, 0.42)',
+          backgroundColor: 'rgba(255, 255, 255, 0.04)',
+          boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.14)',
           willChange: 'transform, width, height'
         }}
       >
         <span
           ref={labelRef}
-          className="text-[10px] font-mono font-bold tracking-[0.16em] text-white select-none transition-opacity duration-150"
+          className="text-[10px] font-sans font-semibold tracking-[0.14em] select-none transition-opacity duration-150"
           style={{ opacity: 0 }}
         />
       </div>
@@ -201,11 +204,11 @@ export const StudioCursor: React.FC = () => {
       <div
         ref={dotRef}
         aria-hidden="true"
-        className="fixed top-0 left-0 z-[9999] w-2 h-2 rounded-full pointer-events-none transition-opacity duration-150"
+        className="fixed top-0 left-0 z-[9999] w-1.5 h-1.5 rounded-full pointer-events-none transition-opacity duration-150"
         style={{
           opacity: 0,
-          backgroundColor: 'var(--brand-orange, #E4583B)',
-          boxShadow: '0 0 10px var(--brand-orange-glow, rgba(228, 88, 59, 0.45))',
+          backgroundColor: '#FFFFFF',
+          boxShadow: '0 0 8px rgba(255, 255, 255, 0.65)',
           willChange: 'transform'
         }}
       />

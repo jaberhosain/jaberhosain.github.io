@@ -120,18 +120,18 @@ export const Navbar: React.FC = () => {
               }}
               className="flex items-center space-x-3 rtl:space-x-reverse group cursor-pointer focus:outline-none shrink-0"
             >
-              <div className="w-9 h-9 rounded-lg bg-[#181B22] border border-[#2B303D] flex items-center justify-center font-bold text-sm text-[#F4F0E8] group-hover:border-[#E4583B] transition-colors font-display tracking-tight">
+              <div className="w-9 h-9 rounded-full glass-icon-disc flex items-center justify-center font-semibold text-xs text-[#F4F0E8] font-display tracking-tight">
                 <span>{portfolio.branding?.logoInitials?.[0] || 'M'}</span>
                 <span className="text-[#E4583B]">{portfolio.branding?.logoInitials?.[1] || 'J'}</span>
               </div>
               <div className="hidden sm:flex flex-col">
-                <span className="font-bold text-xs tracking-[0.14em] text-[#F4F0E8] group-hover:text-[#E4583B] transition-colors font-mono uppercase whitespace-nowrap">
+                <span className="font-medium text-xs tracking-[0.16em] text-[#F4F0E8] group-hover:text-white transition-colors uppercase whitespace-nowrap">
                   {portfolio.branding?.logoText || 'MD JABER HOSAIN'}
                 </span>
               </div>
             </a>
 
-            {/* Zone 2: Clean Unboxed International Navigation */}
+            {/* Zone 2: Clean Editorial Navigation */}
             <nav aria-label="Primary Navigation" className="hidden lg:flex items-center space-x-7 rtl:space-x-reverse">
               {navLinks.map((link) => {
                 const isActive = isMultiPageEnabled && currentPage === link.id;
@@ -146,9 +146,9 @@ export const Navbar: React.FC = () => {
                       }
                     }}
                     aria-current={isActive ? 'page' : undefined}
-                    className={`nav-pill-link editorial-link py-1 text-xs font-mono uppercase tracking-[0.15em] transition-colors whitespace-nowrap shrink-0 ${
+                    className={`nav-pill-link editorial-link py-1 text-xs font-medium tracking-wide transition-colors whitespace-nowrap shrink-0 ${
                       isActive
-                        ? 'text-[#E4583B] font-bold'
+                        ? 'text-[#F4F0E8] font-semibold'
                         : 'text-[#A7A298] hover:text-[#F4F0E8]'
                     }`}
                   >
@@ -165,11 +165,11 @@ export const Navbar: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setThemeDropdownOpen(!themeDropdownOpen)}
-                  className="flex items-center space-x-1.5 rtl:space-x-reverse px-2.5 py-2 text-xs font-mono rounded-lg bg-[#181B22] border border-[#2B303D] text-[#DDD1BE] hover:border-[#E4583B] transition-colors cursor-pointer"
+                  className="flex items-center space-x-1.5 rtl:space-x-reverse h-9 px-3 text-xs rounded-full glass-icon-disc cursor-pointer"
                   aria-label="Select Theme"
                   title="Color Grade Theme"
                 >
-                  <Palette className="w-3.5 h-3.5 text-[#E4583B]" />
+                  <Palette className="w-3.5 h-3.5" strokeWidth={1.35} />
                   <span
                     className="w-2 h-2 rounded-full inline-block"
                     style={{
@@ -180,8 +180,8 @@ export const Navbar: React.FC = () => {
                 </button>
 
                 {themeDropdownOpen && (
-                  <div className="absolute right-0 rtl:left-0 rtl:right-auto mt-2 w-48 py-2 bg-[#181B22] border border-[#2B303D] rounded-xl shadow-2xl z-50">
-                    <div className="px-3 py-1 text-[10px] font-mono uppercase text-[#A7A298] tracking-wider border-b border-[#2B303D] mb-1">
+                  <div className="absolute right-0 rtl:left-0 rtl:right-auto mt-2 w-48 py-2 glass-showcase-inner rounded-2xl shadow-2xl z-50">
+                    <div className="px-3.5 py-1 text-[10px] uppercase text-[#8E8A82] tracking-wider border-b border-white/[0.08] mb-1">
                       Color Grade
                     </div>
                     {themeOptions.map((t) => (
@@ -194,13 +194,13 @@ export const Navbar: React.FC = () => {
                         }}
                         className={`w-full text-left rtl:text-right px-3.5 py-1.5 text-xs flex items-center justify-between hover:bg-white/5 transition-colors cursor-pointer ${
                           activeThemeId === t.id
-                            ? 'text-[#F4F0E8] font-bold bg-[#E4583B]/10'
+                            ? 'text-[#F4F0E8] font-semibold bg-white/[0.06]'
                             : 'text-[#A7A298]'
                         }`}
                       >
                         <div className="flex items-center space-x-2 rtl:space-x-reverse">
                           <span
-                            className="w-2.5 h-2.5 rounded-full"
+                            className="w-2 h-2 rounded-full"
                             style={{ backgroundColor: t.dot }}
                           />
                           <span>{t.label}</span>
@@ -212,8 +212,8 @@ export const Navbar: React.FC = () => {
                     ))}
 
                     {activeThemeId === 'custom' && (
-                      <div className="mt-2 pt-2 border-t border-[#2B303D] px-3.5 py-1.5 flex items-center justify-between">
-                        <span className="text-[11px] text-[#A7A298] font-mono">Accent:</span>
+                      <div className="mt-2 pt-2 border-t border-white/[0.08] px-3.5 py-1.5 flex items-center justify-between">
+                        <span className="text-[11px] text-[#A7A298]">Accent:</span>
                         <input
                           type="color"
                           value={customAccentColor}
@@ -232,15 +232,15 @@ export const Navbar: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setLangDropdownOpen(!langDropdownOpen)}
-                  className="flex items-center space-x-1.5 rtl:space-x-reverse px-3 py-2 text-xs font-mono font-semibold rounded-lg bg-[#181B22] border border-[#2B303D] text-[#DDD1BE] hover:border-[#E4583B] transition-colors cursor-pointer"
+                  className="flex items-center space-x-1.5 rtl:space-x-reverse h-9 px-3 text-xs font-medium rounded-full glass-icon-disc cursor-pointer"
                   aria-label="Select Language"
                 >
-                  <Globe className="w-3.5 h-3.5 text-[#E4583B]" />
+                  <Globe className="w-3.5 h-3.5" strokeWidth={1.35} />
                   <span className="uppercase">{language}</span>
                 </button>
 
                 {langDropdownOpen && (
-                  <div className="absolute right-0 rtl:left-0 rtl:right-auto mt-2 w-36 py-1.5 bg-[#181B22] border border-[#2B303D] rounded-xl shadow-2xl z-50">
+                  <div className="absolute right-0 rtl:left-0 rtl:right-auto mt-2 w-36 py-1.5 glass-showcase-inner rounded-2xl shadow-2xl z-50">
                     {languages.map((item) => (
                       <button
                         key={item.code}
@@ -250,7 +250,7 @@ export const Navbar: React.FC = () => {
                           setLangDropdownOpen(false);
                         }}
                         className={`w-full text-left rtl:text-right px-4 py-2 text-xs flex items-center justify-between hover:bg-white/5 transition-colors cursor-pointer ${
-                          language === item.code ? 'text-[#E4583B] font-bold bg-[#E4583B]/10' : 'text-[#A7A298]'
+                          language === item.code ? 'text-[#F4F0E8] font-semibold bg-white/[0.06]' : 'text-[#A7A298]'
                         }`}
                       >
                         <span>{item.native}</span>
@@ -270,10 +270,10 @@ export const Navbar: React.FC = () => {
                     navigateTo('contact');
                   }
                 }}
-                className="inline-flex items-center space-x-1.5 rtl:space-x-reverse px-4 py-2 text-xs font-bold rounded-lg text-white bg-[#E4583B] hover:bg-[#D0492D] transition-colors uppercase font-mono tracking-wider whitespace-nowrap shrink-0"
+                className="inline-flex items-center space-x-1.5 rtl:space-x-reverse px-4 py-2 text-xs font-semibold rounded-full glass-pill-cta whitespace-nowrap shrink-0"
               >
                 <span>{ui.nav.hireMe}</span>
-                <ArrowUpRight className="w-3.5 h-3.5" />
+                <ArrowUpRight className="w-3.5 h-3.5" strokeWidth={1.5} />
               </a>
             </div>
 
@@ -285,7 +285,7 @@ export const Navbar: React.FC = () => {
                   const nextLang: Language = language === 'en' ? 'bn' : language === 'bn' ? 'ar' : 'en';
                   setLanguage(nextLang);
                 }}
-                className="px-2.5 py-1.5 text-xs font-semibold rounded-lg bg-[#181B22] border border-[#2B303D] text-[#DDD1BE] font-mono"
+                className="px-3 h-9 text-xs font-medium rounded-full glass-icon-disc"
                 aria-label="Toggle language"
               >
                 {language.toUpperCase()}
@@ -294,10 +294,10 @@ export const Navbar: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="p-2 rounded-lg bg-[#181B22] border border-[#2B303D] text-[#F4F0E8]"
+                className="w-9 h-9 rounded-full glass-icon-disc flex items-center justify-center"
                 aria-label="Toggle navigation menu"
               >
-                {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+                {mobileMenuOpen ? <X className="w-4 h-4" strokeWidth={1.4} /> : <Menu className="w-4 h-4" strokeWidth={1.4} />}
               </button>
             </div>
           </div>

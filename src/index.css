@@ -188,6 +188,76 @@ html[lang="ar"] {
   box-shadow: 0 16px 36px -14px rgba(0, 0, 0, 0.55);
 }
 
+/* Editorial Smoked-Glass Showcase Surface (Equinox-inspired organic glass depth) */
+.glass-showcase-card {
+  background: linear-gradient(180deg, rgba(28, 30, 36, 0.78) 0%, rgba(14, 15, 19, 0.90) 100%);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.10),
+    0 32px 64px -16px rgba(0, 0, 0, 0.82);
+}
+
+.glass-showcase-card-muted {
+  background: linear-gradient(180deg, rgba(22, 24, 29, 0.68) 0%, rgba(12, 13, 17, 0.84) 100%);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 24px 48px -14px rgba(0, 0, 0, 0.7);
+}
+
+.glass-showcase-inner {
+  background: rgba(13, 14, 18, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  box-shadow:
+    0 20px 44px -12px rgba(0, 0, 0, 0.72),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07);
+}
+
+/* Uniform Circular Frosted Icon Disc */
+.glass-icon-disc {
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.09);
+  color: #EAE5DC;
+  transition: background-color 0.25s ease, border-color 0.25s ease, transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), color 0.25s ease;
+}
+
+.glass-icon-disc:hover,
+.group:hover .glass-icon-disc {
+  background: rgba(255, 255, 255, 0.11);
+  border-color: rgba(255, 255, 255, 0.25);
+  color: #FFFFFF;
+}
+
+/* Tactile Ivory Pill CTA & Smoked Glass Secondary Pill */
+.glass-pill-cta {
+  background-color: #F4F0E8;
+  color: #111318;
+  transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.glass-pill-cta:hover {
+  background-color: #FFFFFF;
+  box-shadow: 0 8px 22px -6px rgba(255, 255, 255, 0.28);
+}
+
+.glass-pill-ghost {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #E6E1D8;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.glass-pill-ghost:hover {
+  background: rgba(255, 255, 255, 0.13);
+  border-color: rgba(255, 255, 255, 0.24);
+  color: #FFFFFF;
+}
+
 /* Editorial Link Underline */
 .editorial-link {
   position: relative;
@@ -376,6 +446,49 @@ svg.lucide,
   background-color: #FFEDD5 !important;
   border-color: #FDBA74 !important;
   color: #C2410C !important;
+}
+
+[data-theme="light"] .glass-showcase-card {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.90) 0%, rgba(244, 240, 232, 0.94) 100%) !important;
+  border-color: rgba(23, 25, 30, 0.12) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 28px 56px -18px rgba(23, 25, 30, 0.16) !important;
+}
+
+[data-theme="light"] .glass-showcase-card-muted {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.72) 0%, rgba(235, 230, 220, 0.84) 100%) !important;
+  border-color: rgba(23, 25, 30, 0.09) !important;
+  box-shadow: 0 20px 44px -16px rgba(23, 25, 30, 0.12) !important;
+}
+
+[data-theme="light"] .glass-showcase-inner {
+  background: rgba(255, 255, 255, 0.96) !important;
+  border-color: rgba(23, 25, 30, 0.10) !important;
+  box-shadow: 0 16px 36px -12px rgba(23, 25, 30, 0.12) !important;
+}
+
+[data-theme="light"] .glass-icon-disc {
+  background: rgba(23, 25, 30, 0.05) !important;
+  border-color: rgba(23, 25, 30, 0.12) !important;
+  box-shadow: none !important;
+  color: #17191E !important;
+}
+
+[data-theme="light"] .glass-icon-disc:hover,
+[data-theme="light"] .group:hover .glass-icon-disc {
+  background: rgba(23, 25, 30, 0.11) !important;
+  border-color: rgba(201, 68, 38, 0.45) !important;
+  color: #C94426 !important;
+}
+
+[data-theme="light"] .glass-pill-cta {
+  background-color: #17191E !important;
+  color: #F5F2EB !important;
+}
+
+[data-theme="light"] .glass-pill-ghost {
+  background: rgba(23, 25, 30, 0.06) !important;
+  border-color: rgba(23, 25, 30, 0.14) !important;
+  color: #292524 !important;
 }
 
 /* BLUE THEME — Nordic Slate Sapphire */

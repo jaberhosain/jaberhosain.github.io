@@ -6,6 +6,7 @@ import { resolveAssetUrl } from '../utils/assetUrl';
 import { normalizeDirectImageUrl } from '../lib/imageUrlResolver';
 import { Tilt3DImageStage } from './common/Tilt3DImageStage';
 import { Reveal3D } from './common/Reveal3D';
+import { StudioGlassIcon } from './common/StudioIcon';
 
 interface GraphicBestShowcaseProps {
   onOpenLightbox?: (project: ProjectItem, initialIndex?: number) => void;
@@ -34,14 +35,14 @@ export const GraphicBestShowcase: React.FC<GraphicBestShowcaseProps> = ({
   const sectionSubtitle = loc(sectionConfig?.subtitle);
 
   return (
-    <section id="graphic-best-work" className="py-20 bg-[#121419]/75 border-t border-[#2B303D] relative">
+    <section id="graphic-best-work" className="py-20 bg-[#121419]/75 border-t border-white/[0.07] relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <Reveal3D direction="up" className="flex flex-col items-center text-center mb-14">
-          <span className="text-xs font-mono text-[#E4583B] uppercase tracking-[0.2em] mb-2.5">
+          <span className="text-[11px] font-sans text-[#9A958C] uppercase tracking-[0.22em] mb-2.5">
             {sectionTag}
           </span>
 
-          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#F4F0E8] tracking-tight">
+          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-[#F4F0E8] tracking-tight">
             {sectionTitle}
           </h2>
 
@@ -75,11 +76,12 @@ export const GraphicBestShowcase: React.FC<GraphicBestShowcaseProps> = ({
               <Reveal3D key={keyId} direction={dir} delay={col * 90}>
                 <div
                   onClick={() => onOpenLightbox?.(projectItem, 0)}
-                  className="h-full group relative rounded-2xl studio-card overflow-hidden flex flex-col justify-between cursor-pointer hover:-translate-y-1"
+                  data-cursor="view"
+                  className="h-full group relative rounded-[22px] glass-showcase-card overflow-hidden flex flex-col justify-between cursor-pointer hover:-translate-y-1 transition-transform duration-300"
                 >
-                  <div className="p-2.5 bg-[#121419]/90 border-b border-[#2B303D]">
+                  <div className="p-2.5 bg-[#0D0E12]/70 border-b border-white/[0.07]">
                     <Tilt3DImageStage className="aspect-[16/10] w-full" maxTilt={13} scaleOnHover={1.03}>
-                      <div className="relative w-full h-full rounded-xl bg-[#20242E] flex items-center justify-center border border-[#2B303D] overflow-hidden">
+                      <div className="relative w-full h-full rounded-[14px] bg-[#14171E] flex items-center justify-center border border-white/[0.07] overflow-hidden">
                         {cleanUrl && !isBroken ? (
                           <img
                             src={resolveAssetUrl(cleanUrl)}
@@ -89,23 +91,23 @@ export const GraphicBestShowcase: React.FC<GraphicBestShowcaseProps> = ({
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                           />
                         ) : (
-                          <div className="w-full h-full bg-[#181B22] flex flex-col items-center justify-center p-5 text-center">
-                            <div className="w-11 h-11 rounded-xl bg-[#20242E] border border-[#2B303D] flex items-center justify-center text-[#E4583B] mb-2">
-                              <Palette className="w-5 h-5" />
-                            </div>
-                            <span className="text-xs font-mono text-[#DDD1BE] font-semibold line-clamp-1">
+                          <div className="w-full h-full bg-[#14171E] flex flex-col items-center justify-center p-5 text-center">
+                            <StudioGlassIcon size="md" className="mb-2">
+                              <Palette className="w-4 h-4" strokeWidth={1.35} />
+                            </StudioGlassIcon>
+                            <span className="text-xs text-[#DDD1BE] font-medium line-clamp-1">
                               {loc(item.title) || `Top Graphic Work #${idx + 1}`}
                             </span>
-                            <span className="text-[10px] font-mono text-[#A7A298] mt-0.5">
+                            <span className="text-[10px] text-[#8E8A82] mt-0.5">
                               {item.behanceUrl ? 'Open on Behance' : 'Graphic Design'}
                             </span>
                           </div>
                         )}
 
-                        <div className="absolute inset-0 bg-black/45 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center z-10 pointer-events-none">
-                          <span className="inline-flex items-center space-x-1.5 rtl:space-x-reverse px-4 py-2 rounded-lg bg-[#121419]/95 border border-[#E4583B]/60 text-[#F4F0E8] text-xs font-mono font-medium">
-                            <Eye className="w-4 h-4 text-[#E4583B]" />
-                            <span>Preview in Lightbox</span>
+                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center z-10 pointer-events-none">
+                          <span className="inline-flex items-center space-x-1.5 rtl:space-x-reverse px-4 py-1.5 rounded-full glass-pill-ghost text-xs font-medium">
+                            <Eye className="w-3.5 h-3.5" strokeWidth={1.4} />
+                            <span>Preview</span>
                           </span>
                         </div>
                       </div>
@@ -114,8 +116,8 @@ export const GraphicBestShowcase: React.FC<GraphicBestShowcaseProps> = ({
 
                   <div className="p-6 flex flex-col justify-between flex-1">
                     <div>
-                      <div className="text-[11px] font-mono text-[#A7A298] mb-1.5 flex items-center gap-2">
-                        <span className="text-[#E4583B] uppercase tracking-wider font-semibold">Best Work</span>
+                      <div className="text-[11px] text-[#8E8A82] mb-1.5 flex items-center gap-2">
+                        <span className="text-[#EAE5DC] font-medium">Best Work</span>
                         {item.behanceUrl && (
                           <>
                             <span aria-hidden="true">·</span>
@@ -123,31 +125,31 @@ export const GraphicBestShowcase: React.FC<GraphicBestShowcaseProps> = ({
                           </>
                         )}
                       </div>
-                      <h3 className="text-base sm:text-lg font-bold text-[#F4F0E8] group-hover:text-[#E4583B] transition-colors">
+                      <h3 className="text-base sm:text-lg font-semibold text-[#F4F0E8] group-hover:text-white transition-colors">
                         {loc(item.title) || `Top Graphic Work #${idx + 1}`}
                       </h3>
                     </div>
 
-                    <div className="mt-4 pt-4 border-t border-[#2B303D] flex items-center justify-between text-xs font-mono">
+                    <div className="mt-4 pt-4 border-t border-white/[0.08] flex items-center justify-between text-xs">
                       {item.behanceUrl ? (
                         <a
                           href={item.behanceUrl}
                           target="_blank"
                           rel="noopener noreferrer"
                           onClick={(e) => e.stopPropagation()}
-                          className="inline-flex items-center space-x-1.5 rtl:space-x-reverse text-[#60A5FA] hover:text-white font-semibold transition-colors"
+                          className="inline-flex items-center space-x-1.5 rtl:space-x-reverse text-[#DDD1BE] hover:text-white font-medium transition-colors"
                         >
                           <span className="font-bold">Bē</span>
                           <span>Behance</span>
-                          <ExternalLink className="w-3 h-3" />
+                          <ExternalLink className="w-3 h-3" strokeWidth={1.35} />
                         </a>
                       ) : (
-                        <span className="text-[#A7A298]">Visual Design</span>
+                        <span className="text-[#8E8A82]">Visual Design</span>
                       )}
 
-                      <span className="inline-flex items-center space-x-1.5 rtl:space-x-reverse text-[#A7A298] group-hover:text-[#E4583B] transition-colors font-semibold">
+                      <span className="inline-flex items-center space-x-1.5 rtl:space-x-reverse text-[#A7A298] group-hover:text-white transition-colors font-medium">
                         <span>Preview</span>
-                        <Eye className="w-3.5 h-3.5" />
+                        <Eye className="w-3.5 h-3.5" strokeWidth={1.35} />
                       </span>
                     </div>
                   </div>

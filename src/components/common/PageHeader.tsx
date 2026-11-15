@@ -19,26 +19,28 @@ export const PageHeader: React.FC<PageHeaderProps> = ({ meta, summaryText }) => 
   const subtitle = meta.subtitle[language] || meta.subtitle.en;
 
   return (
-    <section className="relative pt-28 pb-12 sm:pt-32 sm:pb-14 bg-[#121419]/78 border-b border-[#2B303D] overflow-hidden">
+    <section className="relative pt-28 pb-12 sm:pt-32 sm:pb-14 bg-[#0D0E12]/78 backdrop-blur-sm border-b border-white/[0.08] overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Clean Breadcrumb Row */}
-        <nav aria-label="Breadcrumb" className="flex items-center space-x-2 rtl:space-x-reverse text-xs font-mono text-[#A7A298] mb-6">
+        <nav aria-label="Breadcrumb" className="flex items-center space-x-2 rtl:space-x-reverse text-xs text-[#A7A298] mb-6">
           <button
             type="button"
             onClick={() => navigateTo('home')}
-            className="inline-flex items-center space-x-1.5 rtl:space-x-reverse hover:text-[#E4583B] transition-colors cursor-pointer"
+            className="inline-flex items-center space-x-1.5 rtl:space-x-reverse hover:text-[#F4F0E8] transition-colors cursor-pointer"
           >
-            <Home className="w-3.5 h-3.5" />
+            <span className="w-6 h-6 rounded-full glass-icon-disc inline-flex items-center justify-center">
+              <Home className="w-3 h-3" strokeWidth={1.35} />
+            </span>
             <span>{homeLabel}</span>
           </button>
-          <ChevronRight className="w-3.5 h-3.5 text-[#A7A298]/60 rtl:rotate-180" />
-          <span className="text-[#F4F0E8] font-semibold">{pageLabel}</span>
+          <ChevronRight className="w-3.5 h-3.5 text-[#A7A298]/60 rtl:rotate-180" strokeWidth={1.35} />
+          <span className="text-[#F4F0E8] font-medium">{pageLabel}</span>
         </nav>
 
         {/* Title & Editorial Index Row */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <Reveal3D direction="left" className="max-w-3xl">
-            <div className="text-xs font-mono text-[#E4583B] tracking-[0.2em] uppercase mb-2 tabular-nums">
+            <div className="text-[11px] font-medium text-[#E4583B] tracking-[0.22em] uppercase mb-2 tabular-nums">
               {meta.index} / {pageLabel}
             </div>
             <h1 className="font-display text-3xl sm:text-5xl font-extrabold text-[#F4F0E8] tracking-tight leading-[1.08] text-balance">
@@ -51,7 +53,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({ meta, summaryText }) => 
 
           {summaryText && (
             <Reveal3D direction="right" delay={120}>
-              <div className="text-xs font-mono text-[#DDD1BE] tabular-nums md:text-right shrink-0">
+              <div className="text-xs font-medium text-[#DDD1BE] px-4 py-1.5 rounded-full glass-pill-ghost tabular-nums md:text-right shrink-0">
                 {summaryText}
               </div>
             </Reveal3D>

@@ -57,35 +57,35 @@ export const Footer: React.FC<FooterProps> = ({ onOpenAdmin }) => {
   const renderSocialIcon = (iconName: string) => {
     switch (iconName.toLowerCase()) {
       case 'facebook':
-        return <Facebook className="w-4 h-4" />;
+        return <Facebook className="w-4 h-4" strokeWidth={1.35} />;
       case 'telegram':
-        return <Send className="w-4 h-4" />;
+        return <Send className="w-4 h-4" strokeWidth={1.35} />;
       case 'behance':
-        return <span className="font-bold text-sm">Bē</span>;
+        return <span className="font-semibold text-xs tracking-tight">Bē</span>;
       case 'youtube':
-        return <Youtube className="w-4 h-4" />;
+        return <Youtube className="w-4 h-4" strokeWidth={1.35} />;
       case 'instagram':
-        return <Instagram className="w-4 h-4" />;
+        return <Instagram className="w-4 h-4" strokeWidth={1.35} />;
       case 'linkedin':
-        return <Linkedin className="w-4 h-4" />;
+        return <Linkedin className="w-4 h-4" strokeWidth={1.35} />;
       case 'whatsapp':
-        return <MessageCircle className="w-4 h-4" />;
+        return <MessageCircle className="w-4 h-4" strokeWidth={1.35} />;
       case 'twitter':
-        return <Twitter className="w-4 h-4" />;
+        return <Twitter className="w-4 h-4" strokeWidth={1.35} />;
       case 'github':
-        return <Github className="w-4 h-4" />;
+        return <Github className="w-4 h-4" strokeWidth={1.35} />;
       default:
-        return <Globe className="w-4 h-4" />;
+        return <Globe className="w-4 h-4" strokeWidth={1.35} />;
     }
   };
 
   return (
-    <footer className="bg-[#121419]/92 border-t border-[#2B303D] text-[#A7A298] py-12">
+    <footer className="bg-[#0B0C10]/92 backdrop-blur-md border-t border-white/[0.08] text-[#A7A298] py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center text-center space-y-6">
 
         {/* Page Directory Links */}
         {isMultiPageEnabled && (
-          <nav aria-label="Footer Pages" className="flex flex-wrap items-center justify-center gap-x-7 gap-y-2 pb-5 border-b border-[#2B303D]/80 w-full max-w-2xl">
+          <nav aria-label="Footer Pages" className="flex flex-wrap items-center justify-center gap-x-7 gap-y-2 pb-5 border-b border-white/[0.08] w-full max-w-2xl">
             {pages.map((p) => {
               const active = currentPage === p.id;
               return (
@@ -96,8 +96,8 @@ export const Footer: React.FC<FooterProps> = ({ onOpenAdmin }) => {
                     e.preventDefault();
                     navigateTo(p.id);
                   }}
-                  className={`text-xs font-mono uppercase tracking-[0.15em] transition-colors whitespace-nowrap ${
-                    active ? 'text-[#E4583B] font-bold' : 'text-[#A7A298] hover:text-[#F4F0E8]'
+                  className={`text-xs font-medium tracking-wide transition-colors whitespace-nowrap ${
+                    active ? 'text-[#E4583B] font-semibold' : 'text-[#A7A298] hover:text-[#F4F0E8]'
                   }`}
                 >
                   {p.label[language] || p.label.en}
@@ -108,11 +108,11 @@ export const Footer: React.FC<FooterProps> = ({ onOpenAdmin }) => {
         )}
 
         {/* Connect Title */}
-        <div className="text-[11px] font-mono uppercase tracking-[0.22em] text-[#A7A298]">
+        <div className="text-[11px] font-medium uppercase tracking-[0.22em] text-[#A7A298]/85">
           {footerConfig?.connectTitle ? loc(footerConfig.connectTitle) : ui.footer.connect}
         </div>
 
-        {/* Social Icons */}
+        {/* Circular Frosted Social Icon Discs */}
         <div className="flex flex-wrap items-center justify-center gap-3">
           {activeSocialLinks.map((item) => (
             <a
@@ -120,7 +120,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenAdmin }) => {
               href={item.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="social-icon-btn w-10 h-10 rounded-lg bg-[#181B22] border border-[#2B303D] flex items-center justify-center text-[#DDD1BE]"
+              className="w-10 h-10 rounded-full glass-icon-disc flex items-center justify-center hover:scale-105"
               title={item.name || item.platform}
               aria-label={item.name || item.platform}
             >
@@ -129,33 +129,39 @@ export const Footer: React.FC<FooterProps> = ({ onOpenAdmin }) => {
           ))}
         </div>
 
-        {/* Language switch */}
+        {/* Language Switch */}
         <div className="flex items-center space-x-2 rtl:space-x-reverse text-xs">
-          <Globe className="w-3.5 h-3.5 text-[#E4583B]" />
+          <Globe className="w-3.5 h-3.5 text-[#A7A298]" strokeWidth={1.35} />
           <button
             onClick={() => setLanguage('en')}
-            className={`px-2 py-0.5 rounded transition-colors cursor-pointer ${language === 'en' ? 'bg-[#E4583B] text-white font-bold' : 'hover:text-[#F4F0E8]'}`}
+            className={`px-3 py-1 rounded-full transition-colors cursor-pointer ${
+              language === 'en' ? 'glass-pill-cta font-semibold' : 'hover:text-[#F4F0E8]'
+            }`}
           >
             English
           </button>
-          <span aria-hidden="true">·</span>
+          <span aria-hidden="true" className="text-white/20">·</span>
           <button
             onClick={() => setLanguage('bn')}
-            className={`px-2 py-0.5 rounded transition-colors cursor-pointer ${language === 'bn' ? 'bg-[#E4583B] text-white font-bold' : 'hover:text-[#F4F0E8]'}`}
+            className={`px-3 py-1 rounded-full transition-colors cursor-pointer ${
+              language === 'bn' ? 'glass-pill-cta font-semibold' : 'hover:text-[#F4F0E8]'
+            }`}
           >
             বাংলা
           </button>
-          <span aria-hidden="true">·</span>
+          <span aria-hidden="true" className="text-white/20">·</span>
           <button
             onClick={() => setLanguage('ar')}
-            className={`px-2 py-0.5 rounded transition-colors cursor-pointer ${language === 'ar' ? 'bg-[#E4583B] text-white font-bold' : 'hover:text-[#F4F0E8]'}`}
+            className={`px-3 py-1 rounded-full transition-colors cursor-pointer ${
+              language === 'ar' ? 'glass-pill-cta font-semibold' : 'hover:text-[#F4F0E8]'
+            }`}
           >
             العربية
           </button>
         </div>
 
         {/* Copyright */}
-        <div className="text-xs font-mono text-[#A7A298] pt-5 border-t border-[#2B303D]/80 w-full flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="text-xs text-[#A7A298] pt-5 border-t border-white/[0.08] w-full flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center space-x-2">
             <span>© 2026 MD JABER HOSAIN. {footerConfig?.copyrightText ? loc(footerConfig.copyrightText) : ui.footer.rights}</span>
             <a
@@ -166,19 +172,21 @@ export const Footer: React.FC<FooterProps> = ({ onOpenAdmin }) => {
                 onOpenAdmin?.();
               }}
               title="Admin Panel"
-              className="text-neutral-600 hover:text-[#E4583B] transition-colors p-1 rounded inline-flex items-center"
+              className="text-neutral-600 hover:text-[#E4583B] transition-colors p-1 rounded-full inline-flex items-center"
               aria-label="Admin Login"
             >
-              <Lock className="w-3 h-3" />
+              <Lock className="w-3 h-3" strokeWidth={1.35} />
             </a>
           </div>
 
           <button
             onClick={scrollToTop}
-            className="inline-flex items-center space-x-1.5 rtl:space-x-reverse text-[#A7A298] hover:text-[#E4583B] transition-colors cursor-pointer"
+            className="inline-flex items-center space-x-1.5 rtl:space-x-reverse text-[#A7A298] hover:text-[#F4F0E8] transition-colors cursor-pointer"
           >
             <span>{footerConfig?.backToTopText ? loc(footerConfig.backToTopText) : 'Back to top'}</span>
-            <ArrowUp className="w-3.5 h-3.5" />
+            <span className="w-7 h-7 rounded-full glass-icon-disc inline-flex items-center justify-center">
+              <ArrowUp className="w-3.5 h-3.5" strokeWidth={1.35} />
+            </span>
           </button>
         </div>
 

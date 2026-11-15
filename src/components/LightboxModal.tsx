@@ -83,16 +83,16 @@ export const LightboxModal: React.FC<LightboxModalProps> = ({ project, initialIn
       onClick={onClose}
     >
       <div
-        className="relative flex flex-col max-w-5xl w-full max-h-[94vh] bg-[#181B22] border border-[#2B303D] rounded-2xl overflow-hidden shadow-2xl"
+        className="relative flex flex-col max-w-5xl w-full max-h-[94vh] glass-showcase-card rounded-[24px] overflow-hidden shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Top bar with group context, title, zoom toggle & close button */}
-        <div className="flex items-center justify-between gap-3 px-4 sm:px-6 py-3.5 border-b border-[#2B303D] bg-[#121419]/95">
+        <div className="flex items-center justify-between gap-3 px-4 sm:px-6 py-3.5 border-b border-white/[0.08]">
           <div className="flex items-center space-x-3 rtl:space-x-reverse min-w-0">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#E4583B] shrink-0" />
+            <span className="w-2 h-2 rounded-full bg-[#E4583B] shrink-0" />
             <div className="min-w-0">
               {groupLabel && (
-                <div className="text-[11px] font-mono text-[#F07C63] truncate">
+                <div className="text-[11px] font-medium text-[#E4583B] truncate">
                   {groupLabel}
                 </div>
               )}
@@ -101,31 +101,31 @@ export const LightboxModal: React.FC<LightboxModalProps> = ({ project, initialIn
               </h3>
             </div>
             {posters.length > 1 && (
-              <span className="text-xs text-neutral-400 font-mono whitespace-nowrap shrink-0 tabular-nums">
+              <span className="text-xs text-[#A7A298] whitespace-nowrap shrink-0 tabular-nums">
                 {currentIndex + 1} / {posters.length}
               </span>
             )}
           </div>
 
-          <div className="flex items-center space-x-1.5 rtl:space-x-reverse shrink-0">
+          <div className="flex items-center space-x-2 rtl:space-x-reverse shrink-0">
             {currentImgUrl && !imgError && (
               <button
                 type="button"
                 onClick={() => setZoomed((z) => !z)}
                 aria-label={zoomed ? 'Fit to screen' : 'Zoom in'}
-                className="p-2 text-neutral-400 hover:text-white hover:bg-neutral-800/80 rounded-lg transition-colors cursor-pointer"
+                className="w-9 h-9 rounded-full glass-icon-disc flex items-center justify-center cursor-pointer"
                 title={zoomed ? 'Fit view' : 'Zoom view'}
               >
-                {zoomed ? <ZoomOut className="w-4 h-4" /> : <ZoomIn className="w-4 h-4" />}
+                {zoomed ? <ZoomOut className="w-4 h-4" strokeWidth={1.35} /> : <ZoomIn className="w-4 h-4" strokeWidth={1.35} />}
               </button>
             )}
             <button
               type="button"
               onClick={onClose}
               aria-label={ui.lightbox.close}
-              className="p-2 text-neutral-400 hover:text-white hover:bg-neutral-800/80 rounded-lg transition-colors cursor-pointer"
+              className="w-9 h-9 rounded-full glass-icon-disc flex items-center justify-center cursor-pointer"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4" strokeWidth={1.35} />
             </button>
           </div>
         </div>
@@ -153,15 +153,15 @@ export const LightboxModal: React.FC<LightboxModalProps> = ({ project, initialIn
             />
           ) : (
             <div className="flex flex-col items-center justify-center p-8 text-center text-neutral-400 space-y-3">
-              <div className="w-16 h-16 rounded-2xl bg-[#20242E] border border-[#2B303D] flex items-center justify-center text-[#E4583B]">
+              <div className="w-16 h-16 rounded-full glass-icon-disc flex items-center justify-center text-[#F4F0E8]">
                 {project.behanceUrl ? (
-                  <span className="font-mono font-bold text-lg">Bē</span>
+                  <span className="font-semibold text-lg">Bē</span>
                 ) : (
-                  <Palette className="w-7 h-7" />
+                  <Palette className="w-6 h-6" strokeWidth={1.35} />
                 )}
               </div>
               <p className="text-[#F4F0E8] font-medium">{currentCaption || loc(project.title)}</p>
-              <p className="text-xs font-mono text-[#A7A298] max-w-md">
+              <p className="text-xs text-[#A7A298] max-w-md">
                 {imgError
                   ? 'External host blocked direct preview. Open the project directly on Behance using the button below.'
                   : 'Preview artwork directly on Behance via the button below.'}
@@ -178,10 +178,10 @@ export const LightboxModal: React.FC<LightboxModalProps> = ({ project, initialIn
                   e.stopPropagation();
                   handlePrev();
                 }}
-                className="absolute left-3 sm:left-5 top-1/2 -translate-y-1/2 p-2.5 sm:p-3 rounded-full bg-[#121419]/85 hover:bg-[#E4583B] text-[#F4F0E8] border border-[#2B303D] hover:border-[#E4583B] transition-all shadow-lg cursor-pointer"
+                className="absolute left-3 sm:left-5 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-11 sm:h-11 rounded-full glass-icon-disc flex items-center justify-center shadow-lg cursor-pointer"
                 aria-label={ui.lightbox.prev}
               >
-                <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
+                <ChevronLeft className="w-5 h-5" strokeWidth={1.35} />
               </button>
               <button
                 type="button"
@@ -189,10 +189,10 @@ export const LightboxModal: React.FC<LightboxModalProps> = ({ project, initialIn
                   e.stopPropagation();
                   handleNext();
                 }}
-                className="absolute right-3 sm:right-5 top-1/2 -translate-y-1/2 p-2.5 sm:p-3 rounded-full bg-[#121419]/85 hover:bg-[#E4583B] text-[#F4F0E8] border border-[#2B303D] hover:border-[#E4583B] transition-all shadow-lg cursor-pointer"
+                className="absolute right-3 sm:right-5 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-11 sm:h-11 rounded-full glass-icon-disc flex items-center justify-center shadow-lg cursor-pointer"
                 aria-label={ui.lightbox.next}
               >
-                <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
+                <ChevronRight className="w-5 h-5" strokeWidth={1.35} />
               </button>
             </>
           )}
@@ -225,10 +225,10 @@ export const LightboxModal: React.FC<LightboxModalProps> = ({ project, initialIn
         )}
 
         {/* Bottom details & Behance Action Bar */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-5 py-4 bg-[#121419] border-t border-[#2B303D]">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-5 py-4 border-t border-white/[0.08]">
           <div className="min-w-0 text-center sm:text-left rtl:sm:text-right">
             {currentCaption && (
-              <div className="text-xs font-mono font-semibold text-[#F07C63] mb-0.5 truncate">
+              <div className="text-xs font-semibold text-[#F07C63] mb-0.5 truncate">
                 {currentCaption}
               </div>
             )}
@@ -243,11 +243,11 @@ export const LightboxModal: React.FC<LightboxModalProps> = ({ project, initialIn
                 href={project.behanceUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center space-x-2 rtl:space-x-reverse px-5 py-2.5 rounded-xl font-medium text-sm text-white bg-[#0057FF] hover:bg-[#0047D4] transition-all shadow-md"
+                className="inline-flex items-center space-x-2 rtl:space-x-reverse px-5 py-2.5 rounded-full glass-pill-cta font-semibold text-xs sm:text-sm transition-all"
               >
                 <span className="font-bold tracking-tight">Bē</span>
                 <span>{ui.lightbox.viewBehance}</span>
-                <ExternalLink className="w-4 h-4" />
+                <ExternalLink className="w-3.5 h-3.5" strokeWidth={1.5} />
               </a>
             )}
 
@@ -256,10 +256,10 @@ export const LightboxModal: React.FC<LightboxModalProps> = ({ project, initialIn
                 href={project.externalUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center space-x-2 rtl:space-x-reverse px-4 py-2.5 rounded-xl font-medium text-sm text-[#F4F0E8] bg-[#20242E] hover:bg-[#2B303D] border border-[#2B303D] transition-all"
+                className="inline-flex items-center space-x-2 rtl:space-x-reverse px-4 py-2.5 rounded-full glass-pill-ghost font-medium text-xs sm:text-sm transition-all"
               >
                 <span>Project Link</span>
-                <ExternalLink className="w-4 h-4 text-[#E4583B]" />
+                <ExternalLink className="w-3.5 h-3.5" strokeWidth={1.35} />
               </a>
             )}
           </div>

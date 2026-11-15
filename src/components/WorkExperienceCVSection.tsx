@@ -4,6 +4,7 @@ import { usePortfolio } from '../context/PortfolioContext';
 import { JABER_CV_DATA } from '../data/jaberCvData';
 import { resolveAssetUrl } from '../utils/assetUrl';
 import { Reveal3D } from './common/Reveal3D';
+import { StudioGlassIcon } from './common/StudioIcon';
 
 export const WorkExperienceCVSection: React.FC = () => {
   const { language } = usePortfolio();
@@ -13,20 +14,20 @@ export const WorkExperienceCVSection: React.FC = () => {
   const cvUrl = resolveAssetUrl(JABER_CV_DATA.pdfPath);
 
   return (
-    <section className="py-24 bg-[#121419]/85 border-t border-[#2B303D] relative">
+    <section className="py-24 bg-[#121419]/85 border-t border-white/[0.07] relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* Section Header + Direct Official CV Link */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-14">
           <Reveal3D direction="left">
-            <p className="text-[11px] font-mono tracking-[0.22em] uppercase text-[#E4583B] mb-2.5">
+            <p className="text-[11px] font-sans tracking-[0.22em] uppercase text-[#9A958C] mb-2.5">
               {isBn
                 ? 'অভিজ্ঞতা ও সিভি ডসিয়ার'
                 : isAr
                 ? 'الخبرة العملية والسيرة الذاتية'
                 : 'Experience & CV Dossier'}
             </p>
-            <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#F4F0E8] tracking-tight">
+            <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-[#F4F0E8] tracking-tight">
               {isBn
                 ? 'পেশাদার অভিজ্ঞতা ও যোগ্যতা'
                 : isAr
@@ -47,9 +48,9 @@ export const WorkExperienceCVSection: React.FC = () => {
               href={cvUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center space-x-2.5 rtl:space-x-reverse px-6 py-3 rounded-lg bg-[#E4583B] hover:bg-[#D0492D] text-white font-mono text-xs font-bold uppercase tracking-wider glow-orange-sm transition-colors whitespace-nowrap"
+              className="inline-flex items-center space-x-2.5 rtl:space-x-reverse px-6 py-3 rounded-full glass-pill-cta text-xs font-semibold transition-all whitespace-nowrap"
             >
-              <FileText className="w-4 h-4" />
+              <FileText className="w-4 h-4" strokeWidth={1.5} />
               <span>
                 {isBn
                   ? 'অফিশিয়াল সিভি দেখুন (PDF)'
@@ -57,7 +58,7 @@ export const WorkExperienceCVSection: React.FC = () => {
                   ? 'عرض السيرة الذاتية (PDF)'
                   : 'View Official CV (PDF)'}
               </span>
-              <ExternalLink className="w-3.5 h-3.5" />
+              <ExternalLink className="w-3.5 h-3.5" strokeWidth={1.5} />
             </a>
           </Reveal3D>
         </div>
@@ -66,30 +67,30 @@ export const WorkExperienceCVSection: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-14">
           {JABER_CV_DATA.experiences.map((exp, idx) => (
             <Reveal3D key={exp.organization} direction={idx % 2 === 0 ? 'left' : 'right'} delay={idx * 90}>
-              <div className="h-full p-7 rounded-2xl studio-card flex flex-col justify-between">
+              <div className="h-full p-7 rounded-[24px] glass-showcase-card flex flex-col justify-between group">
                 <div>
-                  <div className="flex flex-wrap items-center justify-between gap-2 mb-4 pb-4 border-b border-[#2B303D]">
-                    <div className="flex items-center space-x-2.5 rtl:space-x-reverse">
-                      <div className="w-9 h-9 rounded-lg bg-[#20242E] border border-[#2B303D] flex items-center justify-center text-[#E4583B] shrink-0">
-                        <Briefcase className="w-4 h-4" />
-                      </div>
-                      <span className="text-xs font-mono text-[#E4583B] font-semibold">
+                  <div className="flex flex-wrap items-center justify-between gap-2 mb-4 pb-4 border-b border-white/[0.08]">
+                    <div className="flex items-center space-x-3 rtl:space-x-reverse">
+                      <StudioGlassIcon size="sm">
+                        <Briefcase className="w-4 h-4" strokeWidth={1.35} />
+                      </StudioGlassIcon>
+                      <span className="text-xs text-[#EAE5DC] font-medium">
                         {isBn ? exp.durationBn : exp.duration}
                       </span>
                     </div>
                   </div>
 
-                  <h3 className="text-lg sm:text-xl font-bold text-[#F4F0E8] mb-1">
+                  <h3 className="text-lg sm:text-xl font-semibold text-[#F4F0E8] mb-1">
                     {isBn ? exp.organizationBn : exp.organization}
                   </h3>
-                  <p className="text-xs font-mono text-[#DDD1BE] mb-5">
+                  <p className="text-xs text-[#DDD1BE] mb-5">
                     {isBn ? exp.roleBn : exp.role}
                   </p>
 
                   <ul className="space-y-2.5 mb-6">
                     {(isBn ? exp.dutiesBn : exp.duties).map((duty, dIdx) => (
                       <li key={dIdx} className="flex items-start space-x-2.5 rtl:space-x-reverse text-xs sm:text-sm text-[#A7A298] leading-relaxed">
-                        <CheckCircle2 className="w-4 h-4 text-[#E4583B] shrink-0 mt-0.5" />
+                        <CheckCircle2 className="w-4 h-4 text-[#EAE5DC] shrink-0 mt-0.5" strokeWidth={1.35} />
                         <span>{duty}</span>
                       </li>
                     ))}
@@ -97,7 +98,7 @@ export const WorkExperienceCVSection: React.FC = () => {
                 </div>
 
                 {/* Unboxed Metadata Line */}
-                <div className="pt-4 border-t border-[#2B303D] text-[11px] font-mono text-[#A7A298]">
+                <div className="pt-4 border-t border-white/[0.08] text-[11px] text-[#9A958C]">
                   {exp.expertise.join(' · ')}
                 </div>
               </div>
@@ -107,13 +108,15 @@ export const WorkExperienceCVSection: React.FC = () => {
 
         {/* Career Preferences, Languages & Technical Environment Row */}
         <Reveal3D direction="depth" delay={100}>
-          <div className="p-7 rounded-2xl studio-card grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="p-7 rounded-[24px] glass-showcase-card-muted grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="space-y-2">
-              <div className="flex items-center space-x-2 rtl:space-x-reverse text-xs font-mono text-[#E4583B] uppercase tracking-wider font-semibold">
-                <MapPin className="w-4 h-4" />
+              <div className="flex items-center space-x-2.5 rtl:space-x-reverse text-xs text-[#EAE5DC] font-medium">
+                <StudioGlassIcon size="sm">
+                  <MapPin className="w-3.5 h-3.5" strokeWidth={1.35} />
+                </StudioGlassIcon>
                 <span>{isBn ? 'অবস্থান ও পছন্দের কর্মস্থল' : isAr ? 'الموقع والمناطق المفضلة' : 'Location & Preferred Districts'}</span>
               </div>
-              <p className="text-sm font-semibold text-[#F4F0E8]">
+              <p className="text-sm font-medium text-[#F4F0E8]">
                 {isBn ? JABER_CV_DATA.contact.currentAddressBn : JABER_CV_DATA.contact.currentAddress}
               </p>
               <p className="text-xs text-[#A7A298]">
@@ -124,11 +127,13 @@ export const WorkExperienceCVSection: React.FC = () => {
             </div>
 
             <div className="space-y-2">
-              <div className="flex items-center space-x-2 rtl:space-x-reverse text-xs font-mono text-[#E4583B] uppercase tracking-wider font-semibold">
-                <Monitor className="w-4 h-4" />
+              <div className="flex items-center space-x-2.5 rtl:space-x-reverse text-xs text-[#EAE5DC] font-medium">
+                <StudioGlassIcon size="sm">
+                  <Monitor className="w-3.5 h-3.5" strokeWidth={1.35} />
+                </StudioGlassIcon>
                 <span>{isBn ? 'অপারেটিং সিস্টেম ও অফিস' : isAr ? 'الأنظمة والمكتب' : 'OS & Computer Readiness'}</span>
               </div>
-              <p className="text-sm font-semibold text-[#F4F0E8]">
+              <p className="text-sm font-medium text-[#F4F0E8]">
                 {JABER_CV_DATA.skills.operatingSystems.join(' · ')}
               </p>
               <p className="text-xs text-[#A7A298]">
@@ -139,11 +144,13 @@ export const WorkExperienceCVSection: React.FC = () => {
             </div>
 
             <div className="space-y-2">
-              <div className="flex items-center space-x-2 rtl:space-x-reverse text-xs font-mono text-[#E4583B] uppercase tracking-wider font-semibold">
-                <Globe className="w-4 h-4" />
+              <div className="flex items-center space-x-2.5 rtl:space-x-reverse text-xs text-[#EAE5DC] font-medium">
+                <StudioGlassIcon size="sm">
+                  <Globe className="w-3.5 h-3.5" strokeWidth={1.35} />
+                </StudioGlassIcon>
                 <span>{isBn ? 'ভাষাগত দক্ষতা ও ক্যারিয়ার লক্ষ্য' : isAr ? 'اللغات والأهداف' : 'Languages & Career Target'}</span>
               </div>
-              <p className="text-sm font-semibold text-[#F4F0E8]">
+              <p className="text-sm font-medium text-[#F4F0E8]">
                 {isBn
                   ? 'বাংলা (উচ্চ দক্ষতা) · ইংরেজি (মধ্যম)'
                   : 'Bangla (High) · English (Medium)'}

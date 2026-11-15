@@ -8,6 +8,7 @@ import { EditableElement } from './common/EditableElement';
 import { VideoCardGrid } from './VideoCardGrid';
 import { Tilt3DImageStage } from './common/Tilt3DImageStage';
 import { Reveal3D } from './common/Reveal3D';
+import { StudioGlassIcon } from './common/StudioIcon';
 
 interface PortfolioProps {
   onOpenLightbox?: (project: ProjectItem, initialIndex?: number) => void;
@@ -138,13 +139,13 @@ export const Portfolio: React.FC<PortfolioProps> = ({
   return (
     <section
       id={mode === 'graphic' ? 'graphic-projects' : mode === 'video' ? 'video-projects' : 'projects'}
-      className="py-20 bg-[#14171E]/80 border-t border-[#2B303D] relative"
+      className="py-20 bg-[#0E1014]/75 border-t border-white/[0.08] relative"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* Section Header */}
         <Reveal3D direction="up" className="flex flex-col items-center text-center mb-12">
-          <span className="text-xs font-mono text-[#E4583B] uppercase tracking-[0.2em] mb-2.5">
+          <span className="text-[11px] font-medium text-[#E4583B] uppercase tracking-[0.22em] mb-2.5">
             {mode === 'graphic'
               ? viewStyle === 'posters'
                 ? language === 'bn'
@@ -179,30 +180,30 @@ export const Portfolio: React.FC<PortfolioProps> = ({
           <div className="flex justify-center space-x-3 rtl:space-x-reverse mb-12">
             <button
               onClick={() => setActiveTab('video')}
-              className={`inline-flex items-center space-x-2 rtl:space-x-reverse px-5 py-2.5 rounded-lg text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
+              className={`inline-flex items-center space-x-2 rtl:space-x-reverse px-5 py-2.5 rounded-full text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
                 activeTab === 'video'
-                  ? 'bg-[#E4583B] text-white'
-                  : 'bg-[#181B22] text-[#A7A298] hover:text-[#F4F0E8] border border-[#2B303D]'
+                  ? 'glass-pill-cta'
+                  : 'glass-pill-ghost text-[#A7A298] hover:text-[#F4F0E8]'
               }`}
             >
               <EditableElement id="portfolio.tabVideo" label="Video Tab Label" as="span">
                 {ui.projects.tabVideo}
               </EditableElement>
-              <span className="text-xs font-mono opacity-80 tabular-nums">({videoCount})</span>
+              <span className="text-xs opacity-75 tabular-nums">({videoCount})</span>
             </button>
 
             <button
               onClick={() => setActiveTab('graphic')}
-              className={`inline-flex items-center space-x-2 rtl:space-x-reverse px-5 py-2.5 rounded-lg text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
+              className={`inline-flex items-center space-x-2 rtl:space-x-reverse px-5 py-2.5 rounded-full text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
                 activeTab === 'graphic'
-                  ? 'bg-[#E4583B] text-white'
-                  : 'bg-[#181B22] text-[#A7A298] hover:text-[#F4F0E8] border border-[#2B303D]'
+                  ? 'glass-pill-cta'
+                  : 'glass-pill-ghost text-[#A7A298] hover:text-[#F4F0E8]'
               }`}
             >
               <EditableElement id="portfolio.tabGraphic" label="Graphic Tab Label" as="span">
                 {ui.projects.tabGraphic}
               </EditableElement>
-              <span className="text-xs font-mono opacity-80 tabular-nums">({graphicCount})</span>
+              <span className="text-xs opacity-75 tabular-nums">({graphicCount})</span>
             </button>
           </div>
         )}
@@ -227,11 +228,11 @@ export const Portfolio: React.FC<PortfolioProps> = ({
                     <div
                       onClick={() => onOpenLightbox?.(entry.project, entry.indexInProject)}
                       data-cursor="view"
-                      className="h-full group rounded-2xl studio-card overflow-hidden cursor-pointer flex flex-col justify-between hover:-translate-y-1"
+                      className="h-full group rounded-[22px] glass-showcase-card overflow-hidden cursor-pointer flex flex-col justify-between transition-all duration-300 hover:-translate-y-1"
                     >
-                      <div className="p-2.5 bg-[#121419]/90 border-b border-[#2B303D]">
+                      <div className="p-2.5 border-b border-white/[0.08]">
                         <Tilt3DImageStage className="aspect-[4/5] w-full" maxTilt={11} scaleOnHover={1.02}>
-                          <div className="relative w-full h-full rounded-xl bg-[#0E1015] overflow-hidden flex items-center justify-center">
+                          <div className="relative w-full h-full rounded-2xl glass-showcase-inner overflow-hidden flex items-center justify-center">
                             {entry.url && !isBroken ? (
                               <img
                                 src={resolveAssetUrl(entry.url)}
@@ -242,15 +243,17 @@ export const Portfolio: React.FC<PortfolioProps> = ({
                                 loading="lazy"
                               />
                             ) : (
-                              <div className="flex flex-col items-center justify-center p-6 text-center">
-                                <Palette className="w-8 h-8 text-[#E4583B] mb-2" />
-                                <span className="text-xs font-mono text-[#DDD1BE]">{entry.caption}</span>
+                              <div className="flex flex-col items-center justify-center p-6 text-center space-y-2.5">
+                                <StudioGlassIcon size="lg">
+                                  <Palette className="w-5 h-5 text-[#F4F0E8]" strokeWidth={1.35} />
+                                </StudioGlassIcon>
+                                <span className="text-xs text-[#DDD1BE]">{entry.caption}</span>
                               </div>
                             )}
 
                             <div className="absolute inset-0 bg-black/45 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
-                              <span className="inline-flex items-center space-x-1.5 rtl:space-x-reverse px-4 py-2 rounded-lg bg-[#121419]/95 border border-[#E4583B]/60 text-[#F4F0E8] text-xs font-mono">
-                                <Eye className="w-4 h-4 text-[#E4583B]" />
+                              <span className="inline-flex items-center space-x-1.5 rtl:space-x-reverse px-4 py-2 rounded-full glass-pill-cta text-xs font-semibold">
+                                <Eye className="w-3.5 h-3.5" strokeWidth={1.5} />
                                 <span>{language === 'bn' ? 'পোস্টার দেখুন' : 'Inspect Poster'}</span>
                               </span>
                             </div>
@@ -260,8 +263,8 @@ export const Portfolio: React.FC<PortfolioProps> = ({
 
                       <div className="p-4 flex items-center justify-between gap-3">
                         <div className="min-w-0">
-                          <div className="text-[11px] font-mono text-[#A7A298] flex items-center gap-1.5 truncate">
-                            <Layers className="w-3 h-3 text-[#E4583B] shrink-0" />
+                          <div className="text-[11px] text-[#A7A298] flex items-center gap-1.5 truncate">
+                            <Layers className="w-3 h-3 text-[#E4583B] shrink-0" strokeWidth={1.35} />
                             <span className="truncate">{entry.groupLabel}</span>
                             {entry.totalInGroup > 1 && (
                               <>
@@ -272,7 +275,7 @@ export const Portfolio: React.FC<PortfolioProps> = ({
                               </>
                             )}
                           </div>
-                          <h3 className="text-sm font-bold text-[#F4F0E8] group-hover:text-[#E4583B] transition-colors truncate mt-0.5">
+                          <h3 className="text-sm font-semibold text-[#F4F0E8] group-hover:text-white transition-colors truncate mt-0.5">
                             {entry.caption}
                           </h3>
                         </div>
@@ -283,7 +286,7 @@ export const Portfolio: React.FC<PortfolioProps> = ({
                             target="_blank"
                             rel="noopener noreferrer"
                             onClick={(e) => e.stopPropagation()}
-                            className="text-xs font-mono font-bold text-[#60A5FA] hover:text-white shrink-0"
+                            className="w-8 h-8 rounded-full glass-icon-disc flex items-center justify-center text-[11px] font-semibold shrink-0"
                             title="Open Behance Project"
                           >
                             Bē
@@ -295,7 +298,7 @@ export const Portfolio: React.FC<PortfolioProps> = ({
                 );
               })
             ) : (
-              <div className="col-span-full p-12 text-center rounded-2xl studio-card text-[#A7A298] text-sm">
+              <div className="col-span-full p-12 text-center rounded-[22px] glass-showcase-card text-[#A7A298] text-sm">
                 {ui.projects.emptyPlaceholder}
               </div>
             )}
@@ -319,11 +322,11 @@ export const Portfolio: React.FC<PortfolioProps> = ({
                     <div
                       onClick={() => onOpenLightbox?.(project, 0)}
                       data-cursor="view"
-                      className="h-full group relative rounded-2xl studio-card overflow-hidden flex flex-col justify-between cursor-pointer hover:-translate-y-1"
+                      className="h-full group relative rounded-[22px] glass-showcase-card overflow-hidden flex flex-col justify-between cursor-pointer transition-all duration-300 hover:-translate-y-1"
                     >
-                      <div className="p-2.5 bg-[#121419]/90 border-b border-[#2B303D]">
+                      <div className="p-2.5 border-b border-white/[0.08]">
                         <Tilt3DImageStage className="aspect-[16/10] w-full" maxTilt={13} scaleOnHover={1.03}>
-                          <div className="relative w-full h-full rounded-xl bg-[#20242E] flex items-center justify-center border border-[#2B303D] overflow-hidden">
+                          <div className="relative w-full h-full rounded-2xl glass-showcase-inner flex items-center justify-center overflow-hidden">
                             {coverPoster && !coverBroken ? (
                               <img
                                 src={resolveAssetUrl(coverPoster)}
@@ -333,22 +336,22 @@ export const Portfolio: React.FC<PortfolioProps> = ({
                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                               />
                             ) : (
-                              <div className="w-full h-full bg-[#181B22] flex flex-col items-center justify-center text-center p-6 space-y-2.5">
-                                <div className="w-11 h-11 rounded-xl bg-[#121419] border border-[#2B303D] flex items-center justify-center text-[#E4583B]">
-                                  <Palette className="w-5 h-5" />
-                                </div>
-                                <span className="text-xs font-mono text-[#DDD1BE] font-semibold line-clamp-1">
+                              <div className="w-full h-full flex flex-col items-center justify-center text-center p-6 space-y-2.5">
+                                <StudioGlassIcon size="lg">
+                                  <Palette className="w-5 h-5 text-[#F4F0E8]" strokeWidth={1.35} />
+                                </StudioGlassIcon>
+                                <span className="text-xs text-[#DDD1BE] font-semibold line-clamp-1">
                                   {loc(project.title)}
                                 </span>
-                                <span className="text-[10px] font-mono text-[#A7A298]">
+                                <span className="text-[11px] text-[#A7A298]">
                                   {project.behanceUrl ? 'Behance Design Series' : 'Graphic Design'}
                                 </span>
                               </div>
                             )}
 
-                            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center z-10 pointer-events-none">
-                              <span className="inline-flex items-center space-x-1.5 rtl:space-x-reverse px-4 py-2 rounded-lg bg-[#121419]/95 border border-[#E4583B]/60 text-[#F4F0E8] text-xs font-mono font-medium">
-                                <Eye className="w-4 h-4 text-[#E4583B]" />
+                            <div className="absolute inset-0 bg-black/45 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center z-10 pointer-events-none">
+                              <span className="inline-flex items-center space-x-1.5 rtl:space-x-reverse px-4 py-2 rounded-full glass-pill-cta text-xs font-semibold">
+                                <Eye className="w-3.5 h-3.5" strokeWidth={1.5} />
                                 <span>
                                   {posters.length > 1
                                     ? language === 'bn'
@@ -376,7 +379,7 @@ export const Portfolio: React.FC<PortfolioProps> = ({
                                     e.stopPropagation();
                                     onOpenLightbox?.(project, idx);
                                   }}
-                                  className="relative w-14 h-14 rounded-lg overflow-hidden bg-[#20242E] border border-[#2B303D] hover:border-[#E4583B] shrink-0 transition-all cursor-pointer group/thumb"
+                                  className="relative w-14 h-14 rounded-xl overflow-hidden glass-showcase-inner hover:border-white/30 shrink-0 transition-all cursor-pointer group/thumb"
                                   title={p.caption || `Poster ${idx + 1}`}
                                 >
                                   {!brokenImages[thumbKey] ? (
@@ -391,11 +394,11 @@ export const Portfolio: React.FC<PortfolioProps> = ({
                                     />
                                   ) : (
                                     <div className="w-full h-full flex items-center justify-center text-[#A7A298]">
-                                      <Grid className="w-4 h-4" />
+                                      <Grid className="w-4 h-4" strokeWidth={1.35} />
                                     </div>
                                   )}
                                   {isOverflowBadge && (
-                                    <div className="absolute inset-0 bg-black/75 flex items-center justify-center text-[11px] font-mono font-bold text-white">
+                                    <div className="absolute inset-0 bg-black/75 flex items-center justify-center text-[11px] font-semibold text-white">
                                       +{posters.length - 5}
                                     </div>
                                   )}
@@ -408,8 +411,8 @@ export const Portfolio: React.FC<PortfolioProps> = ({
 
                       <div className="p-6 flex flex-col justify-between flex-1">
                         <div>
-                          <div className="text-[11px] font-mono text-[#A7A298] mb-1.5 flex flex-wrap items-center gap-1.5">
-                            <span className="text-[#E4583B] uppercase tracking-wider font-semibold">
+                          <div className="text-[11px] text-[#A7A298] mb-1.5 flex flex-wrap items-center gap-1.5">
+                            <span className="text-[#E4583B] font-medium">
                               {groupLabel || 'Graphic Design'}
                             </span>
                             {posters.length > 0 && (
@@ -428,7 +431,7 @@ export const Portfolio: React.FC<PortfolioProps> = ({
                             )}
                           </div>
 
-                          <h3 className="text-lg font-bold text-[#F4F0E8] mb-2 group-hover:text-[#E4583B] transition-colors">
+                          <h3 className="text-lg font-semibold text-[#F4F0E8] mb-2 group-hover:text-white transition-colors">
                             {loc(project.title)}
                           </h3>
 
@@ -437,7 +440,7 @@ export const Portfolio: React.FC<PortfolioProps> = ({
                           </p>
                         </div>
 
-                        <div className="mt-5 pt-4 border-t border-[#2B303D] flex items-center justify-between text-xs font-mono">
+                        <div className="mt-5 pt-4 border-t border-white/[0.08] flex items-center justify-between text-xs">
                           <div className="flex items-center space-x-3 rtl:space-x-reverse">
                             {project.behanceUrl && (
                               <a
@@ -445,11 +448,11 @@ export const Portfolio: React.FC<PortfolioProps> = ({
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 onClick={(e) => e.stopPropagation()}
-                                className="inline-flex items-center space-x-1 rtl:space-x-reverse text-[#60A5FA] hover:text-white font-bold transition-colors"
+                                className="inline-flex items-center space-x-1 rtl:space-x-reverse px-3 py-1 rounded-full glass-pill-ghost text-[#EAE5DC] hover:text-white font-medium transition-colors"
                               >
                                 <span>Bē</span>
                                 <span>Behance</span>
-                                <ExternalLink className="w-3 h-3" />
+                                <ExternalLink className="w-3 h-3" strokeWidth={1.35} />
                               </a>
                             )}
                             {project.externalUrl && (
@@ -458,17 +461,17 @@ export const Portfolio: React.FC<PortfolioProps> = ({
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 onClick={(e) => e.stopPropagation()}
-                                className="inline-flex items-center space-x-1 rtl:space-x-reverse text-[#DDD1BE] hover:text-white transition-colors"
+                                className="inline-flex items-center space-x-1 rtl:space-x-reverse px-3 py-1 rounded-full glass-pill-ghost text-[#EAE5DC] hover:text-white transition-colors"
                               >
                                 <span>Link</span>
-                                <ExternalLink className="w-3 h-3 text-[#E4583B]" />
+                                <ExternalLink className="w-3 h-3" strokeWidth={1.35} />
                               </a>
                             )}
                           </div>
 
-                          <span className="inline-flex items-center space-x-1.5 rtl:space-x-reverse text-[#A7A298] group-hover:text-[#E4583B] transition-colors font-semibold">
+                          <span className="inline-flex items-center space-x-1.5 rtl:space-x-reverse text-[#A7A298] group-hover:text-[#F4F0E8] transition-colors font-medium">
                             <span>{posters.length > 1 ? 'Open Group' : 'Preview'}</span>
-                            <Eye className="w-3.5 h-3.5" />
+                            <Eye className="w-3.5 h-3.5" strokeWidth={1.35} />
                           </span>
                         </div>
                       </div>
@@ -477,7 +480,7 @@ export const Portfolio: React.FC<PortfolioProps> = ({
                 );
               })
             ) : (
-              <div className="col-span-2 p-12 text-center rounded-2xl studio-card text-[#A7A298] text-sm">
+              <div className="col-span-2 p-12 text-center rounded-[22px] glass-showcase-card text-[#A7A298] text-sm">
                 {ui.projects.emptyPlaceholder}
               </div>
             )}

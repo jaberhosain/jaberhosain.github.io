@@ -2,6 +2,7 @@ import React from 'react';
 import { Youtube, ExternalLink, Folder, Send, Facebook, CheckCircle2 } from 'lucide-react';
 import { usePortfolio } from '../context/PortfolioContext';
 import { Reveal3D } from './common/Reveal3D';
+import { StudioGlassIcon } from './common/StudioIcon';
 
 export const ChannelLinks: React.FC = () => {
   const { portfolio, ui, loc } = usePortfolio();
@@ -10,30 +11,30 @@ export const ChannelLinks: React.FC = () => {
   const renderIcon = (id: string) => {
     switch (id) {
       case 'ch-youtube':
-        return <Youtube className="w-5 h-5 text-[#FF0000]" />;
+        return <Youtube className="w-4 h-4" strokeWidth={1.35} />;
       case 'ch-behance':
-        return <span className="font-bold text-sm text-[#0057FF]">Bē</span>;
+        return <span className="font-semibold text-xs">Bē</span>;
       case 'ch-facebook':
-        return <Facebook className="w-5 h-5 text-[#1877F2]" />;
+        return <Facebook className="w-4 h-4" strokeWidth={1.35} />;
       case 'ch-drive':
-        return <Folder className="w-5 h-5 text-amber-400" />;
+        return <Folder className="w-4 h-4" strokeWidth={1.35} />;
       case 'ch-telegram':
-        return <Send className="w-5 h-5 text-[#229ED9]" />;
+        return <Send className="w-4 h-4" strokeWidth={1.35} />;
       default:
-        return <CheckCircle2 className="w-5 h-5 text-[#E4583B]" />;
+        return <CheckCircle2 className="w-4 h-4" strokeWidth={1.35} />;
     }
   };
 
   return (
-    <section id="channels" className="py-24 bg-[#121419]/75 border-t border-[#2B303D] relative">
+    <section id="channels" className="py-24 bg-[#121419]/75 border-t border-white/[0.07] relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* Section Header */}
         <Reveal3D direction="up" className="flex flex-col items-center text-center mb-16">
-          <h2 className="font-display text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#F4F0E8] tracking-tight uppercase mb-3">
+          <h2 className="font-display text-2xl sm:text-3xl lg:text-4xl font-bold text-[#F4F0E8] tracking-tight mb-3">
             {ui.channels.title}
           </h2>
-          <p className="text-[#A7A298] text-xs sm:text-sm max-w-2xl font-mono">
+          <p className="text-[#A7A298] text-xs sm:text-sm max-w-2xl">
             {ui.channels.subtitle}
           </p>
         </Reveal3D>
@@ -49,31 +50,30 @@ export const ChannelLinks: React.FC = () => {
                 delay={(idx % 2) * 85}
               >
                 <div
-                  className={`h-full studio-card p-6 rounded-2xl transition-all ${
+                  className={`h-full group glass-showcase-card-muted p-6 rounded-[22px] transition-all ${
                     isLinked
-                      ? 'hover:border-[#E4583B]/55'
-                      : 'opacity-80'
+                      ? 'hover:-translate-y-0.5'
+                      : 'opacity-75'
                   }`}
                 >
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex items-center space-x-3 rtl:space-x-reverse">
-                      <div className="w-10 h-10 rounded-xl bg-[#20242E] border border-[#2B303D] flex items-center justify-center">
+                      <StudioGlassIcon size="md">
                         {renderIcon(item.id)}
-                      </div>
+                      </StudioGlassIcon>
                       <div>
-                        <h3 className="font-bold text-base text-[#F4F0E8]">{item.platform}</h3>
-                        <span className="text-[10px] font-mono font-bold tracking-wider text-[#E4583B] uppercase">
+                        <h3 className="font-semibold text-base text-[#F4F0E8]">{item.platform}</h3>
+                        <span className="text-[11px] text-[#9A958C]">
                           {loc(item.badge)}
                         </span>
                       </div>
                     </div>
 
-                    {/* Status Badge */}
                     <span
-                      className={`px-2.5 py-0.5 rounded text-[10px] font-mono font-bold uppercase tracking-wider ${
+                      className={`text-[11px] font-medium ${
                         item.status === 'LINKED'
-                          ? 'bg-emerald-950/60 text-emerald-400 border border-emerald-500/30'
-                          : 'bg-[#20242E] text-[#A7A298] border border-[#2B303D]'
+                          ? 'text-emerald-400'
+                          : 'text-[#8E8A82]'
                       }`}
                     >
                       {item.status === 'LINKED' ? ui.channels.linked : ui.channels.unlinked}
@@ -89,10 +89,10 @@ export const ChannelLinks: React.FC = () => {
                       href={item.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center space-x-1.5 rtl:space-x-reverse text-xs font-semibold text-[#E4583B] hover:text-[#F07C63] transition-colors"
+                      className="inline-flex items-center space-x-1.5 rtl:space-x-reverse text-xs font-medium text-[#EAE5DC] hover:text-white transition-colors"
                     >
                       <span>Visit {item.platform}</span>
-                      <ExternalLink className="w-3.5 h-3.5" />
+                      <ExternalLink className="w-3.5 h-3.5" strokeWidth={1.35} />
                     </a>
                   )}
                 </div>

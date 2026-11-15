@@ -44,11 +44,11 @@ export const VideoShowcase: React.FC<VideoShowcaseProps> = ({
   return (
     <section
       id="videos"
-      className="py-24 bg-[#121419]/75 border-t border-[#2B303D] relative overflow-hidden"
+      className="py-24 bg-[#0D0E12]/75 border-t border-white/[0.08] relative overflow-hidden"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <Reveal3D direction="up" className="flex flex-col items-center text-center mb-12">
-          <span className="text-xs font-mono text-[#E4583B] uppercase tracking-[0.2em] mb-2.5">
+          <span className="text-[11px] font-medium text-[#E4583B] uppercase tracking-[0.22em] mb-2.5">
             {sectionTag}
           </span>
 

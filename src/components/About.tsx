@@ -7,6 +7,7 @@ import { normalizeDirectImageUrl } from '../lib/imageUrlResolver';
 import { EditableElement } from './common/EditableElement';
 import { Tilt3DImageStage } from './common/Tilt3DImageStage';
 import { Reveal3D } from './common/Reveal3D';
+import { StudioGlassIcon, StudioArrowRight } from './common/StudioIcon';
 
 const iconMap: Record<string, React.ElementType> = {
   GraduationCap,
@@ -22,7 +23,7 @@ export const About: React.FC = () => {
   const { about, overviewCards } = portfolio;
 
   return (
-    <section id="about" className="py-24 bg-[#121419]/75 border-t border-[#2B303D] relative">
+    <section id="about" className="py-24 bg-[#121419]/75 border-t border-white/[0.07] relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* Main About Me Block */}
@@ -31,45 +32,47 @@ export const About: React.FC = () => {
           {/* Left: Authentic Portrait in 3D Stage */}
           <Reveal3D direction="left" className="lg:col-span-5 flex justify-center">
             <Tilt3DImageStage className="w-full max-w-sm aspect-[3/4]" maxTilt={14} scaleOnHover={1.02}>
-              <div className="relative w-full h-full rounded-2xl overflow-hidden border border-[#2B303D] bg-[#181B22] shadow-2xl">
-                <img
-                  src={resolveAssetUrl(normalizeDirectImageUrl(about.avatarUrl) || '/assets/jabir_profile.png')}
-                  alt="MD. Jaber Hossain"
-                  referrerPolicy="no-referrer"
-                  className="w-full h-full object-cover object-top"
-                  loading="lazy"
-                  onError={(e) => {
-                    const img = e.currentTarget as HTMLImageElement;
-                    const fallback = resolveAssetUrl('/assets/jaber_hero.png');
-                    const secondFallback = resolveAssetUrl('/assets/jabir_profile.png');
-                    if (img.dataset.fallbackStage === '2') return;
-                    if (img.dataset.fallbackStage !== '1') {
-                      img.dataset.fallbackStage = '1';
-                      img.src = fallback;
-                    } else {
-                      img.dataset.fallbackStage = '2';
-                      img.src = secondFallback;
-                    }
-                  }}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#121419]/60 via-transparent to-transparent" />
+              <div className="relative w-full h-full rounded-[24px] overflow-hidden glass-showcase-card p-2">
+                <div className="relative w-full h-full rounded-[18px] overflow-hidden bg-[#121419]">
+                  <img
+                    src={resolveAssetUrl(normalizeDirectImageUrl(about.avatarUrl) || '/assets/jabir_profile.png')}
+                    alt="MD. Jaber Hossain"
+                    referrerPolicy="no-referrer"
+                    className="w-full h-full object-cover object-top"
+                    loading="lazy"
+                    onError={(e) => {
+                      const img = e.currentTarget as HTMLImageElement;
+                      const fallback = resolveAssetUrl('/assets/jaber_hero.png');
+                      const secondFallback = resolveAssetUrl('/assets/jabir_profile.png');
+                      if (img.dataset.fallbackStage === '2') return;
+                      if (img.dataset.fallbackStage !== '1') {
+                        img.dataset.fallbackStage = '1';
+                        img.src = fallback;
+                      } else {
+                        img.dataset.fallbackStage = '2';
+                        img.src = secondFallback;
+                      }
+                    }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#121419]/60 via-transparent to-transparent" />
+                </div>
               </div>
             </Tilt3DImageStage>
           </Reveal3D>
 
           {/* Right: Bio Text */}
           <Reveal3D direction="right" delay={110} className="lg:col-span-7 flex flex-col items-start text-left rtl:items-start rtl:text-right">
-            <div className="text-xs font-mono text-[#E4583B] uppercase tracking-[0.2em] mb-3">
+            <div className="text-[11px] font-sans text-[#9A958C] uppercase tracking-[0.22em] mb-3">
               {ui.about.sectionTag}
             </div>
 
             <EditableElement id="about.title" label="About Section Title" as="h2" className="mb-6">
-              <span className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#F4F0E8] tracking-tight">
+              <span className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-[#F4F0E8] tracking-tight">
                 {ui.about.title}
               </span>
             </EditableElement>
 
-            <div className="p-8 rounded-2xl studio-card">
+            <div className="p-8 rounded-[24px] glass-showcase-card">
               <EditableElement id="about.bio" label="About Bio Paragraph" as="p" className="text-base sm:text-lg text-[#DDD1BE] leading-relaxed">
                 {loc(about.bio)}
               </EditableElement>
@@ -78,13 +81,13 @@ export const About: React.FC = () => {
         </div>
 
         {/* Section: WHAT YOU'LL FIND HERE */}
-        <div className="pt-8 border-t border-[#2B303D]">
+        <div className="pt-8 border-t border-white/[0.07]">
           <div className="flex flex-col items-center text-center mb-12">
-            <div className="text-xs font-mono text-[#E4583B] uppercase tracking-[0.2em] mb-2.5">
+            <div className="text-[11px] font-sans text-[#9A958C] uppercase tracking-[0.22em] mb-2.5">
               EXPLORE MY WORK
             </div>
             <EditableElement id="about.whatYoullFindHere" label="Explore Work Heading" as="h3">
-              <span className="font-display text-2xl sm:text-3xl font-extrabold text-[#F4F0E8] tracking-tight">
+              <span className="font-display text-2xl sm:text-3xl font-bold text-[#F4F0E8] tracking-tight">
                 {ui.about.whatYoullFindHere}
               </span>
             </EditableElement>
@@ -111,14 +114,14 @@ export const About: React.FC = () => {
                         }
                       }
                     }}
-                    className="h-full group p-6 rounded-2xl studio-card hover:-translate-y-1 flex flex-col justify-between"
+                    className="h-full group p-6 rounded-[22px] glass-showcase-card-muted hover:-translate-y-1 flex flex-col justify-between transition-all duration-300"
                   >
                     <div>
-                      <div className="w-11 h-11 rounded-lg bg-[#20242E] border border-[#2B303D] flex items-center justify-center text-[#E4583B] mb-4 group-hover:scale-105 transition-transform">
-                        <Icon className="w-5 h-5" />
-                      </div>
+                      <StudioGlassIcon size="md" className="mb-4">
+                        <Icon className="w-4 h-4" strokeWidth={1.35} />
+                      </StudioGlassIcon>
 
-                      <h4 className="text-base sm:text-lg font-bold text-[#F4F0E8] mb-2 group-hover:text-[#E4583B] transition-colors">
+                      <h4 className="text-base sm:text-lg font-semibold text-[#F4F0E8] mb-2 group-hover:text-white transition-colors">
                         {loc(card.title)}
                       </h4>
 
@@ -127,8 +130,9 @@ export const About: React.FC = () => {
                       </p>
                     </div>
 
-                    <div className="inline-flex items-center space-x-1.5 rtl:space-x-reverse text-xs font-semibold text-[#E4583B] group-hover:underline">
+                    <div className="inline-flex items-center space-x-2 rtl:space-x-reverse text-xs font-medium text-[#EAE5DC] group-hover:text-white">
                       <span>{loc(card.linkText)}</span>
+                      <StudioArrowRight className="w-3.5 h-3.5 rtl:rotate-180 group-hover:translate-x-0.5 transition-transform" />
                     </div>
                   </a>
                 </Reveal3D>

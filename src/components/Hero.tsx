@@ -67,8 +67,8 @@ export const Hero: React.FC = () => {
           <div className="lg:col-span-7 flex flex-col items-start text-left rtl:items-start rtl:text-right">
 
             {/* Quiet Unboxed Editorial Kicker */}
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] font-mono tracking-[0.2em] uppercase text-[#A7A298] mb-5">
-              <span className="text-[#E4583B] font-semibold">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] font-sans tracking-[0.22em] uppercase text-[#9A958C] mb-5">
+              <span className="text-[#EAE5DC] font-medium">
                 {language === 'bn'
                   ? 'ভিজ্যুয়াল ডিরেকশন · ভিডিও এডিটিং · ডিজাইন'
                   : language === 'ar'
@@ -77,8 +77,8 @@ export const Hero: React.FC = () => {
               </span>
               {hero.showBadge !== false && loc(hero.badge) && (
                 <>
-                  <span aria-hidden="true" className="text-[#2B303D]">/</span>
-                  <span className="text-[#DDD1BE]">{loc(hero.badge)}</span>
+                  <span aria-hidden="true" className="text-white/20">/</span>
+                  <span className="text-[#A7A298]">{loc(hero.badge)}</span>
                 </>
               )}
             </div>
@@ -108,7 +108,7 @@ export const Hero: React.FC = () => {
             </div>
 
             {/* Clean Architectural CTAs */}
-            <div className="flex flex-wrap items-center gap-4 w-full">
+            <div className="flex flex-wrap items-center gap-3.5 w-full">
               {hero.showCtaWork !== false && (
                 <a
                   href={hero.ctaWorkUrl || '#projects'}
@@ -118,12 +118,12 @@ export const Hero: React.FC = () => {
                       navigateTo(hero.ctaWorkUrl || 'videos');
                     }
                   }}
-                  className="inline-flex items-center justify-center space-x-2.5 rtl:space-x-reverse px-7 py-3.5 rounded-lg text-xs sm:text-sm font-bold text-white bg-[#E4583B] hover:bg-[#D0492D] glow-orange transition-all duration-200 uppercase font-mono tracking-wider"
+                  className="inline-flex items-center justify-center space-x-2 rtl:space-x-reverse px-7 py-3.5 rounded-full text-xs sm:text-sm font-semibold glass-pill-cta transition-all duration-200 tracking-wide"
                 >
                   <EditableElement id="hero.ctaWork" label="Work Button Text" as="span">
                     {loc(hero.ctaWork)}
                   </EditableElement>
-                  <ArrowUpRight className="w-4 h-4" />
+                  <ArrowUpRight className="w-4 h-4" strokeWidth={1.5} />
                 </a>
               )}
 
@@ -136,7 +136,7 @@ export const Hero: React.FC = () => {
                       navigateTo(hero.ctaContactUrl || 'contact');
                     }
                   }}
-                  className="inline-flex items-center justify-center space-x-2 rtl:space-x-reverse px-6 py-3.5 rounded-lg text-xs sm:text-sm font-semibold text-[#F4F0E8] bg-[#181B22]/90 hover:bg-[#20242E] border border-[#2B303D] hover:border-[#E4583B]/60 transition-colors uppercase font-mono tracking-wider"
+                  className="inline-flex items-center justify-center space-x-2 rtl:space-x-reverse px-6 py-3.5 rounded-full text-xs sm:text-sm font-medium glass-pill-ghost tracking-wide"
                 >
                   <EditableElement id="hero.ctaContact" label="Contact Button Text" as="span">
                     {loc(hero.ctaContact)}
@@ -147,13 +147,13 @@ export const Hero: React.FC = () => {
 
             {/* Unboxed Architectural Metrics Row */}
             {hero.showCounters && hero.counters && hero.counters.length > 0 && (
-              <div className="mt-10 pt-7 border-t border-[#2B303D]/80 grid grid-cols-2 sm:grid-cols-3 gap-6 w-full max-w-xl">
+              <div className="mt-10 pt-7 border-t border-white/[0.09] grid grid-cols-2 sm:grid-cols-3 gap-6 w-full max-w-xl">
                 {hero.counters.map((c) => (
                   <div key={c.id}>
-                    <div className="text-2xl sm:text-3xl font-extrabold text-[#F4F0E8] font-display tabular-nums">
+                    <div className="text-2xl sm:text-3xl font-bold text-[#F4F0E8] font-display tabular-nums">
                       {c.value}
                     </div>
-                    <div className="text-[11px] text-[#A7A298] font-mono uppercase tracking-wider mt-1">
+                    <div className="text-[11px] text-[#9A958C] tracking-wider uppercase mt-1">
                       {loc(c.label)}
                     </div>
                   </div>
@@ -199,96 +199,98 @@ export const Hero: React.FC = () => {
                   transformStyle: 'preserve-3d'
                 }}
               >
-                <div className="relative w-full h-full rounded-2xl overflow-hidden bg-[#181B22] border border-[#2B303D] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.72)]">
-                  <img
-                    src={resolveAssetUrl(normalizeDirectImageUrl(hero.avatarUrl) || '/assets/jabir_profile.png')}
-                    alt={loc(hero.name)}
-                    referrerPolicy="no-referrer"
-                    className="w-full h-full object-cover object-top pointer-events-none transition-transform duration-500"
-                    style={{
-                      transform: `scale(${cardTransform.isHovered ? 1.04 : 1}) translateZ(18px)`
-                    }}
-                    loading="eager"
-                    onError={(e) => {
-                      const img = e.currentTarget as HTMLImageElement;
-                      const fallback = resolveAssetUrl('/assets/jaber_hero.png');
-                      const secondFallback = resolveAssetUrl('/assets/jabir_profile.png');
-                      if (img.dataset.fallbackStage === '2') return;
-                      if (img.dataset.fallbackStage !== '1') {
-                        img.dataset.fallbackStage = '1';
-                        img.src = fallback;
-                      } else {
-                        img.dataset.fallbackStage = '2';
-                        img.src = secondFallback;
-                      }
-                    }}
-                  />
+                <div className="relative w-full h-full rounded-[24px] overflow-hidden glass-showcase-card p-2">
+                  <div className="relative w-full h-full rounded-[18px] overflow-hidden bg-[#0E1015]">
+                    <img
+                      src={resolveAssetUrl(normalizeDirectImageUrl(hero.avatarUrl) || '/assets/jabir_profile.png')}
+                      alt={loc(hero.name)}
+                      referrerPolicy="no-referrer"
+                      className="w-full h-full object-cover object-top pointer-events-none transition-transform duration-500"
+                      style={{
+                        transform: `scale(${cardTransform.isHovered ? 1.04 : 1}) translateZ(18px)`
+                      }}
+                      loading="eager"
+                      onError={(e) => {
+                        const img = e.currentTarget as HTMLImageElement;
+                        const fallback = resolveAssetUrl('/assets/jaber_hero.png');
+                        const secondFallback = resolveAssetUrl('/assets/jabir_profile.png');
+                        if (img.dataset.fallbackStage === '2') return;
+                        if (img.dataset.fallbackStage !== '1') {
+                          img.dataset.fallbackStage = '1';
+                          img.src = fallback;
+                        } else {
+                          img.dataset.fallbackStage = '2';
+                          img.src = secondFallback;
+                        }
+                      }}
+                    />
 
-                  {/* Subtle Film-Graded Bottom Vignette */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#121419]/80 via-transparent to-transparent pointer-events-none" />
+                    {/* Subtle Film-Graded Bottom Vignette */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#0D0E12]/80 via-transparent to-transparent pointer-events-none" />
 
-                  {/* Calibrated Studio Specular Reflection */}
-                  <div
-                    className="absolute inset-0 pointer-events-none mix-blend-overlay transition-opacity duration-200"
-                    style={{
-                      background: `radial-gradient(circle 320px at ${cardTransform.glareX}% ${cardTransform.glareY}%, rgba(244, 240, 232, 0.32) 0%, rgba(228, 88, 59, 0.1) 45%, transparent 80%)`,
-                      opacity: cardTransform.isHovered ? 1 : 0
-                    }}
-                  />
-
-                  {/* Clean Editorial Caption Bar */}
-                  {hero.showFloatingBadge !== false && (
+                    {/* Calibrated Studio Specular Reflection */}
                     <div
-                      className="absolute bottom-4 left-4 right-4 px-4 py-3 rounded-xl bg-[#121419]/90 border border-[#2B303D] flex items-center justify-between gap-3"
-                      style={{ transform: 'translateZ(36px)' }}
-                    >
-                      <div className="min-w-0">
-                        <div className="font-mono text-[11px] font-bold tracking-wider uppercase text-[#F4F0E8] truncate">
-                          {loc(hero.floatingBadgeText) || loc(hero.name) || 'MD JABER HOSAIN'}
+                      className="absolute inset-0 pointer-events-none mix-blend-overlay transition-opacity duration-200"
+                      style={{
+                        background: `radial-gradient(circle 320px at ${cardTransform.glareX}% ${cardTransform.glareY}%, rgba(244, 240, 232, 0.32) 0%, rgba(228, 88, 59, 0.1) 45%, transparent 80%)`,
+                        opacity: cardTransform.isHovered ? 1 : 0
+                      }}
+                    />
+
+                    {/* Clean Editorial Caption Bar */}
+                    {hero.showFloatingBadge !== false && (
+                      <div
+                        className="absolute bottom-3 left-3 right-3 px-4 py-2.5 rounded-2xl glass-showcase-inner flex items-center justify-between gap-3"
+                        style={{ transform: 'translateZ(36px)' }}
+                      >
+                        <div className="min-w-0">
+                          <div className="text-[11px] font-medium tracking-wider uppercase text-[#F4F0E8] truncate">
+                            {loc(hero.floatingBadgeText) || loc(hero.name) || 'MD JABER HOSAIN'}
+                          </div>
+                          <div className="font-editorial italic text-sm text-[#DDD1BE] truncate">
+                            {language === 'bn' ? 'ভিডিও ও গ্রাফিক ডিজাইনার' : 'Motion & Visual Direction'}
+                          </div>
                         </div>
-                        <div className="text-[10px] font-mono text-[#E4583B] tracking-widest uppercase truncate">
-                          {language === 'bn' ? 'ভিডিও ও গ্রাফিক ডিজাইনার' : 'Motion & Visual Design'}
-                        </div>
+                        <span className="text-[10px] text-[#8E8A82] tabular-nums shrink-0">01</span>
                       </div>
-                      <span className="text-[10px] font-mono text-[#A7A298] shrink-0">01</span>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
 
             {/* Minimal Interactive 3D Stage Mode Switcher */}
-            <div className="mt-4 inline-flex items-center p-1 rounded-lg bg-[#181B22]/95 border border-[#2B303D] z-30">
+            <div className="mt-4 inline-flex items-center p-1 rounded-full glass-pill-ghost z-30">
               <button
                 type="button"
                 onClick={() => setStageMode('portrait')}
-                className={`inline-flex items-center space-x-1.5 rtl:space-x-reverse px-3 py-1.5 rounded-md text-[11px] font-mono uppercase tracking-wider transition-colors cursor-pointer ${
+                className={`inline-flex items-center space-x-1.5 rtl:space-x-reverse px-3.5 py-1.5 rounded-full text-[11px] font-medium transition-colors cursor-pointer ${
                   stageMode === 'portrait'
-                    ? 'bg-[#E4583B] text-white font-bold'
+                    ? 'bg-[#F4F0E8] text-[#111318]'
                     : 'text-[#A7A298] hover:text-[#F4F0E8]'
                 }`}
               >
-                <User className="w-3.5 h-3.5" />
+                <User className="w-3.5 h-3.5" strokeWidth={1.35} />
                 <span>{language === 'bn' ? 'পোর্ট্রেট' : 'Portrait'}</span>
               </button>
               <button
                 type="button"
                 onClick={() => setStageMode('sculpture')}
-                className={`inline-flex items-center space-x-1.5 rtl:space-x-reverse px-3 py-1.5 rounded-md text-[11px] font-mono uppercase tracking-wider transition-colors cursor-pointer ${
+                className={`inline-flex items-center space-x-1.5 rtl:space-x-reverse px-3.5 py-1.5 rounded-full text-[11px] font-medium transition-colors cursor-pointer ${
                   stageMode === 'sculpture'
-                    ? 'bg-[#E4583B] text-white font-bold'
+                    ? 'bg-[#F4F0E8] text-[#111318]'
                     : 'text-[#A7A298] hover:text-[#F4F0E8]'
                 }`}
               >
-                <Box className="w-3.5 h-3.5" />
-                <span>{language === 'bn' ? '৩D অপটিক্স (ঘোরান)' : 'Inspect 3D Rig'}</span>
+                <Box className="w-3.5 h-3.5" strokeWidth={1.35} />
+                <span>{language === 'bn' ? '৩D অপটিক্স' : 'Inspect 3D Rig'}</span>
               </button>
             </div>
           </div>
         </div>
 
         {/* Clean Scroll Anchor Row */}
-        <div className="mt-14 pt-5 border-t border-[#2B303D]/70 flex items-center justify-between text-xs font-mono text-[#A7A298]">
+        <div className="mt-14 pt-5 border-t border-white/[0.08] flex items-center justify-between text-xs text-[#9A958C]">
           <span>
             {language === 'bn'
               ? 'থ্রিডি স্পেস সক্রিয় — মাউস বা স্ক্রল করে গভীরতা অনুভব করুন'
@@ -300,11 +302,11 @@ export const Hero: React.FC = () => {
             onClick={() => {
               window.scrollBy({ top: window.innerHeight * 0.85, behavior: 'smooth' });
             }}
-            className="inline-flex items-center space-x-2 rtl:space-x-reverse text-xs font-mono uppercase tracking-widest text-[#DDD1BE] hover:text-[#E4583B] transition-colors cursor-pointer"
+            className="inline-flex items-center space-x-2 rtl:space-x-reverse text-xs tracking-wide text-[#DDD1BE] hover:text-white transition-colors cursor-pointer"
             aria-label={ui.hero.scrollDown}
           >
             <span>{ui.hero.scrollDown}</span>
-            <ArrowDown className="w-3.5 h-3.5 text-[#E4583B]" />
+            <ArrowDown className="w-3.5 h-3.5" strokeWidth={1.35} />
           </button>
         </div>
 
