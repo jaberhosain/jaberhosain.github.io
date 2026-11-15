@@ -27,6 +27,20 @@ interface ChatMessage {
   actions?: AgentAction[];
 }
 
+function renderFormattedText(text: string): React.ReactNode {
+  const parts = text.split(/(\*\*[^*]+\*\*)/g);
+  return parts.map((part, idx) => {
+    if (part.startsWith('**') && part.endsWith('**') && part.length > 4) {
+      return (
+        <strong key={idx} className="font-semibold text-[#FFFFFF]">
+          {part.slice(2, -2)}
+        </strong>
+      );
+    }
+    return <React.Fragment key={idx}>{part}</React.Fragment>;
+  });
+}
+
 export const PortfolioAIAgent: React.FC = () => {
   const { portfolio, language, loc } = usePortfolio();
   const { navigateTo } = useNavigation();
@@ -42,10 +56,10 @@ export const PortfolioAIAgent: React.FC = () => {
   const getInitialGreeting = (lang: typeof language): ChatMessage => {
     const text =
       lang === 'bn'
-        ? `আসসালামু আলাইকুম! আমি ${ownerName}-এর এআই অ্যাসিস্ট্যান্ট। ভিডিও এডিটিং, গ্রাফিক ডিজাইন, বিহ্যান্স প্রজেক্ট বা কাজের অর্ডারের বিষয়ে যেকোনো প্রশ্ন করতে পারেন।`
+        ? `আসসালামু আলাইকুম! আমি ${ownerName}-এর পার্সোনাল এআই এজেন্ট। তাঁর সিভি, শিক্ষাগত যোগ্যতা, কাজের অভিজ্ঞতা, ভিডিও এডিটিং, গ্রাফিক ডিজাইন বা কাজের অর্ডার—যেকোনো বিষয়ে আমাকে প্রশ্ন করতে পারেন।`
         : lang === 'ar'
-        ? `مرحباً بك! أنا المساعد الذكي لـ ${ownerName}. اسألني عن مونتاج الفيديو، التصميم الجرافيكي، أو كيفية التواصل لبدء مشروع.`
-        : `Hi! I'm ${ownerName}'s AI Assistant. Ask me anything about his video editing, graphic design & Behance poster series, skills, or how to collaborate.`;
+        ? `مرحباً بك! أنا المساعد الشخصي لـ ${ownerName}. اسألني عن سيرته الذاتية، خبراته، مونتاج الفيديو، التصميم الجرافيكي، أو التواصل لبدء مشروع.`
+        : `Hi! I'm ${ownerName}'s AI Agent. Ask me anything about his CV, education, work experience, Adobe skills, video editing, graphic design, or how to hire him.`;
 
     return {
       id: 'welcome-msg',
@@ -93,23 +107,23 @@ export const PortfolioAIAgent: React.FC = () => {
   const quickPrompts =
     language === 'bn'
       ? [
-          'ভিডিও এডিটিং কাজগুলো দেখাও',
-          'গ্রাফিক ডিজাইন ও বিহ্যান্স কাজ',
-          'কীভাবে কাজ অর্ডার বা যোগাযোগ করব?',
-          'দক্ষতা ও শিক্ষাগত যোগ্যতা কী?'
+          'জাবেরের সিভি ও অভিজ্ঞতা',
+          'শিক্ষাগত যোগ্যতা ও রেজাল্ট',
+          'স্কিল, সফটওয়্যার ও এআই',
+          'যোগাযোগ ও প্রত্যাশিত বেতন'
         ]
       : language === 'ar'
       ? [
-          'أعمال مونتاج الفيديو',
-          'تصاميم الجرافيك و Behance',
-          'كيف يمكنني التواصل لطلب عمل؟',
-          'المهارات والبرامج المستخدمة'
+          'السيرة الذاتية والخبرة',
+          'المؤهل العلمي والدرجات',
+          'المهارات والبرامج المستخدمة',
+          'التواصل والراتب المتوقع'
         ]
       : [
-          'Show video editing work',
-          'Graphic design & Behance projects',
-          'How can I hire or contact Jaber?',
-          'What software & skills do you use?'
+          'CV & work experience',
+          'Education & GPA results',
+          'Software, skills & AI tools',
+          'Contact info & expected salary'
         ];
 
   const sendMessage = async (rawText: string) => {
@@ -142,13 +156,13 @@ export const PortfolioAIAgent: React.FC = () => {
           body: JSON.stringify({
             message: trimmed,
             language: detectedLang,
-            history: updatedHistory.slice(-6).map((m) => ({
+            history: updatedHistory.slice(-10).map((m) => ({
               role: m.role,
               text: m.text
             })),
             portfolioSummary: buildPortfolioKnowledgeSummary(portfolio)
           }),
-          signal: AbortSignal.timeout(12000)
+          signal: AbortSignal.timeout(18000)
         });
 
         const contentType = res.headers.get('content-type') || '';
@@ -172,8 +186,8 @@ export const PortfolioAIAgent: React.FC = () => {
           }
         ]);
       } else {
-        // Seamless smart fallback (works on static github.io and offline)
-        const fallback = generateLocalPortfolioReply(trimmed, portfolio, detectedLang);
+        // Seamless CV + Portfolio local intelligence (used on github.io & offline fallback)
+        const fallback = generateLocalPortfolioReply(trimmed, portfolio, detectedLang, updatedHistory);
         setMessages((prev) => [
           ...prev,
           {
@@ -185,8 +199,8 @@ export const PortfolioAIAgent: React.FC = () => {
         ]);
       }
     } catch {
-      // Never break — use local portfolio intelligence engine
-      const fallback = generateLocalPortfolioReply(trimmed, portfolio, detectedLang);
+      // Never break — use local CV + portfolio intelligence engine
+      const fallback = generateLocalPortfolioReply(trimmed, portfolio, detectedLang, updatedHistory);
       setMessages((prev) => [
         ...prev,
         {
@@ -198,14 +212,6 @@ export const PortfolioAIAgent: React.FC = () => {
       ]);
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const handleActionClick = (action: AgentAction) => {
-    if (action.type === 'navigate') {
-      navigateTo(action.target);
-    } else if (action.type === 'external' && action.target) {
-      window.open(action.target, '_blank', 'noopener,noreferrer');
     }
   };
 
@@ -242,10 +248,10 @@ export const PortfolioAIAgent: React.FC = () => {
                 </div>
                 <p className="text-[11px] font-mono text-[#A7A298] truncate">
                   {language === 'bn'
-                    ? 'ভিডিও · গ্রাফিক ডিজাইন · প্রজেক্ট গাইড'
+                    ? 'সিভি · অভিজ্ঞতা · পোর্টফোলিও গাইড'
                     : language === 'ar'
-                    ? 'فيديو · جرافيك · استفسارات المشاريع'
-                    : 'Video · Graphic Design · Project Guide'}
+                    ? 'السيرة الذاتية · الخبرة · معرض الأعمال'
+                    : 'CV · Experience · Portfolio Guide'}
                 </p>
               </div>
             </div>
@@ -286,27 +292,36 @@ export const PortfolioAIAgent: React.FC = () => {
                       : 'bg-[#1E222B] text-[#F4F0E8] border border-[#2B303D] rounded-bl-sm'
                   }`}
                 >
-                  {msg.text}
+                  {renderFormattedText(msg.text)}
                 </div>
 
                 {/* Contextual Action Buttons */}
                 {msg.role === 'assistant' && msg.actions && msg.actions.length > 0 && (
                   <div className="mt-2 flex flex-wrap gap-1.5 max-w-[92%]">
-                    {msg.actions.map((act, idx) => (
-                      <button
-                        key={`${msg.id}-act-${idx}`}
-                        type="button"
-                        onClick={() => handleActionClick(act)}
-                        className="inline-flex items-center space-x-1 rtl:space-x-reverse px-2.5 py-1.5 rounded-lg bg-[#181B22] hover:bg-[#20242E] border border-[#2B303D] hover:border-[#E4583B]/60 text-[11px] font-mono font-semibold text-[#F07C63] hover:text-[#F4F0E8] transition-colors cursor-pointer"
-                      >
-                        <span>{act.label}</span>
-                        {act.type === 'external' ? (
+                    {msg.actions.map((act, idx) =>
+                      act.type === 'external' ? (
+                        <a
+                          key={`${msg.id}-act-${idx}`}
+                          href={act.target}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center space-x-1 rtl:space-x-reverse px-2.5 py-1.5 rounded-lg bg-[#181B22] hover:bg-[#20242E] border border-[#2B303D] hover:border-[#E4583B]/60 text-[11px] font-mono font-semibold text-[#F07C63] hover:text-[#F4F0E8] transition-colors cursor-pointer"
+                        >
+                          <span>{act.label}</span>
                           <ExternalLink className="w-3 h-3" />
-                        ) : (
+                        </a>
+                      ) : (
+                        <button
+                          key={`${msg.id}-act-${idx}`}
+                          type="button"
+                          onClick={() => navigateTo(act.target)}
+                          className="inline-flex items-center space-x-1 rtl:space-x-reverse px-2.5 py-1.5 rounded-lg bg-[#181B22] hover:bg-[#20242E] border border-[#2B303D] hover:border-[#E4583B]/60 text-[11px] font-mono font-semibold text-[#F07C63] hover:text-[#F4F0E8] transition-colors cursor-pointer"
+                        >
+                          <span>{act.label}</span>
                           <ArrowUpRight className="w-3 h-3" />
-                        )}
-                      </button>
-                    ))}
+                        </button>
+                      )
+                    )}
                   </div>
                 )}
               </div>

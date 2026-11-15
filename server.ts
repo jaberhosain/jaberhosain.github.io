@@ -1,6 +1,7 @@
 import express from 'express';
 import path from 'path';
 import { GoogleGenAI, ThinkingLevel } from '@google/genai';
+import { JABER_CV_SYSTEM_DOCUMENT } from './src/data/jaberCvData';
 
 const app = express();
 const PORT = parseInt(process.env.PORT || '3000', 10);
@@ -223,40 +224,75 @@ app.post('/api/agent/chat', async (req, res) => {
   }
 
   try {
-    const conversationContext = Array.isArray(history)
-      ? history
-          .slice(-6)
-          .map((m: any) => `${m.role === 'user' ? 'Visitor' : 'Assistant'}: ${m.text}`)
-          .join('\n')
-      : '';
-
     const systemInstruction = [
-      'You are the official Portfolio AI Agent for MD. Jaber Hosain (মোঃ জাবের হোসাইন), a Creative Video Editor, Graphic Designer, and Digital Marketer.',
-      'Your role is to help visitors, clients, and recruiters explore his Video Editing portfolio, Graphic Design & Behance poster groups, Skills, Education, and Contact options.',
-      'Guidelines:',
-      '- Reply in the same language the visitor uses (Bangla, English, or Arabic). Keep responses concise (2 to 4 short sentences or clean bullet points), warm, and professional.',
-      '- Base your answers strictly on the provided live portfolio summary below. Never invent fake projects or pricing numbers; for custom quotes, invite them to reach out via the Contact page, Email, or Telegram.',
+      'You are the dedicated, human-like AI Agent & Personal Career Representative of Md. Jaber Hosain (মোঃ জাবের হোসাইন).',
+      'Speak naturally, warmly, and clearly—just like an intelligent human assistant who knows Jaber closely. NEVER sound robotic and NEVER repeat the exact same canned greeting or fallback phrase mechanically.',
       '',
-      'LIVE PORTFOLIO DATA:',
-      portfolioSummary,
+      'CORE LANGUAGE RULES:',
+      '- Reply in the exact language the visitor uses (Bangla if they write in Bengali script OR Romanized Banglish; English if they write in English; Arabic if they write in Arabic).',
+      `- UI fallback language hint: ${language}.`,
+      '- Keep replies conversational, helpful, and easy to scan (2 to 5 natural sentences, or clean bullet points when sharing multi-item CV details like education, experience, or contact info).',
+      '',
+      'KNOWLEDGE, HONESTY & APPROXIMATION RULES (CRITICAL):',
+      '1. EXACT CV & PORTFOLIO QUESTIONS: Answer accurately, thoroughly, and confidently using JABER OFFICIAL CV and LIVE PORTFOLIO DATA below. You know his full CV: contact numbers, emails, addresses, Facebook/LinkedIn, career objective, 1.1 yrs experience (As-Sunnah Skill Development Institute & Al Manar Hostel), Alim GPA 4.14 (2025) & Dakhil GPA 3.94 (2023), trainings, expected salary (Tk. 20,000), preferred job categories/districts/countries/organizations, software & OS skills, language proficiency, and personal details (parents, DOB, blood group AB+, height, weight, marital status).',
+      '2. CLOSE / RELATED TOPICS (কাছাকাছি বিষয়): If the visitor asks about something NOT explicitly named in his CV/portfolio, BUT closely related to his skillset (for example: CapCut or DaVinci Resolve instead of Premiere Pro, Figma instead of Photoshop/Illustrator, full-stack web dev vs building his portfolio site, YouTube SEO vs Meta Marketing, hostel accounting vs general accounting, freelance rates or notice period), DO NOT invent fake credentials. Clearly note what is not explicitly listed in his CV, and honestly explain the closest real skill/experience he has and give a practical approximate idea.',
+      '3. UNKNOWN / UNRELATED TOPICS (না জানা বিষয়): If the visitor asks about something completely outside Jaber, his CV, or his creative/professional domain (such as general trivia, math problems, cooking, politics, coding bugs unrelated to his work, private secrets not in his CV, or custom quotes not listed), politely and honestly say that you do not know about that topic right now — e.g. in Bangla: "এই বিষয়ে আপাতত আমি জানি না। তবে জাবের হোসাইনের সিভি, শিক্ষাগত যোগ্যতা, কাজের অভিজ্ঞতা, স্কিল বা প্রজেক্ট সম্পর্কে জানতে চাইলে জিজ্ঞাসা করতে পারেন!" (vary phrasing naturally). Never fabricate fake projects, dates, GPA, phone numbers, or pricing.',
+      '',
+      JABER_CV_SYSTEM_DOCUMENT,
+      '',
+      '=== LIVE PORTFOLIO DATA (FIRESTORE) ===',
+      portfolioSummary || 'Portfolio URL: https://jaberhosain.github.io/'
     ].join('\n');
 
-    const prompt = conversationContext
-      ? `Recent conversation:\n${conversationContext}\n\nVisitor (${language}): ${message}`
-      : message;
+    // Sanitize prior chat turns for Gemini multi-turn history (must start with user role and alternate cleanly)
+    const rawTurns = Array.isArray(history) ? history.slice(-10) : [];
+    const formattedHistory: Array<{ role: 'user' | 'model'; parts: Array<{ text: string }> }> = [];
+    for (const turn of rawTurns) {
+      if (!turn || typeof turn.text !== 'string' || !turn.text.trim()) continue;
+      // Skip initial static welcome assistant greeting before first user message
+      if (formattedHistory.length === 0 && turn.role !== 'user') continue;
+      const role: 'user' | 'model' = turn.role === 'user' ? 'user' : 'model';
+      const last = formattedHistory[formattedHistory.length - 1];
+      if (last && last.role === role) {
+        last.parts[0].text += `\n${turn.text.trim()}`;
+      } else {
+        formattedHistory.push({ role, parts: [{ text: turn.text.trim() }] });
+      }
+    }
+    // Remove trailing user turn if caller included the current message in history
+    if (
+      formattedHistory.length > 0 &&
+      formattedHistory[formattedHistory.length - 1].role === 'user' &&
+      formattedHistory[formattedHistory.length - 1].parts[0].text === message.trim()
+    ) {
+      formattedHistory.pop();
+    }
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-4-hydrogen',
-      contents: prompt,
-      config: {
-        systemInstruction,
-        thinkingConfig: { thinkingLevel: ThinkingLevel.LOW },
-      },
-    });
+    let reply = '';
+    let lastError: any = null;
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        const chat = ai.chats.create({
+          model: 'gemini-4-hydrogen',
+          history: formattedHistory,
+          config: {
+            systemInstruction,
+            thinkingConfig: { thinkingLevel: ThinkingLevel.LOW },
+          },
+        });
+        const response = await chat.sendMessage({ message });
+        reply = (response.text ?? '').trim();
+        if (reply) break;
+      } catch (err) {
+        lastError = err;
+        if (attempt === 0) {
+          await new Promise((r) => setTimeout(r, 350));
+        }
+      }
+    }
 
-    const reply = (response.text ?? '').trim();
     if (!reply) {
-      return res.status(502).json({ error: 'Empty response from model' });
+      throw lastError || new Error('Empty response from Gemini model');
     }
 
     return res.json({ success: true, reply });
