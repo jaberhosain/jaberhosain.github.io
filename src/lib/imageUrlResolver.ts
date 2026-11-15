@@ -108,6 +108,229 @@ function isUsefulResolvedImage(candidateUrl: string, sourceUrl: string): boolean
   return candidateUrl !== sourceUrl;
 }
 
+export interface BehanceExtractResult {
+  success: boolean;
+  title?: string;
+  description?: string;
+  coverImage?: string;
+  images: string[];
+  source: string;
+  note?: string;
+  error?: string;
+}
+
+const BEHANCE_RES_RANK: Record<string, number> = {
+  max_3840: 6,
+  source: 6,
+  orig: 6,
+  max_1920: 5,
+  '1400_opt_1': 5,
+  '1400': 5,
+  max_1200: 4,
+  fs: 3,
+  disp: 2,
+  hd: 2,
+};
+
+function scoreBehanceResolution(url: string): number {
+  const lower = url.toLowerCase();
+  for (const [k, weight] of Object.entries(BEHANCE_RES_RANK)) {
+    if (lower.includes(`/${k}/`)) return weight;
+  }
+  return lower.includes('/project_modules/') ? 1 : 0;
+}
+
+/**
+ * Parses raw HTML source, CSS, Markdown, or newline/comma-separated text
+ * to extract all unique direct poster/image URLs cleanly.
+ */
+export function extractImageUrlsFromRawTextOrHtml(input: string): string[] {
+  if (!input || typeof input !== 'string') return [];
+
+  const decoded = input
+    .replace(/\\u002F/gi, '/')
+    .replace(/\\\//g, '/')
+    .replace(/&amp;/g, '&')
+    .replace(/&quot;/g, '"');
+
+  const urls: string[] = [];
+
+  // 1. Prioritize Behance CDN project module URLs (pick highest resolution per asset filename)
+  const behanceRegex =
+    /https?:\/\/mir-s3-cdn-cf\.behance\.net\/(?:project_modules|projects)\/[^\s"'<>\\)]+?\.(?:jpe?g|png|webp|gif)(?:\?[^\s"'<>\\)]*)?/gi;
+  const behanceMatches = decoded.match(behanceRegex) || [];
+  if (behanceMatches.length > 0) {
+    const bestByAsset = new Map<string, { url: string; score: number }>();
+    const order: string[] = [];
+    for (const raw of behanceMatches) {
+      const clean = raw.replace(/[),.;]+$/, '');
+      const lower = clean.toLowerCase();
+      if (
+        lower.includes('/user/') ||
+        lower.includes('/avatars/') ||
+        lower.includes('max_384') ||
+        lower.includes('/280/') ||
+        lower.includes('/202/') ||
+        lower.includes('/115/')
+      ) {
+        continue;
+      }
+      const assetKey = (clean.match(/\/([a-zA-Z0-9_-]+\.(?:jpe?g|png|webp|gif))(?:\?|$)/i)?.[1] || clean).toLowerCase();
+      const score = scoreBehanceResolution(clean);
+      const prev = bestByAsset.get(assetKey);
+      if (!prev) {
+        order.push(assetKey);
+        bestByAsset.set(assetKey, { url: clean, score });
+      } else if (score > prev.score) {
+        bestByAsset.set(assetKey, { url: clean, score });
+      }
+    }
+    order.forEach((k) => urls.push(bestByAsset.get(k)!.url));
+  }
+
+  // 2. Also capture standard direct image URLs or Google Drive links pasted in multi-line text
+  const generalRegex = /https?:\/\/[^\s"'<>\\)]+/gi;
+  const allMatches = decoded.match(generalRegex) || [];
+  for (const raw of allMatches) {
+    const clean = raw.replace(/[),.;]+$/, '');
+    const lower = clean.toLowerCase();
+    if (lower.includes('mir-s3-cdn-cf.behance.net/')) continue; // already handled above
+    if (
+      lower.includes('behance.net/assets') ||
+      lower.includes('/favicon') ||
+      lower.includes('static.licdn.com') ||
+      lower.includes('captcha')
+    ) {
+      continue;
+    }
+    const kind = classifyImageUrl(clean);
+    if (kind === 'direct' || kind === 'google_drive') {
+      const normalized = normalizeDirectImageUrl(clean);
+      if (normalized && !urls.includes(normalized)) {
+        urls.push(normalized);
+      }
+    }
+  }
+
+  return urls;
+}
+
+/**
+ * Extracts project title, description, cover image, and ALL individual posters
+ * from a Behance project URL (`behance.net/gallery/...`).
+ */
+export async function resolveBehanceProjectFromUrl(rawUrl: string): Promise<BehanceExtractResult> {
+  const cleanUrl = rawUrl.trim();
+  if (!cleanUrl) {
+    return { success: false, images: [], source: 'none', error: 'Please paste a Behance project URL first.' };
+  }
+
+  const normalizedUrl = !/^https?:\/\//i.test(cleanUrl) ? `https://${cleanUrl}` : cleanUrl;
+
+  // If user directly pasted a Behance CDN poster image instead of the gallery page
+  if (normalizedUrl.toLowerCase().includes('mir-s3-cdn-cf.behance.net/')) {
+    return {
+      success: true,
+      coverImage: normalizedUrl,
+      images: [normalizedUrl],
+      source: 'direct_cdn',
+      note: 'Added direct Behance poster image.',
+    };
+  }
+
+  const isGitHubPages =
+    typeof window !== 'undefined' && window.location.hostname.endsWith('github.io');
+
+  // 1. Try local Express /api/extract-behance endpoint
+  if (!isGitHubPages) {
+    try {
+      const res = await fetch(`/api/extract-behance?url=${encodeURIComponent(normalizedUrl)}`, {
+        signal: AbortSignal.timeout(14000),
+      });
+      const contentType = res.headers.get('content-type') || '';
+      if (res.ok && contentType.includes('application/json')) {
+        const data = await res.json();
+        if (data?.success && Array.isArray(data.images) && data.images.length > 0) {
+          return {
+            success: true,
+            title: data.title,
+            description: data.description,
+            coverImage: data.coverImage || data.images[0],
+            images: data.images,
+            source: data.source || 'server',
+            note: `Behance থেকে ${data.images.length}টি পোস্টার অটোমেটিক ইম্পোর্ট হয়েছে।`,
+          };
+        }
+      }
+    } catch {
+      // Fall through to client-side extractors
+    }
+  }
+
+  // 2. Client fallback: r.jina.ai text/markdown mirror (CORS-friendly & captures full gallery posters)
+  try {
+    const jinaRes = await fetch(`https://r.jina.ai/${normalizedUrl}`, {
+      signal: AbortSignal.timeout(10000),
+    });
+    if (jinaRes.ok) {
+      const md = await jinaRes.text();
+      const extracted = extractImageUrlsFromRawTextOrHtml(md);
+      if (extracted.length > 0) {
+        const titleLine = md.match(/^Title:\s*(.+)$/m)?.[1]
+          ?.replace(/\s*::\s*Behance\s*$/i, '')
+          ?.replace(/\s+on\s+Behance\s*$/i, '')
+          ?.trim();
+        return {
+          success: true,
+          title: titleLine,
+          coverImage: extracted[0],
+          images: extracted,
+          source: 'jina_client',
+          note: `Extracted ${extracted.length} poster(s) from Behance.`,
+        };
+      }
+    }
+  } catch {
+    // Fall through to Microlink cover fallback
+  }
+
+  // 3. Microlink fallback (gets cover image + title cleanly)
+  try {
+    const mlRes = await fetch(`https://api.microlink.io?url=${encodeURIComponent(normalizedUrl)}`, {
+      signal: AbortSignal.timeout(7000),
+    });
+    if (mlRes.ok) {
+      const mlData = await mlRes.json();
+      const cover = mlData?.data?.image?.url;
+      if (cover && isUsefulResolvedImage(cover, normalizedUrl)) {
+        const cleanTitle = (mlData?.data?.title || '')
+          .replace(/\s*::\s*Behance\s*$/i, '')
+          .replace(/\s+on\s+Behance\s*$/i, '')
+          .trim();
+        return {
+          success: true,
+          title: cleanTitle || undefined,
+          description: mlData?.data?.description || undefined,
+          coverImage: cover,
+          images: [cover],
+          source: 'microlink',
+          note: 'Extracted Behance cover image (add remaining posters below if needed).',
+        };
+      }
+    }
+  } catch {
+    // Final error guidance
+  }
+
+  return {
+    success: false,
+    images: [],
+    source: 'blocked',
+    error:
+      'Behance এই প্রজেক্টে অটো-স্ক্র্যাপিং ব্লক করেছে। সহজ সমাধান: নিচে "Multi-URL / Page Source" বক্সে পোস্টারের ডিরেক্ট লিংক অথবা Behance পেজের Ctrl+U সোর্স পেস্ট করুন, কিংবা সরাসরি কম্পিউটার/ফোন থেকে পোস্টারগুলো আপলোড করুন।',
+  };
+}
+
 /**
  * Resolves a pasted link into a renderable direct image URL.
  * - Direct image URLs and Google Drive links resolve instantaneously client-side.
@@ -129,6 +352,21 @@ export async function resolveImageFromUrl(rawUrl: string): Promise<ImageResolveR
     };
   }
 
+  // If user pasted a Behance project link into a single-image field, use the Behance multi-extractor first
+  if (kind === 'behance_page') {
+    const be = await resolveBehanceProjectFromUrl(normalized);
+    if (be.success && be.coverImage) {
+      return {
+        imageUrl: normalizeDirectImageUrl(be.coverImage),
+        title: be.title,
+        resolvedFromPage: true,
+        note: be.images.length > 1
+          ? `Behance কভার ইমেজ পাওয়া গেছে (${be.images.length}টি পোস্টারের মধ্যে ১মটি)। সবগুলো পোস্টার যোগ করতে নিচের "Import from Behance" ব্যবহার করুন।`
+          : 'Extracted cover image from Behance link automatically.'
+      };
+    }
+  }
+
   // 1. Try local Express /api/fetch-og endpoint if running in Node/dev mode
   const isGitHubPages =
     typeof window !== 'undefined' && window.location.hostname.endsWith('github.io');
@@ -136,7 +374,7 @@ export async function resolveImageFromUrl(rawUrl: string): Promise<ImageResolveR
   if (!isGitHubPages) {
     try {
       const res = await fetch(`/api/fetch-og?url=${encodeURIComponent(normalized)}`, {
-        signal: AbortSignal.timeout(6500)
+        signal: AbortSignal.timeout(7000)
       });
       const contentType = res.headers.get('content-type') || '';
       if (res.ok && contentType.includes('application/json')) {
@@ -182,7 +420,7 @@ export async function resolveImageFromUrl(rawUrl: string): Promise<ImageResolveR
       imageUrl: normalized,
       resolvedFromPage: false,
       error:
-        'Behance gallery pages block automated extraction. Open your project on Behance, right-click the poster image → "Copy image address" (mir-s3-cdn-cf.behance.net/...), and paste that link — or upload the image file.'
+        'Behance পেজ থেকে অটোমেটিক ছবি নেওয়া যায়নি। Behance-এ পোস্টারটির ওপর Right-Click → "Copy image address" (mir-s3-cdn-cf.behance.net/...) দিয়ে লিংকটি দিন অথবা ছবি ফাইল আপলোড করুন।'
     };
   }
 

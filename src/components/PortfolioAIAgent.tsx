@@ -103,25 +103,40 @@ export const PortfolioAIAgent: React.FC = () => {
     }
   }, [messages, isOpen]);
 
+  const [thinkingStage, setThinkingStage] = useState(0);
+
+  useEffect(() => {
+    if (!isLoading) {
+      setThinkingStage(0);
+      return;
+    }
+    const t1 = setTimeout(() => setThinkingStage(1), 1600);
+    const t2 = setTimeout(() => setThinkingStage(2), 3800);
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+    };
+  }, [isLoading]);
+
   const quickPrompts =
     language === 'bn'
       ? [
-          'জাবেরের সিভি ও অভিজ্ঞতা',
-          'শিক্ষাগত যোগ্যতা ও রেজাল্ট',
-          'স্কিল, সফটওয়্যার ও এআই',
+          'কেন জাবেরকে হায়ার করবেন?',
+          'ওয়েবসাইট ও প্রজেক্টগুলো সম্পর্কে বলুন',
+          'সিভি, শিক্ষাগত যোগ্যতা ও অভিজ্ঞতা',
           'যোগাযোগ ও প্রত্যাশিত বেতন'
         ]
       : language === 'ar'
       ? [
+          'لماذا توظف جابر؟',
+          'نظرة على المشاريع والموقع',
           'السيرة الذاتية والخبرة',
-          'المؤهل العلمي والدرجات',
-          'المهارات والبرامج المستخدمة',
           'التواصل والراتب المتوقع'
         ]
       : [
-          'CV & work experience',
-          'Education & GPA results',
-          'Software, skills & AI tools',
+          'Why hire Jaber?',
+          'Overview of videos & graphic works',
+          'CV, education & experience',
           'Contact info & expected salary'
         ];
 
@@ -161,7 +176,7 @@ export const PortfolioAIAgent: React.FC = () => {
             })),
             portfolioSummary: buildPortfolioKnowledgeSummary(portfolio)
           }),
-          signal: AbortSignal.timeout(18000)
+          signal: AbortSignal.timeout(24000)
         });
 
         const contentType = res.headers.get('content-type') || '';
@@ -329,7 +344,21 @@ export const PortfolioAIAgent: React.FC = () => {
               <div className="flex items-start">
                 <div className="px-3.5 py-2.5 rounded-2xl rounded-bl-sm glass-showcase-inner text-xs text-[#A7A298] flex items-center space-x-2">
                   <Loader2 className="w-3.5 h-3.5 text-[#E4583B] animate-spin" strokeWidth={1.5} />
-                  <span>{language === 'bn' ? 'উত্তর লিখছে...' : 'Thinking...'}</span>
+                  <span>
+                    {language === 'bn'
+                      ? thinkingStage === 0
+                        ? 'ওয়েবসাইট ও সিভি বিশ্লেষণ করছে...'
+                        : thinkingStage === 1
+                        ? 'প্রজেক্ট ও অভিজ্ঞতা যাচাই করছে...'
+                        : 'উত্তর গুছিয়ে লিখছে...'
+                      : language === 'ar'
+                      ? 'جاري تحليل الموقع والسيرة الذاتية...'
+                      : thinkingStage === 0
+                      ? 'Analyzing website & CV...'
+                      : thinkingStage === 1
+                      ? 'Checking projects & skills...'
+                      : 'Drafting thoughtful reply...'}
+                  </span>
                 </div>
               </div>
             )}

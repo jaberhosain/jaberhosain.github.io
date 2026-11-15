@@ -8,12 +8,15 @@ import {
   EyeOff,
   Sparkles,
   ExternalLink,
-  Layers
+  Layers,
+  Loader2,
+  Wand2
 } from 'lucide-react';
 import { usePortfolio } from '../../context/PortfolioContext';
 import { BestWorkGraphicItem, BestWorkSectionConfig } from '../../types/portfolio';
 import { ImageUploaderField } from './ImageUploaderField';
 import { ConfirmDeleteModal } from './ConfirmDeleteModal';
+import { resolveBehanceProjectFromUrl } from '../../lib/imageUrlResolver';
 
 interface BestWorkGraphicEditorProps {
   onNotify?: (msg: string, type?: 'success' | 'error') => void;
@@ -32,6 +35,7 @@ export const BestWorkGraphicEditor: React.FC<BestWorkGraphicEditorProps> = ({ on
     }
   };
 
+  const [extractingId, setExtractingId] = useState<string | null>(null);
   const [deleteModal, setDeleteModal] = useState<{
     isOpen: boolean;
     id: string;
@@ -109,19 +113,60 @@ export const BestWorkGraphicEditor: React.FC<BestWorkGraphicEditorProps> = ({ on
     notify('Item removed from Best Work');
   };
 
+  const handleExtractFromBehance = async (item: BestWorkGraphicItem, idx: number) => {
+    const url = (item.behanceUrl || '').trim();
+    if (!url || !url.toLowerCase().includes('behance.net')) {
+      notify('Please paste a valid Behance project link first', 'error');
+      return;
+    }
+
+    setExtractingId(item.id);
+    try {
+      const result = await resolveBehanceProjectFromUrl(url);
+      if (result.images.length > 0 || result.coverImage) {
+        const chosenImage = result.coverImage || result.images[0];
+        updateDraft((prev) => ({
+          ...prev,
+          bestGraphicWorks: (prev.bestGraphicWorks || []).map((w, i) =>
+            i === idx
+              ? {
+                  ...w,
+                  imageUrl: chosenImage || w.imageUrl,
+                  title:
+                    result.title && (!w.title?.en || w.title.en === 'Top Graphic Artwork')
+                      ? { ...w.title, en: result.title }
+                      : w.title
+                }
+              : w
+          )
+        }));
+        notify(`Extracted artwork from Behance (${result.images.length || 1} found)`);
+      } else {
+        notify(
+          result.error || 'Could not extract artwork automatically. Please paste a direct image URL or upload a file.',
+          'error'
+        );
+      }
+    } catch (err: any) {
+      notify(err?.message || 'Failed to fetch Behance project', 'error');
+    } finally {
+      setExtractingId(null);
+    }
+  };
+
   return (
     <div className="space-y-6 max-w-4xl">
       {/* Header Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#232B33]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/[0.08]">
         <div>
-          <h2 className="text-xl font-bold text-white flex items-center space-x-2 rtl:space-x-reverse">
-            <Sparkles className="w-5 h-5 text-[#FF5722]" />
-            <span>Graphic Design - Best Work</span>
-            <span className="text-xs font-mono px-2 py-0.5 rounded bg-[#FF5722]/15 text-[#FF5722] border border-[#FF5722]/30">
-              {items.length} Works
+          <h2 className="text-lg font-semibold text-white flex items-center space-x-2.5 rtl:space-x-reverse">
+            <Sparkles className="w-4 h-4 text-[#E4583B]" />
+            <span>Graphic Design — Best Work</span>
+            <span className="text-xs text-neutral-400 tabular-nums font-normal">
+              ({items.length} works)
             </span>
           </h2>
-          <p className="text-xs text-neutral-400 mt-1 font-mono">
+          <p className="text-xs text-neutral-400 mt-1">
             Curate top graphic works shown in the dedicated Best Work block with high-res lightbox and Behance links.
           </p>
         </div>
@@ -129,7 +174,7 @@ export const BestWorkGraphicEditor: React.FC<BestWorkGraphicEditorProps> = ({ on
         <button
           type="button"
           onClick={handleAddItem}
-          className="inline-flex items-center space-x-1.5 rtl:space-x-reverse px-4 py-2 rounded-xl text-xs font-bold text-white bg-[#FF5722] hover:bg-[#F4511E] shadow-lg shadow-orange-900/30 transition-all shrink-0 self-start sm:self-auto min-h-[44px]"
+          className="inline-flex items-center space-x-1.5 rtl:space-x-reverse px-4 py-2 rounded-lg text-xs font-medium text-white bg-[#E4583B] hover:bg-[#D0492D] transition-colors shrink-0 self-start sm:self-auto"
         >
           <Plus className="w-4 h-4" />
           <span>Add Best Work</span>
@@ -137,117 +182,118 @@ export const BestWorkGraphicEditor: React.FC<BestWorkGraphicEditorProps> = ({ on
       </div>
 
       {/* Section Headings in 3 Languages */}
-      <div className="p-5 rounded-3xl bg-[#141A20] border border-[#232B33] space-y-4 shadow-lg">
+      <div className="p-5 rounded-2xl bg-[#121419] border border-white/[0.08] space-y-4">
         <div className="flex items-center space-x-2 rtl:space-x-reverse">
-          <Layers className="w-4 h-4 text-[#FF5722]" />
-          <h3 className="text-xs font-mono font-bold text-white uppercase tracking-wider">
+          <Layers className="w-4 h-4 text-[#E4583B]" />
+          <h3 className="text-xs font-medium text-white uppercase tracking-wider">
             Public Section Headings & Description (Multilingual)
           </h3>
         </div>
 
-        {/* Section Title */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <div>
-            <label className="block text-[11px] font-mono text-neutral-400 mb-1">Section Title (EN)</label>
+            <label className="block text-[11px] font-medium text-neutral-400 mb-1">Section Title (EN)</label>
             <input
               type="text"
               value={sectionConfig.title?.en || ''}
               onChange={(e) => updateSectionField('title', 'en', e.target.value)}
-              className="w-full px-3 py-2 rounded-xl bg-[#0B0F12] border border-[#232B33] text-xs text-white font-mono focus:border-[#FF5722] focus:outline-none"
+              className="w-full px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] text-xs text-white focus:border-[#E4583B] focus:outline-none"
             />
           </div>
           <div>
-            <label className="block text-[11px] font-mono text-neutral-400 mb-1">Section Title (BN)</label>
+            <label className="block text-[11px] font-medium text-neutral-400 mb-1">Section Title (BN)</label>
             <input
               type="text"
               value={sectionConfig.title?.bn || ''}
               onChange={(e) => updateSectionField('title', 'bn', e.target.value)}
-              className="w-full px-3 py-2 rounded-xl bg-[#0B0F12] border border-[#232B33] text-xs text-white font-mono focus:border-[#FF5722] focus:outline-none"
+              className="w-full px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] text-xs text-white focus:border-[#E4583B] focus:outline-none"
             />
           </div>
           <div>
-            <label className="block text-[11px] font-mono text-neutral-400 mb-1">Section Title (AR)</label>
+            <label className="block text-[11px] font-medium text-neutral-400 mb-1">Section Title (AR)</label>
             <input
               type="text"
+              dir="rtl"
               value={sectionConfig.title?.ar || ''}
               onChange={(e) => updateSectionField('title', 'ar', e.target.value)}
-              className="w-full px-3 py-2 rounded-xl bg-[#0B0F12] border border-[#232B33] text-xs text-white font-mono focus:border-[#FF5722] focus:outline-none"
+              className="w-full px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] text-xs text-white focus:border-[#E4583B] focus:outline-none"
             />
           </div>
         </div>
 
-        {/* Section Subtitle */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <div>
-            <label className="block text-[11px] font-mono text-neutral-400 mb-1">Subtitle / Description (EN)</label>
+            <label className="block text-[11px] font-medium text-neutral-400 mb-1">Subtitle / Description (EN)</label>
             <textarea
               rows={2}
               value={sectionConfig.subtitle?.en || ''}
               onChange={(e) => updateSectionField('subtitle', 'en', e.target.value)}
-              className="w-full px-3 py-2 rounded-xl bg-[#0B0F12] border border-[#232B33] text-xs text-white font-mono focus:border-[#FF5722] focus:outline-none"
+              className="w-full px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] text-xs text-white focus:border-[#E4583B] focus:outline-none resize-none"
             />
           </div>
           <div>
-            <label className="block text-[11px] font-mono text-neutral-400 mb-1">Subtitle / Description (BN)</label>
+            <label className="block text-[11px] font-medium text-neutral-400 mb-1">Subtitle / Description (BN)</label>
             <textarea
               rows={2}
               value={sectionConfig.subtitle?.bn || ''}
               onChange={(e) => updateSectionField('subtitle', 'bn', e.target.value)}
-              className="w-full px-3 py-2 rounded-xl bg-[#0B0F12] border border-[#232B33] text-xs text-white font-mono focus:border-[#FF5722] focus:outline-none"
+              className="w-full px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] text-xs text-white focus:border-[#E4583B] focus:outline-none resize-none"
             />
           </div>
           <div>
-            <label className="block text-[11px] font-mono text-neutral-400 mb-1">Subtitle / Description (AR)</label>
+            <label className="block text-[11px] font-medium text-neutral-400 mb-1">Subtitle / Description (AR)</label>
             <textarea
               rows={2}
+              dir="rtl"
               value={sectionConfig.subtitle?.ar || ''}
               onChange={(e) => updateSectionField('subtitle', 'ar', e.target.value)}
-              className="w-full px-3 py-2 rounded-xl bg-[#0B0F12] border border-[#232B33] text-xs text-white font-mono focus:border-[#FF5722] focus:outline-none"
+              className="w-full px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] text-xs text-white focus:border-[#E4583B] focus:outline-none resize-none"
             />
           </div>
         </div>
       </div>
 
       {/* Items List */}
-      <div className="space-y-6">
+      <div className="space-y-5">
         {items.map((item, idx) => {
           const isVisible = item.visible !== false;
+          const isExtracting = extractingId === item.id;
+
           return (
             <div
               key={item.id || idx}
-              className={`p-5 sm:p-6 rounded-3xl bg-[#141A20] border transition-all space-y-4 shadow-xl ${
-                isVisible ? 'border-[#232B33] hover:border-neutral-700' : 'border-neutral-800 opacity-70'
+              className={`p-5 rounded-2xl bg-[#121419] border transition-colors space-y-4 ${
+                isVisible ? 'border-white/[0.08] hover:border-white/[0.14]' : 'border-white/[0.05] opacity-70'
               }`}
             >
               {/* Item Header */}
-              <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-[#232B33]">
+              <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-white/[0.06]">
                 <div className="flex items-center space-x-3 rtl:space-x-reverse">
-                  <span className="w-7 h-7 rounded-full bg-[#181E24] border border-[#232B33] flex items-center justify-center text-xs font-mono font-bold text-[#FF5722]">
+                  <span className="w-7 h-7 rounded-lg bg-[#171A21] border border-white/[0.08] flex items-center justify-center text-xs font-semibold text-[#E4583B] tabular-nums">
                     #{idx + 1}
                   </span>
-                  <span className="text-sm font-bold text-white font-mono truncate max-w-[200px] sm:max-w-xs">
+                  <span className="text-sm font-semibold text-white truncate max-w-[200px] sm:max-w-xs">
                     {item.title?.en || 'Untitled Artwork'}
                   </span>
                   <span
-                    className={`text-[10px] font-mono px-2 py-0.5 rounded border ${
+                    className={`text-[11px] px-2 py-0.5 rounded border font-medium ${
                       isVisible
-                        ? 'bg-emerald-950/60 text-emerald-400 border-emerald-500/30'
-                        : 'bg-neutral-900 text-neutral-500 border-neutral-700'
+                        ? 'bg-emerald-950/50 text-emerald-400 border-emerald-500/30'
+                        : 'bg-[#171A21] text-neutral-500 border-white/[0.08]'
                     }`}
                   >
                     {isVisible ? 'Visible' : 'Hidden'}
                   </span>
                 </div>
 
-                {/* Action Controls: Show/Hide, Up, Down, Delete */}
+                {/* Action Controls */}
                 <div className="flex items-center space-x-1.5 rtl:space-x-reverse">
-                  {/* Show/Hide Toggle */}
                   <button
                     type="button"
                     onClick={() => handleToggleVisible(idx)}
-                    className={`inline-flex items-center space-x-1 px-2.5 py-1.5 rounded-lg text-xs font-mono transition-colors ${
+                    className={`inline-flex items-center space-x-1 px-2.5 py-1.5 rounded-lg text-xs transition-colors ${
                       isVisible
-                        ? 'bg-[#181E24] text-neutral-300 hover:text-white border border-[#232B33]'
+                        ? 'bg-[#171A21] text-neutral-300 hover:text-white border border-white/[0.08]'
                         : 'bg-amber-950/40 text-amber-300 border border-amber-500/30'
                     }`}
                     title={isVisible ? 'Hide from public site' : 'Show on public site'}
@@ -256,29 +302,26 @@ export const BestWorkGraphicEditor: React.FC<BestWorkGraphicEditorProps> = ({ on
                     <span className="hidden sm:inline">{isVisible ? 'Visible' : 'Hidden'}</span>
                   </button>
 
-                  {/* Reorder Up */}
                   <button
                     type="button"
                     onClick={() => handleMove(idx, idx - 1)}
                     disabled={idx === 0}
-                    className="p-1.5 rounded-lg text-neutral-400 hover:text-white hover:bg-neutral-800 disabled:opacity-30 disabled:pointer-events-none transition-colors"
+                    className="p-1.5 rounded-lg text-neutral-400 hover:text-white hover:bg-[#171A21] disabled:opacity-30 disabled:pointer-events-none transition-colors"
                     title="Move Up"
                   >
                     <ArrowUp className="w-4 h-4" />
                   </button>
 
-                  {/* Reorder Down */}
                   <button
                     type="button"
                     onClick={() => handleMove(idx, idx + 1)}
                     disabled={idx === items.length - 1}
-                    className="p-1.5 rounded-lg text-neutral-400 hover:text-white hover:bg-neutral-800 disabled:opacity-30 disabled:pointer-events-none transition-colors"
+                    className="p-1.5 rounded-lg text-neutral-400 hover:text-white hover:bg-[#171A21] disabled:opacity-30 disabled:pointer-events-none transition-colors"
                     title="Move Down"
                   >
                     <ArrowDown className="w-4 h-4" />
                   </button>
 
-                  {/* Delete Item */}
                   <button
                     type="button"
                     onClick={() =>
@@ -288,7 +331,7 @@ export const BestWorkGraphicEditor: React.FC<BestWorkGraphicEditorProps> = ({ on
                         name: item.title?.en || `Artwork #${idx + 1}`
                       })
                     }
-                    className="p-1.5 rounded-lg text-rose-400 hover:text-rose-300 hover:bg-rose-950/40 transition-colors"
+                    className="p-1.5 rounded-lg text-rose-400 hover:text-rose-300 hover:bg-rose-950/30 transition-colors"
                     title="Delete item"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -299,7 +342,7 @@ export const BestWorkGraphicEditor: React.FC<BestWorkGraphicEditorProps> = ({ on
               {/* Multilingual Titles */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
-                  <label className="block text-[11px] font-mono text-neutral-400 mb-1">Title (EN)</label>
+                  <label className="block text-[11px] font-medium text-neutral-400 mb-1">Title (EN)</label>
                   <input
                     type="text"
                     value={item.title?.en || ''}
@@ -313,11 +356,11 @@ export const BestWorkGraphicEditor: React.FC<BestWorkGraphicEditorProps> = ({ on
                       }));
                     }}
                     placeholder="Poster or Artwork Title"
-                    className="w-full px-3 py-2 rounded-xl bg-[#0B0F12] border border-[#232B33] text-xs text-white font-mono focus:border-[#FF5722] focus:outline-none"
+                    className="w-full px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] text-xs text-white focus:border-[#E4583B] focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-mono text-neutral-400 mb-1">Title (BN)</label>
+                  <label className="block text-[11px] font-medium text-neutral-400 mb-1">Title (BN)</label>
                   <input
                     type="text"
                     value={item.title?.bn || ''}
@@ -331,13 +374,14 @@ export const BestWorkGraphicEditor: React.FC<BestWorkGraphicEditorProps> = ({ on
                       }));
                     }}
                     placeholder="পোস্টার বা আর্টওয়ার্কের নাম"
-                    className="w-full px-3 py-2 rounded-xl bg-[#0B0F12] border border-[#232B33] text-xs text-white font-mono focus:border-[#FF5722] focus:outline-none"
+                    className="w-full px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] text-xs text-white focus:border-[#E4583B] focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-mono text-neutral-400 mb-1">Title (AR)</label>
+                  <label className="block text-[11px] font-medium text-neutral-400 mb-1">Title (AR)</label>
                   <input
                     type="text"
+                    dir="rtl"
                     value={item.title?.ar || ''}
                     onChange={(e) => {
                       const val = e.target.value;
@@ -349,38 +393,53 @@ export const BestWorkGraphicEditor: React.FC<BestWorkGraphicEditorProps> = ({ on
                       }));
                     }}
                     placeholder="عنوان العمل الفني"
-                    className="w-full px-3 py-2 rounded-xl bg-[#0B0F12] border border-[#232B33] text-xs text-white font-mono focus:border-[#FF5722] focus:outline-none"
+                    className="w-full px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] text-xs text-white focus:border-[#E4583B] focus:outline-none"
                   />
                 </div>
               </div>
 
-              {/* Optional Behance URL */}
+              {/* Optional Behance URL with 1-Click Extract */}
               <div>
-                <label className="block text-[11px] font-mono text-neutral-400 mb-1 flex items-center space-x-1.5 rtl:space-x-reverse">
+                <label className="block text-[11px] font-medium text-neutral-400 mb-1 flex items-center space-x-1.5 rtl:space-x-reverse">
                   <span>Behance Project URL (Optional)</span>
-                  <ExternalLink className="w-3 h-3 text-[#0057FF]" />
+                  <ExternalLink className="w-3 h-3 text-[#3B82F6]" />
                 </label>
-                <input
-                  type="url"
-                  value={item.behanceUrl || ''}
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    updateDraft((prev) => ({
-                      ...prev,
-                      bestGraphicWorks: (prev.bestGraphicWorks || []).map((w, i) =>
-                        i === idx ? { ...w, behanceUrl: val } : w
-                      )
-                    }));
-                  }}
-                  placeholder="https://www.behance.net/gallery/..."
-                  className="w-full px-3 py-2 rounded-xl bg-[#0B0F12] border border-[#232B33] text-xs text-white font-mono focus:border-[#FF5722] focus:outline-none"
-                />
-                <span className="text-[10px] text-neutral-500 font-mono mt-1 block">
-                  Clicking the artwork on the public site opens the high-res lightbox with a direct "View on Behance" button.
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <input
+                    type="url"
+                    value={item.behanceUrl || ''}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      updateDraft((prev) => ({
+                        ...prev,
+                        bestGraphicWorks: (prev.bestGraphicWorks || []).map((w, i) =>
+                          i === idx ? { ...w, behanceUrl: val } : w
+                        )
+                      }));
+                    }}
+                    placeholder="https://www.behance.net/gallery/..."
+                    className="flex-1 px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] text-xs text-white font-mono focus:border-[#E4583B] focus:outline-none"
+                  />
+                  <button
+                    type="button"
+                    disabled={isExtracting || !item.behanceUrl}
+                    onClick={() => handleExtractFromBehance(item, idx)}
+                    className="inline-flex items-center justify-center space-x-1.5 px-3.5 py-2 rounded-lg bg-[#171A21] hover:bg-[#1E222B] border border-white/[0.08] text-xs font-medium text-neutral-200 disabled:opacity-40 transition-colors shrink-0"
+                  >
+                    {isExtracting ? (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin text-[#E4583B]" />
+                    ) : (
+                      <Wand2 className="w-3.5 h-3.5 text-[#E4583B]" />
+                    )}
+                    <span>{isExtracting ? 'Extracting...' : 'Extract Artwork'}</span>
+                  </button>
+                </div>
+                <span className="text-[11px] text-neutral-500 mt-1 block">
+                  Clicking the artwork on the public site opens the high-res lightbox with a direct &quot;View on Behance&quot; button.
                 </span>
               </div>
 
-              {/* Image Upload using ImageUploaderField (Compresses and stores in Firebase Storage) */}
+              {/* Image Upload */}
               <ImageUploaderField
                 label="Artwork Image (High Resolution)"
                 value={item.imageUrl || ''}
@@ -393,19 +452,19 @@ export const BestWorkGraphicEditor: React.FC<BestWorkGraphicEditorProps> = ({ on
                   }));
                 }}
                 defaultFallback=""
-                helperText="Upload from device OR paste a direct image URL (Behance CDN mir-s3-cdn-cf.behance.net/..., i.postimg.cc/..., Google Drive)."
+                helperText="Upload from device OR paste a Behance project / direct image URL."
               />
             </div>
           );
         })}
 
         {items.length === 0 && (
-          <div className="p-8 text-center rounded-3xl bg-[#141A20] border border-[#232B33] text-neutral-400 space-y-2">
-            <p className="text-xs font-mono">No graphic best works added yet.</p>
+          <div className="p-8 text-center rounded-2xl bg-[#121419] border border-dashed border-white/[0.09] text-neutral-400 space-y-3">
+            <p className="text-xs">No graphic best works added yet.</p>
             <button
               type="button"
               onClick={handleAddItem}
-              className="px-4 py-2 rounded-xl text-xs font-mono font-bold text-[#FF5722] bg-[#FF5722]/10 border border-[#FF5722]/30 hover:bg-[#FF5722]/20 transition-all inline-flex items-center space-x-1.5"
+              className="px-4 py-2 rounded-lg text-xs font-medium text-white bg-[#E4583B] hover:bg-[#D0492D] transition-colors inline-flex items-center space-x-1.5"
             >
               <Plus className="w-4 h-4" />
               <span>Add Your First Best Work</span>

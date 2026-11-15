@@ -46,15 +46,20 @@ export function detectQueryLanguage(query: string, fallback: Language): Language
 export function buildPortfolioKnowledgeSummary(portfolio: PortfolioConfig): string {
   const name = portfolio.hero?.name?.en || JABER_CV_DATA.fullName;
   const tagline = portfolio.hero?.tagline?.en || JABER_CV_DATA.headline;
+  const badge = portfolio.hero?.badge?.en || '';
   const bioEn = portfolio.about?.bio?.en || '';
   const bioBn = portfolio.about?.bio?.bn || '';
+
+  const counters = (portfolio.hero?.counters || [])
+    .map((c) => `- ${c.value} (${c.label?.en} / ${c.label?.bn})`)
+    .join('\n');
 
   const services = (portfolio.services || [])
     .map((s) => `- ${s.title?.en} (${s.title?.bn}): ${s.description?.en}`)
     .join('\n');
 
   const skills = (portfolio.skills || [])
-    .map((sk) => `- ${sk.title?.en}: ${(sk.tools || []).join(', ')}`)
+    .map((sk) => `- ${sk.title?.en} (${sk.description?.en}): ${(sk.tools || []).join(', ')}`)
     .join('\n');
 
   const institutes = (portfolio.professionalInstitutes || [])
@@ -62,30 +67,56 @@ export function buildPortfolioKnowledgeSummary(portfolio: PortfolioConfig): stri
     .join('\n');
 
   const academics = (portfolio.academicRecords || [])
-    .map((ac) => `- ${ac.title?.en} (${ac.year}): ${ac.status?.en}`)
+    .map((ac) => `- ${ac.title?.en} (${ac.year}): ${ac.status?.en} — ${ac.description?.en}`)
+    .join('\n');
+
+  const workflow = (portfolio.workflow || [])
+    .map((w) => `- Step ${w.step}: ${w.title?.en} (${w.title?.bn})${w.description?.en ? ` — ${w.description.en}` : ''}`)
+    .join('\n');
+
+  const overviewCards = (portfolio.overviewCards || [])
+    .map((o) => `- ${o.title?.en}: ${o.description?.en}`)
     .join('\n');
 
   const graphicProjects = (portfolio.projects || [])
     .filter((p: any) => p.category === 'graphic' && p.visible !== false && !p.hidden)
     .map((p) => {
       const group = p.groupName?.en ? `[Group: ${p.groupName.en}] ` : '';
-      const posterCount = (p.galleryImages?.length || 0) + (p.coverImage ? 1 : 0);
-      return `- ${group}${p.title?.en || 'Graphic Work'} (${posterCount} poster(s)) ${p.behanceUrl ? `| Behance: ${p.behanceUrl}` : ''}`;
+      const posterSet = new Set<string>();
+      if (p.coverImage) posterSet.add(p.coverImage);
+      (p.galleryImages || []).forEach((u: string) => u && posterSet.add(u));
+      const posterCaptions = (p.galleryCaptions || []).filter(Boolean).join(', ');
+      return `- ${group}${p.title?.en || 'Graphic Work'} (${posterSet.size} poster(s))${p.description?.en ? ` — ${p.description.en}` : ''}${posterCaptions ? ` | Posters: ${posterCaptions}` : ''}${p.behanceUrl ? ` | Behance: ${p.behanceUrl}` : ''}`;
     })
     .join('\n');
 
   const bestGraphics = (portfolio.bestGraphicWorks || [])
     .filter((g) => g.visible !== false)
-    .map((g) => `- ${g.title?.en}`)
+    .map((g) => `- ${g.title?.en}${g.behanceUrl ? ` (${g.behanceUrl})` : ''}`)
     .join('\n');
 
-  const videosList = [
-    ...(portfolio.bestVideoWorks || []).filter((v: any) => v.visible !== false),
-    ...(portfolio.videos || []).filter((v: any) => v.visible !== false && !v.hidden)
+  const allVideos = [
+    ...(portfolio.bestVideoWorks || [])
+      .filter((v: any) => v.visible !== false)
+      .map((v: any) => ({ ...v, groupLabel: 'Featured/Best Video' })),
+    ...(portfolio.videos || [])
+      .filter((v: any) => v.visible !== false && !v.hidden)
+      .map((v: any) => ({ ...v, groupLabel: 'Portfolio Video' }))
   ];
-  const videoTitles = videosList
-    .slice(0, 8)
-    .map((v: any) => `- ${v.title?.en || v.title?.bn || 'Video Project'} (${v.category || 'Video'})`)
+  const videoTitles = allVideos
+    .map(
+      (v: any) =>
+        `- [${v.groupLabel}] ${v.title?.en || v.title?.bn || 'Video Project'} (${v.videoType || 'video'}${v.duration ? `, ${v.duration}` : ''})${v.description?.en ? ` — ${v.description.en}` : ''}${v.videoUrl ? ` | ${v.videoUrl}` : ''}`
+    )
+    .join('\n');
+
+  const channels = (portfolio.channelLinks || [])
+    .map((ch) => `- ${ch.platform} (${ch.status}): ${ch.description?.en}${ch.url ? ` | ${ch.url}` : ''}`)
+    .join('\n');
+
+  const socials = (portfolio.socialLinks || [])
+    .filter((s) => s.enabled !== false)
+    .map((s) => `- ${s.name}: ${s.url}`)
     .join('\n');
 
   const email = portfolio.contact?.email || JABER_CV_DATA.contact.emails[2];
@@ -93,18 +124,25 @@ export function buildPortfolioKnowledgeSummary(portfolio: PortfolioConfig): stri
   const behance = portfolio.contact?.behanceUrl || 'https://www.behance.net/jaberhosain';
 
   return [
+    `Website Architecture: Interactive 3D WebGL Portfolio across 6 dedicated pages (Home, About & CV, Video Edits, Graphic Design & Posters Gallery, Skills & Workflow, Contact). Supports Bangla, English, and Arabic.`,
     `Owner Name: ${name}`,
+    badge ? `Hero Headline Badge: ${badge}` : '',
     `Role / Tagline: ${tagline}`,
+    counters ? `Hero Key Metrics:\n${counters}` : '',
     `About (EN): ${bioEn}`,
     `About (BN): ${bioBn}`,
+    overviewCards ? `Site Overview Pillars:\n${overviewCards}` : '',
     `Services:\n${services}`,
+    workflow ? `Creative Workflow Steps:\n${workflow}` : '',
     `Skills & Tools:\n${skills}`,
     `Professional Training:\n${institutes}`,
     `Academic Education:\n${academics}`,
-    `Video Portfolio Count: ${videosList.length} published videos`,
-    videoTitles ? `Featured Videos:\n${videoTitles}` : '',
-    `Graphic Design Projects:\n${graphicProjects || 'Brand Identity, Social Media Visuals, Posters & Thumbnails'}`,
-    `Best Graphic Works:\n${bestGraphics}`,
+    `Video Portfolio Count: ${allVideos.length} published videos`,
+    videoTitles ? `All Videos:\n${videoTitles}` : '',
+    `Graphic Design Project Groups:\n${graphicProjects || 'Brand Identity, Social Media Visuals, Posters & Thumbnails'}`,
+    bestGraphics ? `Best Graphic Works:\n${bestGraphics}` : '',
+    channels ? `Channels & Links:\n${channels}` : '',
+    socials ? `Social Profiles:\n${socials}` : '',
     `Live Contact Links: Email: ${email} | Telegram: ${telegram} | Behance: ${behance}`
   ]
     .filter(Boolean)
@@ -237,6 +275,9 @@ export function inferAgentActions(
 type TopicId =
   | 'greeting'
   | 'cv_overview'
+  | 'why_hire'
+  | 'website_overview'
+  | 'workflow_process'
   | 'experience'
   | 'education'
   | 'training'
@@ -262,7 +303,16 @@ function detectMatchingTopics(q: string): TopicId[] {
   if (/thanks|thank you|thx|dhonnobad|ধন্যবাদ|শুকরিয়া|থ্যাংকস|شكرا/.test(q)) {
     topics.push('thanks');
   }
-  if (/\bcv\b|resume|biodata|profile|overview|who is|about jaber|জাবের কে|সম্পর্কে বলো|বায়োডাটা|সিভি|পরিচিতি|من هو|سيرة/.test(q)) {
+  if (/why hire|keno hire|কেন নিব|কেন হায়ার|কেন নেব|কেমন কাজ|quality|কাজের মান|ভালো|যোগ্যতা|fit|strength|সুবিধা|help my|কীভাবে সাহায্য/.test(q)) {
+    topics.push('why_hire');
+  }
+  if (/website|site|পেইজ|পেজ|কি কি আছে|কী কী আছে|features|3d|থ্রিডি|section|সেকশন|সর্বমোট|কয়টা প্রজেক্ট|কয়টা কাজ/.test(q)) {
+    topics.push('website_overview');
+  }
+  if (/workflow|process|how.*work|কীভাবে কাজ করে|ধাপ|প্রসেস|সময় লাগে|turnaround|delivery/.test(q)) {
+    topics.push('workflow_process');
+  }
+  if (/\bcv\b|resume|biodata|profile|overview|who is|about jaber|জাবের কে|সম্পর্কে|বায়োডাটা|সিভি|পরিচিতি|من هو|سيرة/.test(q)) {
     topics.push('cv_overview');
   }
   if (/experience|work history|job history|hostel|al manar|as-sunnah|sunnah|year|অভিজ্ঞতা|কোথায় কাজ|চাকরি|হোস্টেল|মানার|সুন্নাহ|خبرة/.test(q)) {
@@ -274,7 +324,7 @@ function detectMatchingTopics(q: string): TopicId[] {
   if (/training|course|certificate|certification|bismillah|satarkul|small business|ট্রেনিং|প্রশিক্ষণ|কোর্স|সার্টিফিকেট|বিসমিল্লাহ|تدريب/.test(q)) {
     topics.push('training');
   }
-  if (/salary|expected|beton|tk|taka|district|country|abroad|prefer|job category|hire|looking for|চাকরি চায়|বেতন|স্যালারি|কত টাকা|জেলা|দেশ|কোম্পানি|পছন্দ|বেতন কত|راتب/.test(q)) {
+  if (/salary|expected|beton|tk|taka|district|country|abroad|prefer|job category|hire|looking for|price|pricing|budget|charge|rate|খরচ|বাজেট|চার্জ|চাকরি চায়|বেতন|স্যালারি|কত টাকা|জেলা|দেশ|কোম্পানি|পছন্দ|বেতন কত|راتب/.test(q)) {
     topics.push('career_salary');
   }
   if (/video|edit|premiere|after effects|motion|reel|short|documentary|vimeo|youtube|ভিডিও|এডিট|প্রিমিয়ার|আফটার ইফেক্ট|মোশন|রিল|فيديو|مونتاج/.test(q)) {
@@ -292,7 +342,7 @@ function detectMatchingTopics(q: string): TopicId[] {
   if (/office|word|excel|powerpoint|google sheet|workspace|data entry|computer|operator|typing|windows|mac|linux|accounts|অফিস|ওয়ার্ড|এক্সেল|পাওয়ারপয়েন্ট|ডেটা এন্ট্রি|কম্পিউটার|টাইপিং|হিসাব|লিনাক্স|ম্যাক|حاسوب/.test(q)) {
     topics.push('office_computer');
   }
-  if (/contact|phone|mobile|call|email|mail|gmail|facebook|linkedin|telegram|reach|ফোন|মোবাইল|নাম্বার|ইমেইল|জিমেইল|ফেসবুক|লিঙ্কডইন|টেলিগ্রাম|যোগাযোগ|নাম্বার কত|تواصل|هاتف/.test(q)) {
+  if (/contact|phone|mobile|call|email|mail|gmail|facebook|linkedin|telegram|reach|order|অর্ডার|ফোন|মোবাইল|নাম্বার|ইমেইল|জিমেইল|ফেসবুক|লিঙ্কডইন|টেলিগ্রাম|যোগাযোগ|নাম্বার কত|تواصل|هاتف/.test(q)) {
     topics.push('contact');
   }
   if (/address|location|where|live|home|district|tongi|gazipur|lakshmipur|raypur|kerowa|thikana|basha|bari|ঠিকানা|বাসা|বাড়ি|কোথায় থাকে|টঙ্গী|গাজীপুর|লক্ষ্মীপুর|রায়পুর|عنوان/.test(q)) {
@@ -459,6 +509,40 @@ export function generateLocalPortfolioReply(
           );
           break;
 
+        case 'why_hire':
+          parts.push(
+            lang === 'bn'
+              ? `**কেন জাবেরকে হায়ার করবেন?**\n• **অল-ইন-ওয়ান ক্রিয়েটিভ স্কিল:** একসাথে ভিডিও এডিটিং (Premiere Pro, After Effects), গ্রাফিক ডিজাইন (Photoshop, Illustrator, Canva), Meta মার্কেটিং এবং AI ওয়ার্কফ্লো পারেন—তাই টিমের আলাদা কাজের খরচ ও সময় বাঁচে।\n• **বাস্তব অফিস ও দায়িত্বশীলতার প্রমাণ:** আল মানার হোস্টেলে ১০ মাস দৈনিক হিসাব ও ডকুমেন্টেশন সামলানোর পাশাপাশি আস-সুন্নাহ ইনস্টিটিউট থেকে প্র্যাকটিক্যাল প্রোডাকশন ট্রেনিং সম্পন্ন করেছেন।\n• **ওয়েবসাইটেই কাজের প্রমাণ:** বর্তমানে সাইটে **${videoCount}টি ভিডিও এডিট** এবং **${graphicProjects.length}টি গ্রাফিক ডিজাইন প্রজেক্ট গ্রুপ** লাইভ রয়েছে।`
+              : `**Why Work With Jaber?**\n• **Multi-Disciplinary Production:** Combines Video Editing (Premiere Pro, After Effects), Graphic Design (Photoshop, Illustrator), Meta Marketing, and modern AI tools in one streamlined workflow.\n• **Verified Discipline & Operations:** Backed by 10 months of financial/office management at Al Manar Hostel plus practical production training at As-Sunnah Skill Development Institute.\n• **Live Portfolio Proof:** Showcasing **${videoCount} video edits** and **${graphicProjects.length} graphic design groups** directly on this website.`
+          );
+          break;
+
+        case 'website_overview': {
+          const totalPosters = graphicProjects.reduce((acc, p) => {
+            const gCount = (p.galleryImages?.length || 0) + (p.coverImage && !(p.galleryImages || []).includes(p.coverImage) ? 1 : 0);
+            return acc + Math.max(1, gCount);
+          }, 0);
+          parts.push(
+            lang === 'bn'
+              ? `**এই ওয়েবসাইটে কী কী রয়েছে:**\n• **ভিডিও পোর্টফোলিও:** ${videoCount}টি প্রকাশিত ভিডিও এডিট (YouTube, Vimeo, Facebook ও মোশন রিলস)।\n• **গ্রাফিক ডিজাইন ও পোস্টার গ্যালারি:** ${graphicProjects.length}টি প্রজেক্ট গ্রুপের অধীনে মোট **${totalPosters}+টি পোস্টার** এবং সেরা কাজের শোক্যাস (Behance লিংকসহ)।\n• **সিভি, দক্ষতা ও যোগাযোগ:** ৬টি ডেডিকেটেড ৩ডি পেজ—হোম, অ্যাবাউট ও সিভি, ভিডিও, ডিজাইন, স্কিলস ও কন্টাক্ট পেজ (বাংলা, ইংরেজি ও আরবি সাপোর্টসহ)।`
+              : `**What's Inside This Portfolio Website:**\n• **Video Showcase:** ${videoCount} published video projects spanning reels, commercials, and motion graphics.\n• **Graphic Design Gallery:** ${graphicProjects.length} project groups containing **${totalPosters}+ posters** plus Best Work highlights linked to Behance.\n• **Complete Interactive CV & Skills:** 6 3D-animated pages covering About/CV, Videos, Design, Skills & Workflow, and Contact in English, Bangla, and Arabic.`
+          );
+          break;
+        }
+
+        case 'workflow_process': {
+          const steps = (portfolio.workflow || [])
+            .slice(0, 5)
+            .map((w) => `${w.step}. **${pickLoc(w.title, lang)}**${w.description ? ` — ${pickLoc(w.description, lang)}` : ''}`)
+            .join('\n');
+          parts.push(
+            lang === 'bn'
+              ? `**জাবেরের কাজের ধাপ (Creative Workflow):**\n${steps || '১. ব্রিফ ও রিসার্চ → ২. কনসেপ্ট ও স্ক্রিপ্ট → ৩. এডিটিং ও ডিজাইন → ৪. রিভিশন ও ফাইনাল ডেলিভারি।'}\nসাধারণ সোশ্যাল মিডিয়া পোস্টার বা শর্ট রিলস সাধারণত কাজের জটিলতা অনুযায়ী ১–৩ দিনের মধ্যে ডেলিভারি দেওয়া হয়।`
+              : `**Creative Workflow:**\n${steps || '1. Brief & Research → 2. Concept → 3. Editing & Design → 4. Review & Delivery.'}\nStandard posters or short-form reels typically take 1–3 days depending on brief complexity.`
+          );
+          break;
+        }
+
         case 'experience':
           parts.push(
             lang === 'bn'
@@ -609,20 +693,13 @@ export function generateLocalPortfolioReply(
     };
   }
 
-  // Strictly unknown / out-of-scope question: politely state "এই বিষয়ে আপাতত আমি জানি না"
-  const lastAssistantText = history.filter((h) => h.role === 'assistant').slice(-1)[0]?.text || '';
-  const alreadySaidUnknown = /আপাতত আমি জানি না|don't currently know|لا أعرف حالياً/.test(lastAssistantText);
-
+  // Strictly out-of-scope query fallback — calm, helpful, never repetitive "দুঃখিত"
   const unknownText =
     lang === 'bn'
-      ? alreadySaidUnknown
-        ? 'দুঃখিত, এই বিষয়েও আপাতত আমার কাছে নির্দিষ্ট কোনো তথ্য নেই। আপনি চাইলে জাবেরের সিভি থেকে তাঁর শিক্ষা, কাজের অভিজ্ঞতা, সফটওয়্যার স্কিল, প্রত্যাশিত বেতন কিংবা যোগাযোগের নম্বর জিজ্ঞাসা করতে পারেন।'
-        : 'দুঃখিত, এই বিষয়ে আপাতত আমি জানি না। তবে মোঃ জাবের হোসাইনের সিভি, শিক্ষাগত যোগ্যতা, কাজের অভিজ্ঞতা, ভিডিও এডিটিং, গ্রাফিক ডিজাইন বা যোগাযোগের তথ্য সম্পর্কে জানতে চাইলে অবশ্যই উত্তর দিতে পারব!'
+      ? `আপনি সম্ভবত পোর্টফোলিওর বাইরের একটি নির্দিষ্ট বিষয় জানতে চেয়েছেন—এই মুহূর্তে আমার কাছে এই নির্দিষ্ট তথ্যটি সংরক্ষিত নেই।\n\nতবে ওয়েবসাইট ও সিভি বিশ্লেষণ করে আমি জাবেরের **${videoCount}টি ভিডিও প্রজেক্ট**, **${graphicProjects.length}টি গ্রাফিক ডিজাইন গ্রুপ**, **১.১ বছরের কাজের অভিজ্ঞতা**, **আলিম/দাখিল রেজাল্ট**, **সফটওয়্যার ও AI স্কিল** কিংবা **যোগাযোগ ও বেতন** নিয়ে বিস্তারিত তথ্য দিতে পারব—কোনটি জানতে চান?`
       : lang === 'ar'
-      ? 'عذراً، لا أعرف حالياً معلومات حول هذا الموضوع. لكن يمكنني إجابتك عن سيرة جابر الذاتية، تعليمه، خبراته، أو أعماله في المونتاج والتصميم.'
-      : alreadySaidUnknown
-      ? "Sorry, I still don't have information on that specific topic right now. Try asking about Jaber's education, work experience, Adobe software skills, expected salary, or contact info!"
-      : "Sorry, I don't know about that topic right now. However, I can answer anything about Md. Jaber Hosain's CV, education, 1.1 years of experience, Video Editing & Graphic Design portfolio, or contact details!";
+      ? `هذه المعلومة المحددة غير متوفرة لدي حالياً خارج نطاق السيرة الذاتية ومعرض الأعمال. يمكنني تزويدك بتفاصيل دقيقة حول **${videoCount} فيديو** و **${graphicProjects.length} مشاريع تصميم** وخبرات جابر العملية ومؤهلاته وكيفية التواصل معه.`
+      : `I don't have that exact external detail stored here right now. Based on Jaber's live website and CV, I can give you deep details on his **${videoCount} video edits**, **${graphicProjects.length} graphic design groups**, **1.1 years of experience**, **education results**, **Adobe & AI tools**, or **hiring/contact details**—what would you like to explore?`;
 
   return {
     text: unknownText,

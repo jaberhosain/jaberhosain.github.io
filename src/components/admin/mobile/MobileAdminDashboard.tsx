@@ -1,9 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
   Layers,
-  FileText,
-  Film,
-  Share2,
   Palette,
   Eye,
   Send,
@@ -19,31 +16,23 @@ import {
   LogOut,
   LogIn,
   KeyRound,
-  Mail,
   Lock,
   ExternalLink,
   RotateCcw,
   Sparkles,
   Inbox,
-  FileSpreadsheet,
   Check,
-  Video,
-  Image as ImageIcon,
   Sliders,
-  GraduationCap,
-  Wrench,
-  Award,
-  Globe,
   Download,
   RefreshCw,
-  User
+  User,
+  Wand2,
+  Loader2
 } from 'lucide-react';
 import { usePortfolio } from '../../../context/PortfolioContext';
-import { resolveAssetUrl } from '../../../utils/assetUrl';
 import {
   auth,
   signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
   signInWithPopup,
   googleProvider,
   signOut,
@@ -52,14 +41,14 @@ import {
   updatePassword
 } from '../../../lib/firebase';
 import { uploadMediaToStorage } from '../../../lib/mediaUpload';
+import { resolveBehanceProjectFromUrl } from '../../../lib/imageUrlResolver';
 import {
   ProjectItem,
   VideoShowcaseItem,
   Lead,
   ThemeId,
   ServiceItem,
-  SkillCategory,
-  AcademicRecord
+  SkillCategory
 } from '../../../types/portfolio';
 import { defaultThemeColors, defaultThemeFonts } from '../../../data/initialPortfolio';
 import { EducationEditor } from '../EducationEditor';
@@ -70,17 +59,26 @@ import { ContactFooterEditor } from '../ContactFooterEditor';
 import { ThemeEditor } from '../ThemeEditor';
 import { ConfirmDeleteModal } from '../ConfirmDeleteModal';
 import { ADMIN_GROUPS, AdminGroupId } from '../adminNavigation';
-import { 
-  detectVideoType, 
-  extractVimeoInfo, 
-  extractYouTubeId, 
-  fetchVideoAutoMetadata, 
-  VimeoIcon 
+import {
+  detectVideoType,
+  extractVimeoInfo,
+  extractYouTubeId,
+  fetchVideoAutoMetadata,
+  VimeoIcon
 } from '../../../lib/videoUtils';
 import { BestWorkGraphicEditor } from '../BestWorkGraphicEditor';
 import { BestWorkVideoEditor } from '../BestWorkVideoEditor';
 import { ImageUploaderField } from '../ImageUploaderField';
 import { ProjectGalleryManager } from '../ProjectGalleryManager';
+import { HomePage } from '../../pages/HomePage';
+import { AboutPage } from '../../pages/AboutPage';
+import { VideosPage } from '../../pages/VideosPage';
+import { DesignPage } from '../../pages/DesignPage';
+import { SkillsPage } from '../../pages/SkillsPage';
+import { ContactPage } from '../../pages/ContactPage';
+import { Footer } from '../../Footer';
+import { VideoModal } from '../../VideoModal';
+import { LightboxModal } from '../../LightboxModal';
 
 interface MobileAdminDashboardProps {
   onBackToSite: () => void;
@@ -88,6 +86,7 @@ interface MobileAdminDashboardProps {
 
 type MobileTab = 'overview' | AdminGroupId;
 type SubSection = string | null;
+type PreviewPageId = 'home' | 'about' | 'videos' | 'design' | 'skills' | 'contact';
 
 export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBackToSite }) => {
   const {
@@ -110,6 +109,11 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
   const [activeTab, setActiveTab] = useState<MobileTab>('overview');
   const [activeSection, setActiveSection] = useState<SubSection>(null);
   const [showLivePreview, setShowLivePreview] = useState(false);
+  const [wasPreviewDraft, setWasPreviewDraft] = useState(false);
+  const [previewPage, setPreviewPage] = useState<PreviewPageId>('home');
+  const [previewVideo, setPreviewVideo] = useState<VideoShowcaseItem | null>(null);
+  const [previewProject, setPreviewProject] = useState<ProjectItem | null>(null);
+  const [previewLightboxIndex, setPreviewLightboxIndex] = useState(0);
 
   // Authentication states (Strictly identical to Desktop Admin)
   const [usernameInput, setUsernameInput] = useState('jabirbd');
@@ -131,9 +135,13 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
   const [leads, setLeads] = useState<Lead[]>([]);
   const [loadingLeads, setLoadingLeads] = useState(false);
 
-  // Media states
+  // Media & Behance states
   const [fetchingOgId, setFetchingOgId] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState<Record<string, number>>({});
+  const [behanceImportUrl, setBehanceImportUrl] = useState('');
+  const [importingBehanceProject, setImportingBehanceProject] = useState(false);
+  const [extractingProjectId, setExtractingProjectId] = useState<string | null>(null);
+  const [behanceImportHint, setBehanceImportHint] = useState<{ type: 'ok' | 'err'; text: string } | null>(null);
 
   // Reusable Delete Confirmation State
   const [deleteConfirm, setDeleteConfirm] = useState<{
@@ -165,6 +173,127 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
     setToastMessage(msg);
     setToastType(type);
     setTimeout(() => setToastMessage(null), 4000);
+  };
+
+  const openLivePreview = () => {
+    setWasPreviewDraft(isPreviewDraft);
+    setIsPreviewDraft(true);
+    setPreviewPage('home');
+    setShowLivePreview(true);
+  };
+
+  const closeLivePreview = () => {
+    setShowLivePreview(false);
+    setPreviewVideo(null);
+    setPreviewProject(null);
+    setIsPreviewDraft(wasPreviewDraft);
+  };
+
+  // Mobile 1-Click Import Entire Behance Project Group
+  const handleImportNewBehanceProject = async () => {
+    const url = behanceImportUrl.trim();
+    if (!url) {
+      setBehanceImportHint({ type: 'err', text: 'আগে একটি Behance প্রজেক্টের লিংক পেস্ট করুন।' });
+      return;
+    }
+
+    setImportingBehanceProject(true);
+    setBehanceImportHint(null);
+    try {
+      const res = await resolveBehanceProjectFromUrl(url);
+      if (res.success && res.images.length > 0) {
+        const newId = 'proj-' + Date.now();
+        const nextOrder = (draftPortfolio.projects?.length || 0) + 1;
+        const resolvedTitle = res.title?.trim() || 'Behance Poster Series';
+        const resolvedDesc =
+          res.description?.trim() ||
+          'High-resolution graphic design poster campaign and visual identity series.';
+
+        const newProject: ProjectItem = {
+          id: newId,
+          title: { en: resolvedTitle, bn: resolvedTitle, ar: resolvedTitle },
+          groupName: { en: resolvedTitle, bn: '', ar: '' },
+          category: 'graphic',
+          description: { en: resolvedDesc, bn: resolvedDesc, ar: resolvedDesc },
+          behanceUrl: url,
+          externalUrl: '',
+          coverImage: res.coverImage || res.images[0],
+          galleryImages: res.images,
+          galleryCaptions: res.images.map(() => ''),
+          order: nextOrder,
+        };
+
+        updateDraft((prev) => ({
+          ...prev,
+          projects: [...(prev.projects || []), newProject],
+        }));
+        setBehanceImportUrl('');
+        setBehanceImportHint({
+          type: 'ok',
+          text: `"${resolvedTitle}" (${res.images.length}টি পোস্টার) #${nextOrder} হিসেবে যুক্ত হয়েছে।`,
+        });
+        showToast(`Imported "${resolvedTitle}" (${res.images.length} posters)!`);
+        setTimeout(() => {
+          document.getElementById(`mobile-project-${newId}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 120);
+      } else {
+        setBehanceImportHint({
+          type: 'err',
+          text:
+            res.error ||
+            'Behance অটো-ব্লক করেছে। নিচে নতুন প্রজেক্টে "Smart Import / URLs" দিয়ে পেজ সোর্স অথবা পোস্টার লিংক দিন।',
+        });
+        showToast('Behance blocked automated fetch — use Smart Import.', 'error');
+      }
+    } catch (err: any) {
+      setBehanceImportHint({
+        type: 'err',
+        text: err?.message || 'Behance থেকে ডেটা আনতে সমস্যা হয়েছে।',
+      });
+    } finally {
+      setImportingBehanceProject(false);
+    }
+  };
+
+  // Per-project Behance extractor (Mobile)
+  const handleExtractProjectBehance = async (proj: ProjectItem) => {
+    const url = (proj.behanceUrl || '').trim();
+    if (!url || !url.toLowerCase().includes('behance.net')) {
+      showToast('প্রথমে প্রজেক্টের Behance লিংক দিন।', 'error');
+      return;
+    }
+    setExtractingProjectId(proj.id);
+    try {
+      const res = await resolveBehanceProjectFromUrl(url);
+      if (res.success && res.images.length > 0) {
+        updateDraft((prev) => ({
+          ...prev,
+          projects: (prev.projects || []).map((p) => {
+            if (p.id !== proj.id) return p;
+            const merged = [...(p.galleryImages || [])];
+            for (const img of res.images) {
+              if (img && !merged.includes(img)) merged.push(img);
+            }
+            const nextCaptions = Array.from({ length: merged.length }, (_, i) => p.galleryCaptions?.[i] || '');
+            const isDefaultTitle =
+              !p.title?.en || p.title.en === 'New Graphic Project' || p.title.en === 'Untitled';
+            return {
+              ...p,
+              coverImage: p.coverImage || res.coverImage || res.images[0],
+              galleryImages: merged,
+              galleryCaptions: nextCaptions,
+              title: isDefaultTitle && res.title ? { ...(p.title || { en: '', bn: '', ar: '' }), en: res.title } : p.title,
+              groupName: !p.groupName?.en && res.title ? { ...(p.groupName || { en: '', bn: '', ar: '' }), en: res.title } : p.groupName,
+            };
+          }),
+        }));
+        showToast(res.note || `${res.images.length}টি পোস্টার যুক্ত হয়েছে!`);
+      } else {
+        showToast(res.error || 'অটো-এক্সট্র্যাক্ট করা যায়নি। নিচে Smart Import ব্যবহার করুন।', 'error');
+      }
+    } finally {
+      setExtractingProjectId(null);
+    }
   };
 
   // Auth Handlers (Matching Desktop Admin exactly)
@@ -609,14 +738,14 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
   // While auth session is restoring from browserLocalPersistence / IndexedDB, show clean loader
   if (authRestoring) {
     return (
-      <div className="min-h-screen bg-[#070A0C] text-neutral-100 flex flex-col justify-center items-center p-4 selection:bg-[#FF5722] selection:text-white">
+      <div className="min-h-screen bg-[#0B0C0F] text-[#F4F0E8] flex flex-col justify-center items-center p-4 font-sans selection:bg-[#E4583B] selection:text-white">
         <div className="flex flex-col items-center space-y-4">
-          <div className="w-12 h-12 rounded-2xl bg-[#141A20] border border-[#232B33] flex items-center justify-center font-bold text-xl text-white font-mono animate-pulse glow-orange-sm">
+          <div className="w-11 h-11 rounded-xl bg-[#121419] border border-white/[0.08] flex items-center justify-center font-bold text-lg text-[#F4F0E8]">
             <span>M</span>
-            <span className="text-[#FF5722]">J</span>
+            <span className="text-[#E4583B]">J</span>
           </div>
-          <div className="flex items-center space-x-2 text-xs font-mono text-neutral-400">
-            <RefreshCw className="w-3.5 h-3.5 animate-spin text-[#FF5722]" />
+          <div className="flex items-center space-x-2 text-xs text-[#8E8A82]">
+            <RefreshCw className="w-3.5 h-3.5 animate-spin text-[#E4583B]" />
             <span>Verifying session...</span>
           </div>
         </div>
@@ -629,25 +758,24 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
   // ==========================================
   if (!currentUser || !isAdmin) {
     return (
-      <div className="min-h-screen bg-[#070A0C] text-neutral-100 flex flex-col justify-between p-4 font-sans">
+      <div className="min-h-screen bg-[#0B0C0F] text-[#F4F0E8] flex flex-col justify-between p-4 font-sans">
         {/* Top Header */}
-        <div className="flex items-center justify-between pt-2 pb-6 border-b border-[#1A222B]">
+        <div className="flex items-center justify-between pt-2 pb-5 border-b border-white/[0.08]">
           <div className="flex items-center space-x-2.5 rtl:space-x-reverse">
-            <div className="w-9 h-9 rounded-xl bg-[#141A20] border border-[#232B33] flex items-center justify-center font-bold text-white font-mono">
-              <span>M</span>
-              <span className="text-[#FF5722]">J</span>
+            <div className="w-9 h-9 rounded-lg bg-[#E4583B] flex items-center justify-center font-bold text-white text-sm">
+              MJ
             </div>
             <div>
-              <h1 className="text-sm font-bold text-white font-mono tracking-wide">
+              <h1 className="text-sm font-semibold text-[#F4F0E8]">
                 MD JABER HOSAIN
               </h1>
-              <p className="text-[10px] text-neutral-400 font-mono">Mobile Admin Portal</p>
+              <p className="text-[11px] text-[#8E8A82]">Mobile Studio Console</p>
             </div>
           </div>
           <button
             type="button"
             onClick={onBackToSite}
-            className="px-3 py-1.5 text-xs font-mono text-neutral-400 hover:text-white rounded-lg bg-[#141A20] border border-[#232B33] min-h-[44px] flex items-center justify-center"
+            className="px-3.5 py-2 text-xs font-medium text-[#D7D2C8] hover:text-white rounded-lg bg-[#121419] border border-white/[0.08] min-h-[44px] flex items-center justify-center"
           >
             Back to Site
           </button>
@@ -655,13 +783,13 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
 
         {/* Center Login Box */}
         <div className="my-auto py-6 max-w-sm mx-auto w-full">
-          <div className="p-6 rounded-3xl bg-[#0F1419] border border-[#232B33] shadow-2xl space-y-5">
+          <div className="p-6 rounded-2xl bg-[#121419] border border-white/[0.08] shadow-2xl space-y-5">
             <div className="text-center space-y-1.5">
-              <div className="w-12 h-12 rounded-2xl bg-[#FF5722]/10 border border-[#FF5722]/30 text-[#FF5722] flex items-center justify-center mx-auto mb-2">
-                <Lock className="w-6 h-6" />
+              <div className="w-11 h-11 rounded-xl bg-[#171A21] border border-white/[0.08] text-[#E4583B] flex items-center justify-center mx-auto mb-2">
+                <Lock className="w-5 h-5" />
               </div>
-              <h2 className="text-lg font-bold text-white">Admin Authentication</h2>
-              <p className="text-xs text-neutral-400 font-mono">
+              <h2 className="text-lg font-semibold text-[#F4F0E8]">Admin Authentication</h2>
+              <p className="text-xs text-[#8E8A82]">
                 Sign in with your username or backup Gmail
               </p>
             </div>
@@ -670,14 +798,14 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
               <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-start space-x-2">
                 <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
                 <div>
-                  <p className="font-bold">Access Restricted</p>
+                  <p className="font-semibold">Access Restricted</p>
                   <p className="text-[11px] text-amber-200/80">
-                    Logged in as {currentUser.email}, which is not the designated owner account.
+                    Logged in as <span className="font-mono">{currentUser.email}</span>, which is not the designated owner account.
                   </p>
                   <button
                     type="button"
                     onClick={handleSignOut}
-                    className="mt-2 text-xs font-mono underline text-amber-300 min-h-[44px] flex items-center"
+                    className="mt-2 text-xs underline text-amber-300 min-h-[44px] flex items-center"
                   >
                     Sign out to switch account
                   </button>
@@ -694,11 +822,11 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
 
             <form onSubmit={handleUsernamePasswordAuth} className="space-y-4">
               <div>
-                <label className="block text-xs font-mono text-neutral-300 mb-1.5 font-semibold">
+                <label className="block text-xs font-medium text-[#A7A298] mb-1.5">
                   Username or Email
                 </label>
                 <div className="relative">
-                  <User className="w-4 h-4 text-neutral-500 absolute left-3 top-3.5" />
+                  <User className="w-4 h-4 text-[#6F6B64] absolute left-3 top-3.5" />
                   <input
                     type="text"
                     required
@@ -707,24 +835,24 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
                     placeholder="jabirbd"
                     autoCapitalize="none"
                     autoCorrect="off"
-                    className="w-full pl-9 pr-3 py-3 rounded-xl bg-[#070A0C] border border-[#232B33] text-sm text-white placeholder-neutral-600 focus:border-[#FF5722] focus:outline-none min-h-[44px]"
+                    className="w-full pl-9 pr-3 py-3 rounded-xl bg-[#0B0C0F] border border-white/[0.08] text-sm font-mono text-[#F4F0E8] placeholder-[#6F6B64] focus:border-[#E4583B] focus:outline-none min-h-[44px]"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-mono text-neutral-300 mb-1.5 font-semibold">
+                <label className="block text-xs font-medium text-[#A7A298] mb-1.5">
                   Password
                 </label>
                 <div className="relative">
-                  <KeyRound className="w-4 h-4 text-neutral-500 absolute left-3 top-3.5" />
+                  <KeyRound className="w-4 h-4 text-[#6F6B64] absolute left-3 top-3.5" />
                   <input
                     type="password"
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full pl-9 pr-3 py-3 rounded-xl bg-[#070A0C] border border-[#232B33] text-sm text-white placeholder-neutral-600 focus:border-[#FF5722] focus:outline-none min-h-[44px]"
+                    className="w-full pl-9 pr-3 py-3 rounded-xl bg-[#0B0C0F] border border-white/[0.08] text-sm text-[#F4F0E8] placeholder-[#6F6B64] focus:border-[#E4583B] focus:outline-none min-h-[44px]"
                   />
                 </div>
               </div>
@@ -732,10 +860,10 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
               <button
                 type="submit"
                 disabled={authLoading}
-                className="w-full py-3.5 px-4 rounded-xl font-bold text-sm text-white bg-[#FF5722] hover:bg-[#F4511E] shadow-lg shadow-orange-900/30 transition-all flex items-center justify-center space-x-2 disabled:opacity-50 min-h-[48px]"
+                className="w-full py-3 px-4 rounded-xl font-semibold text-sm text-white bg-[#E4583B] hover:bg-[#D0492D] transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 min-h-[48px]"
               >
                 {authLoading ? (
-                  <span className="animate-spin text-sm">⌛</span>
+                  <Loader2 className="w-4 h-4 animate-spin" />
                 ) : (
                   <>
                     <LogIn className="w-4 h-4" />
@@ -746,16 +874,15 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
             </form>
 
             <div className="relative py-2 flex items-center justify-center">
-              <div className="border-t border-[#232B33] w-full"></div>
-              <span className="bg-[#0F1419] px-3 text-[11px] font-mono text-neutral-500 absolute">OR</span>
+              <div className="border-t border-white/[0.08] w-full"></div>
+              <span className="bg-[#121419] px-3 text-[11px] text-[#6F6B64] absolute">OR</span>
             </div>
 
-            {/* Google Authentication (Matching Desktop) */}
             <button
               type="button"
               onClick={handleGoogleLogin}
               disabled={authLoading}
-              className="w-full py-3 px-4 rounded-xl font-semibold text-xs text-neutral-200 bg-[#141A20] hover:bg-[#1A222B] border border-[#232B33] transition-colors flex items-center justify-center space-x-2 min-h-[48px]"
+              className="w-full py-3 px-4 rounded-xl font-medium text-xs text-[#EAE5DC] bg-[#171A21] hover:bg-[#1E222B] border border-white/[0.08] transition-colors flex items-center justify-center space-x-2 min-h-[48px]"
             >
               <svg className="w-4 h-4" viewBox="0 0 24 24">
                 <path
@@ -781,57 +908,125 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
         </div>
 
         {/* Footer */}
-        <p className="text-[11px] text-center text-neutral-500 font-mono pb-2">
-          Secure Mobile Admin &bull; Real Firebase Backend
+        <p className="text-[11px] text-center text-[#6F6B64] pb-2">
+          Studio Admin &middot; Synced with Firebase
         </p>
       </div>
     );
   }
 
   // ==========================================
-  // 2. LIVE PREVIEW MODAL (Full Screen on Mobile)
+  // 2. INTERACTIVE LIVE DRAFT PREVIEW MODAL (Renders real React public pages reading draftPortfolio!)
   // ==========================================
   if (showLivePreview) {
+    const previewTabs: { id: PreviewPageId; label: string }[] = [
+      { id: 'home', label: 'Home' },
+      { id: 'about', label: 'About' },
+      { id: 'videos', label: 'Videos' },
+      { id: 'design', label: 'Design' },
+      { id: 'skills', label: 'Skills' },
+      { id: 'contact', label: 'Contact' },
+    ];
+
+    const openPreviewLightbox = (proj: ProjectItem, initialIndex = 0) => {
+      setPreviewLightboxIndex(initialIndex);
+      setPreviewProject(proj);
+    };
+
+    const renderPreviewContent = () => {
+      switch (previewPage) {
+        case 'about':
+          return <AboutPage />;
+        case 'videos':
+          return <VideosPage onOpenVideo={(vid) => setPreviewVideo(vid)} />;
+        case 'design':
+          return <DesignPage onOpenLightbox={openPreviewLightbox} />;
+        case 'skills':
+          return <SkillsPage />;
+        case 'contact':
+          return <ContactPage />;
+        case 'home':
+        default:
+          return (
+            <HomePage
+              onOpenLightbox={openPreviewLightbox}
+              onOpenVideo={(vid) => setPreviewVideo(vid)}
+            />
+          );
+      }
+    };
+
     return (
-      <div className="fixed inset-0 z-50 bg-[#070A0C] flex flex-col">
-        {/* Floating Top Control */}
-        <div className="p-3 bg-[#0B0F12]/95 border-b border-[#232B33] flex items-center justify-between backdrop-blur-xl shrink-0">
+      <div className="fixed inset-0 z-50 bg-[#0B0C0F] flex flex-col">
+        {/* Top Control Bar */}
+        <div className="px-3 py-2.5 bg-[#121419]/95 border-b border-white/[0.08] flex items-center justify-between gap-2 backdrop-blur-md shrink-0">
           <button
             type="button"
-            onClick={() => {
-              setShowLivePreview(false);
-              setIsPreviewDraft(false);
-            }}
-            className="px-3.5 py-2 rounded-xl bg-[#141A20] border border-[#232B33] text-xs font-mono font-bold text-white flex items-center space-x-1.5 min-h-[44px]"
+            onClick={closeLivePreview}
+            className="px-3 py-2 rounded-lg bg-[#171A21] border border-white/[0.08] text-xs font-semibold text-[#F4F0E8] flex items-center space-x-1.5 min-h-[44px]"
           >
-            <ArrowLeft className="w-4 h-4 text-[#FF5722]" />
-            <span>Return to Admin</span>
+            <ArrowLeft className="w-4 h-4 text-[#E4583B]" />
+            <span>Back to Admin</span>
           </button>
 
-          <div className="flex items-center space-x-2">
-            <span className="text-[11px] font-mono text-neutral-400 hidden sm:inline">
-              Draft Preview
-            </span>
+          <span className="text-xs font-medium text-[#A7A298] truncate">
+            Live Draft Preview
+          </span>
+
+          <button
+            type="button"
+            onClick={handlePublishLive}
+            disabled={publishing}
+            className="px-3.5 py-2 rounded-lg bg-[#E4583B] hover:bg-[#D0492D] text-xs font-semibold text-white flex items-center space-x-1.5 min-h-[44px] disabled:opacity-50"
+          >
+            <Send className="w-3.5 h-3.5" />
+            <span>{publishing ? 'Publishing...' : 'Publish'}</span>
+          </button>
+        </div>
+
+        {/* Page Switcher Bar inside Preview */}
+        <div className="px-3 py-2 bg-[#0B0C0F] border-b border-white/[0.06] flex items-center gap-1.5 overflow-x-auto no-scrollbar shrink-0">
+          {previewTabs.map((tab) => (
             <button
+              key={tab.id}
               type="button"
-              onClick={handlePublishLive}
-              disabled={publishing}
-              className="px-3.5 py-2 rounded-xl bg-[#FF5722] hover:bg-[#F4511E] text-xs font-mono font-bold text-white flex items-center space-x-1.5 shadow-lg shadow-orange-900/30 min-h-[44px]"
+              onClick={() => setPreviewPage(tab.id)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap shrink-0 transition-colors ${
+                previewPage === tab.id
+                  ? 'bg-[#E4583B] text-white'
+                  : 'bg-[#171A21] text-[#A7A298] hover:text-white border border-white/[0.06]'
+              }`}
             >
-              <Send className="w-3.5 h-3.5" />
-              <span>{publishing ? 'Publishing...' : 'Publish'}</span>
+              {tab.label}
             </button>
+          ))}
+        </div>
+
+        {/* Scrollable Draft Site Viewport */}
+        <div className="flex-1 overflow-y-auto bg-[#121419] text-[#F4F0E8] relative">
+          <div className="min-h-full flex flex-col">
+            <div className="flex-1">{renderPreviewContent()}</div>
+            <Footer onOpenAdmin={closeLivePreview} />
           </div>
         </div>
 
-        {/* Preview Frame */}
-        <div className="flex-1 w-full h-full overflow-hidden bg-black relative">
-          <iframe
-            src="/"
-            title="Live Preview"
-            className="w-full h-full border-0"
+        {previewVideo && (
+          <VideoModal
+            video={previewVideo}
+            onClose={() => setPreviewVideo(null)}
           />
-        </div>
+        )}
+
+        {previewProject && (
+          <LightboxModal
+            project={previewProject}
+            initialIndex={previewLightboxIndex}
+            onClose={() => {
+              setPreviewProject(null);
+              setPreviewLightboxIndex(0);
+            }}
+          />
+        )}
       </div>
     );
   }
@@ -848,9 +1043,9 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
       case 'branding':
         return (
           <div className="space-y-4">
-            <div className="p-4 rounded-2xl bg-[#0F1419] border border-[#232B33] space-y-4">
+            <div className="p-4 rounded-2xl bg-[#121419] border border-white/[0.08] space-y-4">
               <div>
-                <label className="block text-xs font-mono text-neutral-300 font-semibold mb-1.5">
+                <label className="block text-xs font-medium text-[#D7D2C8] mb-1.5">
                   Website Page Title
                 </label>
                 <input
@@ -862,12 +1057,12 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
                       branding: { ...(prev.branding || {}), title: e.target.value },
                     }))
                   }
-                  className="w-full px-3 py-2.5 rounded-xl bg-[#070A0C] border border-[#232B33] text-sm text-white font-mono focus:border-[#FF5722] focus:outline-none min-h-[44px]"
+                  className="w-full px-3 py-2.5 rounded-xl bg-[#0B0C0F] border border-white/[0.08] text-sm text-[#F4F0E8] focus:border-[#E4583B] focus:outline-none min-h-[44px]"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-mono text-neutral-300 font-semibold mb-1.5">
+                <label className="block text-xs font-medium text-[#D7D2C8] mb-1.5">
                   Brand Name / Monogram Text
                 </label>
                 <input
@@ -879,12 +1074,12 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
                       branding: { ...(prev.branding || {}), logoText: e.target.value },
                     }))
                   }
-                  className="w-full px-3 py-2.5 rounded-xl bg-[#070A0C] border border-[#232B33] text-sm text-white font-mono focus:border-[#FF5722] focus:outline-none min-h-[44px]"
+                  className="w-full px-3 py-2.5 rounded-xl bg-[#0B0C0F] border border-white/[0.08] text-sm text-[#F4F0E8] focus:border-[#E4583B] focus:outline-none min-h-[44px]"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-mono text-neutral-300 font-semibold mb-1.5">
+                <label className="block text-xs font-medium text-[#D7D2C8] mb-1.5">
                   Logo Initials (2 Letters, e.g. MJ)
                 </label>
                 <input
@@ -897,26 +1092,26 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
                       branding: { ...(prev.branding || {}), logoInitials: e.target.value.toUpperCase() },
                     }))
                   }
-                  className="w-24 px-3 py-2.5 rounded-xl bg-[#070A0C] border border-[#232B33] text-sm text-white font-mono text-center tracking-widest focus:border-[#FF5722] focus:outline-none min-h-[44px]"
+                  className="w-24 px-3 py-2.5 rounded-xl bg-[#0B0C0F] border border-white/[0.08] text-sm text-[#F4F0E8] text-center tracking-widest focus:border-[#E4583B] focus:outline-none min-h-[44px]"
                 />
               </div>
             </div>
 
             {/* Change Admin Password Card */}
-            <div className="p-4 rounded-2xl bg-[#0F1419] border border-[#232B33] space-y-4">
+            <div className="p-4 rounded-2xl bg-[#121419] border border-white/[0.08] space-y-4">
               <div>
-                <h3 className="text-sm font-bold text-white font-mono flex items-center space-x-2">
-                  <KeyRound className="w-4 h-4 text-[#FF5722]" />
+                <h3 className="text-sm font-semibold text-[#F4F0E8] flex items-center space-x-2">
+                  <KeyRound className="w-4 h-4 text-[#E4583B]" />
                   <span>Change Admin Password</span>
                 </h3>
-                <p className="text-[11px] text-neutral-400 font-mono mt-0.5">
+                <p className="text-xs text-[#8E8A82] mt-0.5">
                   Update password for your username login (minimum 10 characters).
                 </p>
               </div>
 
               {passwordChangeMessage && (
                 <div
-                  className={`p-3 rounded-xl border text-xs font-mono flex items-center space-x-2 ${
+                  className={`p-3 rounded-xl border text-xs flex items-center space-x-2 ${
                     passwordChangeMessage.type === 'success'
                       ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
                       : 'bg-rose-500/10 border-rose-500/30 text-rose-300'
@@ -933,7 +1128,7 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
 
               <form onSubmit={handleChangePassword} className="space-y-3">
                 <div>
-                  <label className="block text-xs font-mono text-neutral-300 font-semibold mb-1">
+                  <label className="block text-xs font-medium text-[#D7D2C8] mb-1">
                     Current Password
                   </label>
                   <input
@@ -942,12 +1137,12 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
                     value={currentPasswordInput}
                     onChange={(e) => setCurrentPasswordInput(e.target.value)}
                     placeholder="••••••••••"
-                    className="w-full px-3 py-2.5 rounded-xl bg-[#070A0C] border border-[#232B33] text-sm text-white font-mono focus:border-[#FF5722] focus:outline-none min-h-[44px]"
+                    className="w-full px-3 py-2.5 rounded-xl bg-[#0B0C0F] border border-white/[0.08] text-sm text-[#F4F0E8] focus:border-[#E4583B] focus:outline-none min-h-[44px]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-mono text-neutral-300 font-semibold mb-1">
+                  <label className="block text-xs font-medium text-[#D7D2C8] mb-1">
                     New Password (min 10 chars)
                   </label>
                   <input
@@ -957,12 +1152,12 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
                     value={newPasswordInput}
                     onChange={(e) => setNewPasswordInput(e.target.value)}
                     placeholder="At least 10 characters"
-                    className="w-full px-3 py-2.5 rounded-xl bg-[#070A0C] border border-[#232B33] text-sm text-white font-mono focus:border-[#FF5722] focus:outline-none min-h-[44px]"
+                    className="w-full px-3 py-2.5 rounded-xl bg-[#0B0C0F] border border-white/[0.08] text-sm text-[#F4F0E8] focus:border-[#E4583B] focus:outline-none min-h-[44px]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-mono text-neutral-300 font-semibold mb-1">
+                  <label className="block text-xs font-medium text-[#D7D2C8] mb-1">
                     Confirm New Password
                   </label>
                   <input
@@ -972,14 +1167,14 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
                     value={confirmPasswordInput}
                     onChange={(e) => setConfirmPasswordInput(e.target.value)}
                     placeholder="Repeat new password"
-                    className="w-full px-3 py-2.5 rounded-xl bg-[#070A0C] border border-[#232B33] text-sm text-white font-mono focus:border-[#FF5722] focus:outline-none min-h-[44px]"
+                    className="w-full px-3 py-2.5 rounded-xl bg-[#0B0C0F] border border-white/[0.08] text-sm text-[#F4F0E8] focus:border-[#E4583B] focus:outline-none min-h-[44px]"
                   />
                 </div>
 
                 <button
                   type="submit"
                   disabled={changingPassword}
-                  className="w-full py-3 rounded-xl bg-[#FF5722] hover:bg-[#F4511E] text-white font-mono font-bold text-xs transition-colors disabled:opacity-50 flex items-center justify-center space-x-2 min-h-[44px]"
+                  className="w-full py-3 rounded-xl bg-[#E4583B] hover:bg-[#D0492D] text-white font-semibold text-xs transition-colors disabled:opacity-50 flex items-center justify-center space-x-2 min-h-[44px]"
                 >
                   <Lock className="w-3.5 h-3.5" />
                   <span>{changingPassword ? 'Updating Password...' : 'Update Password'}</span>
@@ -988,20 +1183,20 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
             </div>
 
             {/* Session Safety & Inactivity Auto-Logout Card */}
-            <div className="p-4 rounded-2xl bg-[#0F1419] border border-[#232B33] space-y-3">
+            <div className="p-4 rounded-2xl bg-[#121419] border border-white/[0.08] space-y-3">
               <div>
-                <h3 className="text-sm font-bold text-white font-mono flex items-center space-x-2">
-                  <Sliders className="w-4 h-4 text-[#FF5722]" />
-                  <span>Session Safety & Auto-Logout</span>
+                <h3 className="text-sm font-semibold text-[#F4F0E8] flex items-center space-x-2">
+                  <Sliders className="w-4 h-4 text-[#E4583B]" />
+                  <span>Session Safety &amp; Auto-Logout</span>
                 </h3>
-                <p className="text-[11px] text-neutral-400 font-mono mt-0.5">
+                <p className="text-xs text-[#8E8A82] mt-0.5">
                   Off by default so you stay signed in permanently.
                 </p>
               </div>
               <select
                 value={autoLogoutMinutes}
                 onChange={(e) => handleAutoLogoutChange(Number(e.target.value))}
-                className="w-full px-3 py-2.5 rounded-xl bg-[#070A0C] border border-[#232B33] text-xs text-white font-mono focus:border-[#FF5722] focus:outline-none min-h-[44px]"
+                className="w-full px-3 py-2.5 rounded-xl bg-[#0B0C0F] border border-white/[0.08] text-xs text-[#F4F0E8] focus:border-[#E4583B] focus:outline-none min-h-[44px]"
               >
                 <option value={0}>Off — Keep me logged in (Default)</option>
                 <option value={15}>After 15 minutes of inactivity</option>
@@ -1028,7 +1223,7 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
       case 'about':
         return (
           <div className="space-y-4">
-            <div className="p-4 rounded-2xl bg-[#0F1419] border border-[#232B33] space-y-4">
+            <div className="p-4 rounded-2xl bg-[#121419] border border-white/[0.08] space-y-4">
               <ImageUploaderField
                 label="About Portrait Photo (URL or Upload)"
                 value={draftPortfolio.about.avatarUrl}
@@ -1050,14 +1245,14 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
                   }));
                   showToast('Synced photo to Hero & About!');
                 }}
-                className="w-full py-2.5 rounded-xl bg-[#141A20] hover:bg-[#1A222B] border border-[#232B33] text-xs font-mono font-semibold text-neutral-200 flex items-center justify-center space-x-2 min-h-[44px]"
+                className="w-full py-2.5 rounded-xl bg-[#171A21] hover:bg-[#1E222B] border border-white/[0.08] text-xs font-medium text-[#EAE5DC] flex items-center justify-center space-x-2 min-h-[44px]"
               >
-                <CheckCircle className="w-3.5 h-3.5 text-[#FF5722]" />
+                <CheckCircle className="w-3.5 h-3.5 text-[#E4583B]" />
                 <span>Also Apply This Photo to Hero Section</span>
               </button>
 
               <div>
-                <label className="block text-xs font-mono text-neutral-300 font-semibold mb-1.5">
+                <label className="block text-xs font-medium text-[#D7D2C8] mb-1.5">
                   Bio (English)
                 </label>
                 <textarea
@@ -1069,12 +1264,12 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
                       about: { ...prev.about, bio: { ...prev.about.bio, en: e.target.value } },
                     }))
                   }
-                  className="w-full px-3 py-2.5 rounded-xl bg-[#070A0C] border border-[#232B33] text-xs text-white font-mono focus:border-[#FF5722] focus:outline-none"
+                  className="w-full px-3 py-2.5 rounded-xl bg-[#0B0C0F] border border-white/[0.08] text-xs text-[#F4F0E8] focus:border-[#E4583B] focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-mono text-neutral-300 font-semibold mb-1.5">
+                <label className="block text-xs font-medium text-[#D7D2C8] mb-1.5">
                   Bio (Bangla)
                 </label>
                 <textarea
@@ -1086,7 +1281,7 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
                       about: { ...prev.about, bio: { ...prev.about.bio, bn: e.target.value } },
                     }))
                   }
-                  className="w-full px-3 py-2.5 rounded-xl bg-[#070A0C] border border-[#232B33] text-xs text-white font-mono focus:border-[#FF5722] focus:outline-none"
+                  className="w-full px-3 py-2.5 rounded-xl bg-[#0B0C0F] border border-white/[0.08] text-xs text-[#F4F0E8] focus:border-[#E4583B] focus:outline-none"
                 />
               </div>
             </div>
@@ -1099,7 +1294,7 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
       case 'photo':
         return (
           <div className="space-y-4">
-            <div className="p-4 rounded-2xl bg-[#0F1419] border border-[#232B33] space-y-4">
+            <div className="p-4 rounded-2xl bg-[#121419] border border-white/[0.08] space-y-4">
               <ImageUploaderField
                 label="Hero Main Portrait Photo"
                 value={draftPortfolio.hero.avatarUrl}
@@ -1137,7 +1332,7 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
                   }));
                   showToast('Synced Hero & About profile photo!');
                 }}
-                className="w-full py-2.5 rounded-xl bg-[#FF5722] hover:bg-[#F4511E] text-xs font-mono font-bold text-white flex items-center justify-center space-x-2 min-h-[44px]"
+                className="w-full py-2.5 rounded-xl bg-[#E4583B] hover:bg-[#D0492D] text-xs font-semibold text-white flex items-center justify-center space-x-2 min-h-[44px]"
               >
                 <CheckCircle className="w-4 h-4" />
                 <span>Use Hero Photo for Both Hero &amp; About</span>
@@ -1167,7 +1362,7 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
                 }));
                 showToast('New service item added');
               }}
-              className="w-full py-3 rounded-xl bg-[#141A20] hover:bg-[#1A222B] border border-[#232B33] text-xs font-mono font-bold text-[#FF5722] flex items-center justify-center space-x-2 min-h-[44px]"
+              className="w-full py-3 rounded-xl bg-[#121419] hover:bg-[#171A21] border border-white/[0.08] text-xs font-semibold text-[#E4583B] flex items-center justify-center space-x-2 min-h-[44px]"
             >
               <Plus className="w-4 h-4" />
               <span>Add New Service</span>
@@ -1176,10 +1371,10 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
             {(draftPortfolio.services || []).map((srv, idx) => (
               <div
                 key={srv.id || idx}
-                className="p-4 rounded-2xl bg-[#0F1419] border border-[#232B33] space-y-3"
+                className="p-4 rounded-2xl bg-[#121419] border border-white/[0.08] space-y-3"
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-mono text-[#FF5722] font-bold">
+                  <span className="text-xs text-[#E4583B] font-semibold tabular-nums">
                     Service #{idx + 1}
                   </span>
                   <button
@@ -1207,7 +1402,7 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-mono text-neutral-400 mb-1">
+                  <label className="block text-xs text-[#8E8A82] mb-1">
                     Title (EN)
                   </label>
                   <input
@@ -1221,12 +1416,12 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
                         ),
                       }))
                     }
-                    className="w-full px-3 py-2 rounded-xl bg-[#070A0C] border border-[#232B33] text-xs text-white font-mono min-h-[44px]"
+                    className="w-full px-3 py-2 rounded-xl bg-[#0B0C0F] border border-white/[0.08] text-xs text-[#F4F0E8] focus:border-[#E4583B] focus:outline-none min-h-[44px]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-mono text-neutral-400 mb-1">
+                  <label className="block text-xs text-[#8E8A82] mb-1">
                     Description (EN)
                   </label>
                   <textarea
@@ -1242,7 +1437,7 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
                         ),
                       }))
                     }
-                    className="w-full px-3 py-2 rounded-xl bg-[#070A0C] border border-[#232B33] text-xs text-white font-mono"
+                    className="w-full px-3 py-2 rounded-xl bg-[#0B0C0F] border border-white/[0.08] text-xs text-[#F4F0E8] focus:border-[#E4583B] focus:outline-none"
                   />
                 </div>
               </div>
@@ -1272,7 +1467,7 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
                 }));
                 showToast('New skill category added');
               }}
-              className="w-full py-3 rounded-xl bg-[#141A20] hover:bg-[#1A222B] border border-[#232B33] text-xs font-mono font-bold text-[#FF5722] flex items-center justify-center space-x-2 min-h-[44px]"
+              className="w-full py-3 rounded-xl bg-[#121419] hover:bg-[#171A21] border border-white/[0.08] text-xs font-semibold text-[#E4583B] flex items-center justify-center space-x-2 min-h-[44px]"
             >
               <Plus className="w-4 h-4" />
               <span>Add Skill Category</span>
@@ -1281,10 +1476,10 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
             {(draftPortfolio.skills || []).map((skill, idx) => (
               <div
                 key={skill.id || idx}
-                className="p-3.5 rounded-2xl bg-[#0F1419] border border-[#232B33] space-y-2.5"
+                className="p-3.5 rounded-2xl bg-[#121419] border border-white/[0.08] space-y-2.5"
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-mono text-[#FF5722] font-semibold">
+                  <span className="text-xs text-[#E4583B] font-semibold tabular-nums">
                     Category #{idx + 1}
                   </span>
                   <button
@@ -1312,7 +1507,7 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-mono text-neutral-400 mb-1">
+                  <label className="block text-[11px] text-[#8E8A82] mb-1">
                     Category Title (EN)
                   </label>
                   <input
@@ -1326,12 +1521,12 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
                         ),
                       }))
                     }
-                    className="w-full px-2.5 py-2 rounded-xl bg-[#070A0C] border border-[#232B33] text-xs text-white font-mono min-h-[44px]"
+                    className="w-full px-2.5 py-2 rounded-xl bg-[#0B0C0F] border border-white/[0.08] text-xs text-[#F4F0E8] focus:border-[#E4583B] focus:outline-none min-h-[44px]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-mono text-neutral-400 mb-1">
+                  <label className="block text-[11px] text-[#8E8A82] mb-1">
                     Software / Tools (comma separated)
                   </label>
                   <input
@@ -1344,13 +1539,13 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
                         skills: prev.skills.map((s, i) => (i === idx ? { ...s, tools: list } : s)),
                       }));
                     }}
-                    className="w-full px-2.5 py-2 rounded-xl bg-[#070A0C] border border-[#232B33] text-xs text-white font-mono min-h-[44px]"
+                    className="w-full px-2.5 py-2 rounded-xl bg-[#0B0C0F] border border-white/[0.08] text-xs text-[#F4F0E8] focus:border-[#E4583B] focus:outline-none min-h-[44px]"
                   />
                 </div>
               </div>
             ))}
 
-            <div className="pt-6 border-t border-[#1D232A]">
+            <div className="pt-6 border-t border-white/[0.08]">
               <WorkflowEditor />
             </div>
           </div>
@@ -1397,6 +1592,51 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
       case 'projects':
         return (
           <div className="space-y-4">
+            {/* 1-Click Mobile Behance Group Importer */}
+            <div className="p-4 rounded-2xl bg-[#121419] border border-white/[0.08] space-y-2.5">
+              <div className="flex items-center space-x-2">
+                <Wand2 className="w-4 h-4 text-[#E4583B]" />
+                <h3 className="text-xs font-semibold text-[#F4F0E8]">
+                  Import Entire Behance Project Group
+                </h3>
+              </div>
+              <p className="text-[11px] text-[#8E8A82]">
+                Behance প্রজেক্ট লিংক দিন—সব পোস্টার ১টি প্রজেক্ট গ্রুপে যোগ হয়ে যাবে।
+              </p>
+              <input
+                type="url"
+                value={behanceImportUrl}
+                onChange={(e) => setBehanceImportUrl(e.target.value)}
+                placeholder="https://www.behance.net/gallery/..."
+                className="w-full px-3 py-2.5 rounded-xl bg-[#0B0C0F] border border-white/[0.08] text-xs font-mono text-[#F4F0E8] placeholder-[#6F6B64] focus:border-[#E4583B] focus:outline-none min-h-[44px]"
+              />
+              <button
+                type="button"
+                disabled={importingBehanceProject}
+                onClick={handleImportNewBehanceProject}
+                className="w-full py-2.5 rounded-xl bg-[#E4583B] hover:bg-[#D0492D] text-xs font-semibold text-white flex items-center justify-center space-x-1.5 disabled:opacity-50 min-h-[44px]"
+              >
+                {importingBehanceProject ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Sparkles className="w-4 h-4" />
+                )}
+                <span>{importingBehanceProject ? 'Importing Posters...' : 'Import Behance Group'}</span>
+              </button>
+
+              {behanceImportHint && (
+                <div
+                  className={`p-2.5 rounded-xl text-xs border ${
+                    behanceImportHint.type === 'ok'
+                      ? 'bg-emerald-950/35 border-emerald-500/30 text-emerald-300'
+                      : 'bg-amber-950/35 border-amber-500/30 text-amber-200'
+                  }`}
+                >
+                  {behanceImportHint.text}
+                </div>
+              )}
+            </div>
+
             <button
               type="button"
               onClick={() => {
@@ -1408,6 +1648,7 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
                   category: 'graphic',
                   coverImage: '',
                   galleryImages: [],
+                  galleryCaptions: [],
                   behanceUrl: 'https://www.behance.net/jaberhosain',
                   order: (draftPortfolio.projects?.length || 0) + 1,
                 };
@@ -1417,26 +1658,27 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
                 }));
                 showToast('New graphic project created!');
               }}
-              className="w-full py-3 rounded-xl bg-[#141A20] hover:bg-[#1A222B] border border-[#232B33] text-xs font-mono font-bold text-[#FF5722] flex items-center justify-center space-x-2 min-h-[44px]"
+              className="w-full py-3 rounded-xl bg-[#121419] hover:bg-[#171A21] border border-white/[0.08] text-xs font-semibold text-[#E4583B] flex items-center justify-center space-x-2 min-h-[44px]"
             >
               <Plus className="w-4 h-4" />
-              <span>Add New Graphics Project</span>
+              <span>Add Blank Graphics Project</span>
             </button>
 
             {(draftPortfolio.projects || []).map((proj, idx) => (
               <div
+                id={`mobile-project-${proj.id}`}
                 key={proj.id || idx}
-                className="p-4 rounded-2xl bg-[#0F1419] border border-[#232B33] space-y-3"
+                className="p-4 rounded-2xl bg-[#121419] border border-white/[0.08] space-y-3"
               >
                 {/* Header & Order Controls */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-1.5">
-                    <span className="text-xs font-mono font-bold text-white">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center space-x-1.5 min-w-0">
+                    <span className="text-xs font-semibold text-[#F4F0E8] truncate tabular-nums">
                       #{idx + 1} {proj.title?.en || 'Untitled'}
                     </span>
                   </div>
 
-                  <div className="flex items-center space-x-1">
+                  <div className="flex items-center space-x-1 shrink-0">
                     <button
                       type="button"
                       disabled={idx === 0}
@@ -1449,7 +1691,7 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
                           projects: newProjects.map((p, i) => ({ ...p, order: i + 1 })),
                         }));
                       }}
-                      className="p-2 text-neutral-400 hover:text-white disabled:opacity-30 min-h-[44px] min-w-[44px] flex items-center justify-center"
+                      className="p-2 text-[#8E8A82] hover:text-white disabled:opacity-30 min-h-[44px] min-w-[44px] flex items-center justify-center"
                     >
                       <ArrowUp className="w-4 h-4" />
                     </button>
@@ -1465,7 +1707,7 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
                           projects: newProjects.map((p, i) => ({ ...p, order: i + 1 })),
                         }));
                       }}
-                      className="p-2 text-neutral-400 hover:text-white disabled:opacity-30 min-h-[44px] min-w-[44px] flex items-center justify-center"
+                      className="p-2 text-[#8E8A82] hover:text-white disabled:opacity-30 min-h-[44px] min-w-[44px] flex items-center justify-center"
                     >
                       <ArrowDown className="w-4 h-4" />
                     </button>
@@ -1496,7 +1738,7 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
 
                 {/* Group / Series Name */}
                 <div>
-                  <label className="block text-[11px] font-mono text-neutral-400 mb-1">
+                  <label className="block text-[11px] text-[#8E8A82] mb-1">
                     Project Group / Series Name (Optional, e.g. Eid Poster Series)
                   </label>
                   <input
@@ -1519,12 +1761,12 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
                       }))
                     }
                     placeholder="e.g. Brand Identity / Poster Campaign"
-                    className="w-full px-3 py-2 rounded-xl bg-[#070A0C] border border-[#232B33] text-xs text-white font-mono min-h-[44px]"
+                    className="w-full px-3 py-2 rounded-xl bg-[#0B0C0F] border border-white/[0.08] text-xs text-[#F4F0E8] focus:border-[#E4583B] focus:outline-none min-h-[44px]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-mono text-neutral-400 mb-1">
+                  <label className="block text-[11px] text-[#8E8A82] mb-1">
                     Title (EN)
                   </label>
                   <input
@@ -1538,28 +1780,43 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
                         ),
                       }))
                     }
-                    className="w-full px-3 py-2 rounded-xl bg-[#070A0C] border border-[#232B33] text-xs text-white font-mono min-h-[44px]"
+                    className="w-full px-3 py-2 rounded-xl bg-[#0B0C0F] border border-white/[0.08] text-xs text-[#F4F0E8] focus:border-[#E4583B] focus:outline-none min-h-[44px]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-mono text-neutral-400 mb-1">
+                  <label className="block text-[11px] text-[#8E8A82] mb-1">
                     Behance Project Link (opens in Lightbox)
                   </label>
-                  <input
-                    type="text"
-                    value={proj.behanceUrl || ''}
-                    onChange={(e) =>
-                      updateDraft((prev) => ({
-                        ...prev,
-                        projects: prev.projects?.map((p, i) =>
-                          i === idx ? { ...p, behanceUrl: e.target.value } : p
-                        ),
-                      }))
-                    }
-                    placeholder="https://www.behance.net/gallery/..."
-                    className="w-full px-3 py-2 rounded-xl bg-[#070A0C] border border-[#232B33] text-xs text-white font-mono min-h-[44px]"
-                  />
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={proj.behanceUrl || ''}
+                      onChange={(e) =>
+                        updateDraft((prev) => ({
+                          ...prev,
+                          projects: prev.projects?.map((p, i) =>
+                            i === idx ? { ...p, behanceUrl: e.target.value } : p
+                          ),
+                        }))
+                      }
+                      placeholder="https://www.behance.net/gallery/..."
+                      className="flex-1 min-w-0 px-3 py-2 rounded-xl bg-[#0B0C0F] border border-white/[0.08] text-xs font-mono text-[#F4F0E8] focus:border-[#E4583B] focus:outline-none min-h-[44px]"
+                    />
+                    <button
+                      type="button"
+                      disabled={extractingProjectId === proj.id || !proj.behanceUrl}
+                      onClick={() => handleExtractProjectBehance(proj)}
+                      className="px-3 py-2 rounded-xl bg-[#171A21] hover:bg-[#1E222B] border border-white/[0.08] text-xs font-medium text-[#F4F0E8] disabled:opacity-45 shrink-0 min-h-[44px] flex items-center space-x-1"
+                    >
+                      {extractingProjectId === proj.id ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin text-[#E4583B]" />
+                      ) : (
+                        <Wand2 className="w-3.5 h-3.5 text-[#E4583B]" />
+                      )}
+                      <span>{extractingProjectId === proj.id ? 'Extracting' : 'Extract'}</span>
+                    </button>
+                  </div>
                 </div>
 
                 <ImageUploaderField
@@ -1581,6 +1838,7 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
                   galleryImages={proj.galleryImages || []}
                   galleryCaptions={proj.galleryCaptions || []}
                   coverImage={proj.coverImage || ''}
+                  behanceUrl={proj.behanceUrl || ''}
                   onChange={(nextImages, nextCaptions, newCover) => {
                     updateDraft((prev) => ({
                       ...prev,
@@ -1594,6 +1852,25 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
                             }
                           : p
                       ),
+                    }));
+                  }}
+                  onBehanceImported={({ title, description }) => {
+                    updateDraft((prev) => ({
+                      ...prev,
+                      projects: prev.projects?.map((p, i) => {
+                        if (i !== idx) return p;
+                        const isDefaultTitle =
+                          !p.title?.en || p.title.en === 'New Graphic Project' || p.title.en === 'Untitled';
+                        return {
+                          ...p,
+                          title: isDefaultTitle && title ? { ...(p.title || { en: '', bn: '', ar: '' }), en: title } : p.title,
+                          groupName: !p.groupName?.en && title ? { ...(p.groupName || { en: '', bn: '', ar: '' }), en: title } : p.groupName,
+                          description:
+                            !p.description?.en && description
+                              ? { ...(p.description || { en: '', bn: '', ar: '' }), en: description }
+                              : p.description,
+                        };
+                      }),
                     }));
                   }}
                 />
@@ -1634,7 +1911,7 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
                 }));
                 showToast('New video entry added');
               }}
-              className="w-full py-3 rounded-xl bg-[#141A20] hover:bg-[#1A222B] border border-[#232B33] text-xs font-mono font-bold text-[#FF5722] flex items-center justify-center space-x-2 min-h-[44px]"
+              className="w-full py-3 rounded-xl bg-[#121419] hover:bg-[#171A21] border border-white/[0.08] text-xs font-semibold text-[#E4583B] flex items-center justify-center space-x-2 min-h-[44px]"
             >
               <Plus className="w-4 h-4" />
               <span>Add New Video</span>
@@ -1643,10 +1920,10 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
             {(draftPortfolio.videos || []).map((vid, idx) => (
               <div
                 key={vid.id || idx}
-                className="p-4 rounded-2xl bg-[#0F1419] border border-[#232B33] space-y-3"
+                className="p-4 rounded-2xl bg-[#121419] border border-white/[0.08] space-y-3"
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-mono font-bold text-white">
+                  <span className="text-xs font-semibold text-[#F4F0E8] tabular-nums">
                     #{idx + 1} {vid.title?.en || 'Untitled Video'}
                   </span>
                   <div className="flex items-center space-x-1">
@@ -1662,7 +1939,7 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
                           videos: newVideos.map((v, i) => ({ ...v, order: i + 1 })),
                         }));
                       }}
-                      className="p-2 text-neutral-400 hover:text-white disabled:opacity-30 min-h-[44px] min-w-[44px] flex items-center justify-center"
+                      className="p-2 text-[#8E8A82] hover:text-white disabled:opacity-30 min-h-[44px] min-w-[44px] flex items-center justify-center"
                     >
                       <ArrowUp className="w-4 h-4" />
                     </button>
@@ -1678,7 +1955,7 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
                           videos: newVideos.map((v, i) => ({ ...v, order: i + 1 })),
                         }));
                       }}
-                      className="p-2 text-neutral-400 hover:text-white disabled:opacity-30 min-h-[44px] min-w-[44px] flex items-center justify-center"
+                      className="p-2 text-[#8E8A82] hover:text-white disabled:opacity-30 min-h-[44px] min-w-[44px] flex items-center justify-center"
                     >
                       <ArrowDown className="w-4 h-4" />
                     </button>
@@ -1710,7 +1987,7 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
                 {/* Platform & Order */}
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <label className="block text-[10px] font-mono text-neutral-400 mb-1">
+                    <label className="block text-[11px] text-[#8E8A82] mb-1">
                       Platform
                     </label>
                     <select
@@ -1722,7 +1999,7 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
                           videos: prev.videos.map((v, i) => (i === idx ? { ...v, videoType: val } : v)),
                         }));
                       }}
-                      className="w-full px-2.5 py-2 rounded-xl bg-[#070A0C] border border-[#232B33] text-xs text-[#FF5722] font-mono focus:outline-none min-h-[40px]"
+                      className="w-full px-2.5 py-2 rounded-xl bg-[#0B0C0F] border border-white/[0.08] text-xs text-[#F4F0E8] focus:border-[#E4583B] focus:outline-none min-h-[40px]"
                     >
                       <option value="vimeo">Vimeo</option>
                       <option value="youtube">YouTube</option>
@@ -1731,7 +2008,7 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
                     </select>
                   </div>
                   <div>
-                    <label className="block text-[10px] font-mono text-neutral-400 mb-1">
+                    <label className="block text-[11px] text-[#8E8A82] mb-1">
                       Order
                     </label>
                     <input
@@ -1745,13 +2022,13 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
                           videos: prev.videos.map((v, i) => (i === idx ? { ...v, order: val } : v)),
                         }));
                       }}
-                      className="w-full px-2.5 py-2 rounded-xl bg-[#070A0C] border border-[#232B33] text-xs text-white font-mono min-h-[40px]"
+                      className="w-full px-2.5 py-2 rounded-xl bg-[#0B0C0F] border border-white/[0.08] text-xs text-[#F4F0E8] tabular-nums min-h-[40px]"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-mono text-neutral-400 mb-1">
+                  <label className="block text-[11px] text-[#8E8A82] mb-1">
                     Video URL (Vimeo, YouTube or Facebook)
                   </label>
                   <input
@@ -1781,33 +2058,31 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
                       }
                     }}
                     placeholder="https://vimeo.com/... or https://youtube.com/..."
-                    className="w-full px-3 py-2 rounded-xl bg-[#070A0C] border border-[#232B33] text-xs text-white font-mono min-h-[44px]"
+                    className="w-full px-3 py-2 rounded-xl bg-[#0B0C0F] border border-white/[0.08] text-xs font-mono text-[#F4F0E8] focus:border-[#E4583B] focus:outline-none min-h-[44px]"
                   />
                 </div>
 
-                {/* Thumbnail Preview (if any) - object-contain */}
                 {(vid.customThumbnailUrl || vid.thumbnailUrl) && (
-                  <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-[#080B0D] border border-[#232B33] flex items-center justify-center">
+                  <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-[#0B0C0F] border border-white/[0.08] flex items-center justify-center">
                     <img
                       src={vid.customThumbnailUrl || vid.thumbnailUrl}
                       alt="Thumbnail preview"
                       className="w-full h-full object-contain"
                     />
-                    <div className="absolute top-2 left-2 flex items-center space-x-1.5 bg-black/85 backdrop-blur-sm px-2 py-0.5 rounded text-[10px] font-mono border border-[#232B33]">
+                    <div className="absolute top-2 left-2 flex items-center space-x-1.5 bg-black/85 backdrop-blur-sm px-2 py-0.5 rounded text-[10px] border border-white/[0.08]">
                       {vid.customThumbnailUrl ? (
                         <span className="text-emerald-400">Custom Thumbnail</span>
                       ) : vid.videoType === 'vimeo' ? (
                         <span className="text-[#1AB7EA] flex items-center gap-1">
-                          <VimeoIcon className="w-3 h-3" /> Vimeo Auto Thumbnail
+                          <VimeoIcon className="w-3 h-3" /> Vimeo Auto
                         </span>
                       ) : (
-                        <span className="text-neutral-300">Auto Thumbnail</span>
+                        <span className="text-[#D7D2C8]">Auto Thumbnail</span>
                       )}
                     </div>
                   </div>
                 )}
 
-                {/* Reset to Automatic Thumbnail Button (Mobile) */}
                 {vid.customThumbnailUrl && (
                   <button
                     type="button"
@@ -1823,7 +2098,7 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
                       }
                       showToast('Reset to automatic thumbnail');
                     }}
-                    className="w-full py-2 px-3 rounded-xl bg-amber-950/40 hover:bg-amber-950/60 border border-amber-500/30 text-xs font-mono font-semibold text-amber-300 flex items-center justify-center space-x-1.5 min-h-[44px]"
+                    className="w-full py-2 px-3 rounded-xl bg-amber-950/35 hover:bg-amber-950/55 border border-amber-500/30 text-xs font-medium text-amber-300 flex items-center justify-center space-x-1.5 min-h-[44px]"
                   >
                     <RotateCcw className="w-3.5 h-3.5 text-amber-400" />
                     <span>Reset to automatic thumbnail</span>
@@ -1835,15 +2110,15 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
                     type="button"
                     disabled={fetchingOgId === vid.id}
                     onClick={() => handleFetchOg(vid, idx)}
-                    className="flex-1 py-2 px-3 rounded-xl bg-[#141A20] hover:bg-[#1A222B] border border-[#232B33] text-xs font-mono font-semibold text-neutral-200 flex items-center justify-center space-x-1.5 min-h-[44px]"
+                    className="flex-1 py-2 px-3 rounded-xl bg-[#171A21] hover:bg-[#1E222B] border border-white/[0.08] text-xs font-medium text-[#EAE5DC] flex items-center justify-center space-x-1.5 min-h-[44px]"
                   >
-                    <Sparkles className="w-3.5 h-3.5 text-[#FF5722]" />
-                    <span>{fetchingOgId === vid.id ? 'Fetching...' : 'Re-fetch Thumbnail'}</span>
+                    <Sparkles className="w-3.5 h-3.5 text-[#E4583B]" />
+                    <span>{fetchingOgId === vid.id ? 'Fetching...' : 'Re-fetch Thumb'}</span>
                   </button>
 
-                  <label className="py-2 px-3 rounded-xl bg-[#141A20] hover:bg-[#1A222B] border border-[#232B33] text-xs font-mono font-semibold text-neutral-200 flex items-center justify-center space-x-1.5 cursor-pointer min-h-[44px]">
-                    <Upload className="w-3.5 h-3.5 text-[#FF5722]" />
-                    <span>Upload Thumbnail</span>
+                  <label className="py-2 px-3 rounded-xl bg-[#171A21] hover:bg-[#1E222B] border border-white/[0.08] text-xs font-medium text-[#EAE5DC] flex items-center justify-center space-x-1.5 cursor-pointer min-h-[44px]">
+                    <Upload className="w-3.5 h-3.5 text-[#E4583B]" />
+                    <span>Upload Thumb</span>
                     <input
                       type="file"
                       accept="image/*"
@@ -1863,7 +2138,7 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-mono text-neutral-400 mb-1">
+                  <label className="block text-[11px] text-[#8E8A82] mb-1">
                     Title (EN)
                   </label>
                   <input
@@ -1877,7 +2152,7 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
                         ),
                       }))
                     }
-                    className="w-full px-3 py-2 rounded-xl bg-[#070A0C] border border-[#232B33] text-xs text-white font-mono min-h-[44px]"
+                    className="w-full px-3 py-2 rounded-xl bg-[#0B0C0F] border border-white/[0.08] text-xs text-[#F4F0E8] focus:border-[#E4583B] focus:outline-none min-h-[44px]"
                   />
                 </div>
               </div>
@@ -1898,10 +2173,10 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
       case 'channels':
         return (
           <div className="space-y-4">
-            <div className="p-4 rounded-2xl bg-[#0F1419] border border-[#232B33] space-y-3">
-              <h3 className="text-sm font-bold text-white font-mono">Channel Links</h3>
+            <div className="p-4 rounded-2xl bg-[#121419] border border-white/[0.08] space-y-3">
+              <h3 className="text-sm font-semibold text-[#F4F0E8]">Channel Links</h3>
               <div>
-                <label className="block text-xs font-mono text-neutral-400 mb-1">
+                <label className="block text-xs text-[#8E8A82] mb-1">
                   YouTube Channel URL
                 </label>
                 <input
@@ -1914,12 +2189,12 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
                     }))
                   }
                   placeholder="https://www.youtube.com/@mdjaberhosain"
-                  className="w-full px-3 py-2 rounded-xl bg-[#070A0C] border border-[#232B33] text-xs text-white font-mono min-h-[44px]"
+                  className="w-full px-3 py-2 rounded-xl bg-[#0B0C0F] border border-white/[0.08] text-xs font-mono text-[#F4F0E8] focus:border-[#E4583B] focus:outline-none min-h-[44px]"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-mono text-neutral-400 mb-1">
+                <label className="block text-xs text-[#8E8A82] mb-1">
                   Facebook Profile / Page URL
                 </label>
                 <input
@@ -1932,12 +2207,12 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
                     }))
                   }
                   placeholder="https://www.facebook.com/..."
-                  className="w-full px-3 py-2 rounded-xl bg-[#070A0C] border border-[#232B33] text-xs text-white font-mono min-h-[44px]"
+                  className="w-full px-3 py-2 rounded-xl bg-[#0B0C0F] border border-white/[0.08] text-xs font-mono text-[#F4F0E8] focus:border-[#E4583B] focus:outline-none min-h-[44px]"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-mono text-neutral-400 mb-1">
+                <label className="block text-xs text-[#8E8A82] mb-1">
                   Behance Profile URL
                 </label>
                 <input
@@ -1950,7 +2225,7 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
                     }))
                   }
                   placeholder="https://www.behance.net/..."
-                  className="w-full px-3 py-2 rounded-xl bg-[#070A0C] border border-[#232B33] text-xs text-white font-mono min-h-[44px]"
+                  className="w-full px-3 py-2 rounded-xl bg-[#0B0C0F] border border-white/[0.08] text-xs font-mono text-[#F4F0E8] focus:border-[#E4583B] focus:outline-none min-h-[44px]"
                 />
               </div>
             </div>
@@ -1963,10 +2238,10 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
       case 'contact-info':
         return (
           <div className="space-y-4">
-            <div className="p-4 rounded-2xl bg-[#0F1419] border border-[#232B33] space-y-4">
-              <h3 className="text-sm font-bold text-white font-mono">Direct Contact Information</h3>
+            <div className="p-4 rounded-2xl bg-[#121419] border border-white/[0.08] space-y-4">
+              <h3 className="text-sm font-semibold text-[#F4F0E8]">Direct Contact Information</h3>
               <div>
-                <label className="block text-xs font-mono text-neutral-400 mb-1">
+                <label className="block text-xs text-[#8E8A82] mb-1">
                   Primary Email
                 </label>
                 <input
@@ -1979,12 +2254,12 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
                     }))
                   }
                   placeholder="yourname@gmail.com"
-                  className="w-full px-3 py-2 rounded-xl bg-[#070A0C] border border-[#232B33] text-xs text-white font-mono min-h-[44px]"
+                  className="w-full px-3 py-2 rounded-xl bg-[#0B0C0F] border border-white/[0.08] text-xs font-mono text-[#F4F0E8] focus:border-[#E4583B] focus:outline-none min-h-[44px]"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-mono text-neutral-400 mb-1">Facebook URL</label>
+                <label className="block text-xs text-[#8E8A82] mb-1">Facebook URL</label>
                 <input
                   type="text"
                   value={draftPortfolio.contact?.facebookUrl || ''}
@@ -1993,12 +2268,12 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
                     contact: { ...(prev.contact || {}), facebookUrl: e.target.value }
                   }))}
                   placeholder="https://www.facebook.com/..."
-                  className="w-full px-3 py-2 rounded-xl bg-[#070A0C] border border-[#232B33] text-xs text-white font-mono min-h-[44px]"
+                  className="w-full px-3 py-2 rounded-xl bg-[#0B0C0F] border border-white/[0.08] text-xs font-mono text-[#F4F0E8] focus:border-[#E4583B] focus:outline-none min-h-[44px]"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-mono text-neutral-400 mb-1">Telegram URL</label>
+                <label className="block text-xs text-[#8E8A82] mb-1">Telegram URL</label>
                 <input
                   type="text"
                   value={draftPortfolio.contact?.telegramUrl || ''}
@@ -2007,12 +2282,12 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
                     contact: { ...(prev.contact || {}), telegramUrl: e.target.value }
                   }))}
                   placeholder="https://t.me/..."
-                  className="w-full px-3 py-2 rounded-xl bg-[#070A0C] border border-[#232B33] text-xs text-white font-mono min-h-[44px]"
+                  className="w-full px-3 py-2 rounded-xl bg-[#0B0C0F] border border-white/[0.08] text-xs font-mono text-[#F4F0E8] focus:border-[#E4583B] focus:outline-none min-h-[44px]"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-mono text-neutral-400 mb-1">Behance URL</label>
+                <label className="block text-xs text-[#8E8A82] mb-1">Behance URL</label>
                 <input
                   type="text"
                   value={draftPortfolio.contact?.behanceUrl || ''}
@@ -2021,7 +2296,7 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
                     contact: { ...(prev.contact || {}), behanceUrl: e.target.value }
                   }))}
                   placeholder="https://www.behance.net/..."
-                  className="w-full px-3 py-2 rounded-xl bg-[#070A0C] border border-[#232B33] text-xs text-white font-mono min-h-[44px]"
+                  className="w-full px-3 py-2 rounded-xl bg-[#0B0C0F] border border-white/[0.08] text-xs font-mono text-[#F4F0E8] focus:border-[#E4583B] focus:outline-none min-h-[44px]"
                 />
               </div>
             </div>
@@ -2046,10 +2321,10 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
           <div className="space-y-4">
             <SocialLinksEditor />
 
-            <div className="p-4 rounded-2xl bg-[#0F1419] border border-[#232B33] space-y-3">
-              <h3 className="text-sm font-bold text-white font-mono">Direct Contact Information</h3>
+            <div className="p-4 rounded-2xl bg-[#121419] border border-white/[0.08] space-y-3">
+              <h3 className="text-sm font-semibold text-[#F4F0E8]">Direct Contact Information</h3>
               <div>
-                <label className="block text-xs font-mono text-neutral-400 mb-1">
+                <label className="block text-xs text-[#8E8A82] mb-1">
                   Primary Email
                 </label>
                 <input
@@ -2061,7 +2336,7 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
                       contact: { ...(prev.contact || {}), email: e.target.value },
                     }))
                   }
-                  className="w-full px-3 py-2 rounded-xl bg-[#070A0C] border border-[#232B33] text-xs text-white font-mono min-h-[44px]"
+                  className="w-full px-3 py-2 rounded-xl bg-[#0B0C0F] border border-white/[0.08] text-xs font-mono text-[#F4F0E8] focus:border-[#E4583B] focus:outline-none min-h-[44px]"
                 />
               </div>
             </div>
@@ -2106,29 +2381,29 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
       case 'controls-backup':
         return (
           <div className="space-y-4">
-            <div className="p-4 rounded-2xl bg-[#0F1419] border border-[#232B33] space-y-3">
-              <h3 className="text-sm font-bold text-white font-mono">Data Export & Backup</h3>
-              <p className="text-xs text-neutral-400 font-mono">Download complete portfolio JSON backup</p>
+            <div className="p-4 rounded-2xl bg-[#121419] border border-white/[0.08] space-y-3">
+              <h3 className="text-sm font-semibold text-[#F4F0E8]">Data Export &amp; Backup</h3>
+              <p className="text-xs text-[#8E8A82]">Download complete portfolio JSON backup</p>
               <button
                 type="button"
                 onClick={() => {
                   exportPortfolioBackup();
                   showToast('Backup JSON downloaded successfully!');
                 }}
-                className="w-full py-3 rounded-xl bg-[#141A20] hover:bg-[#1A222B] border border-[#232B33] text-xs font-mono font-bold text-white flex items-center justify-center space-x-2 min-h-[44px]"
+                className="w-full py-3 rounded-xl bg-[#171A21] hover:bg-[#1E222B] border border-white/[0.08] text-xs font-semibold text-[#F4F0E8] flex items-center justify-center space-x-2 min-h-[44px]"
               >
-                <Download className="w-4 h-4 text-[#FF5722]" />
+                <Download className="w-4 h-4 text-[#E4583B]" />
                 <span>Download Complete JSON Backup</span>
               </button>
             </div>
 
-            <div className="p-4 rounded-2xl bg-[#0F1419] border border-[#232B33] space-y-3">
-              <h3 className="text-sm font-bold text-white font-mono">Draft & Deployment Controls</h3>
+            <div className="p-4 rounded-2xl bg-[#121419] border border-white/[0.08] space-y-3">
+              <h3 className="text-sm font-semibold text-[#F4F0E8]">Draft &amp; Deployment Controls</h3>
               <button
                 type="button"
                 onClick={handlePublishLive}
                 disabled={publishing}
-                className="w-full py-3.5 rounded-xl bg-[#FF5722] hover:bg-[#F4511E] text-xs font-mono font-bold text-white flex items-center justify-center space-x-2 shadow-lg shadow-orange-900/30 min-h-[48px]"
+                className="w-full py-3.5 rounded-xl bg-[#E4583B] hover:bg-[#D0492D] text-xs font-semibold text-white flex items-center justify-center space-x-2 min-h-[48px]"
               >
                 <Send className="w-4 h-4" />
                 <span>{publishing ? 'Publishing Live...' : 'Publish to Live Site'}</span>
@@ -2136,20 +2411,17 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
 
               <button
                 type="button"
-                onClick={() => {
-                  setIsPreviewDraft(true);
-                  setShowLivePreview(true);
-                }}
-                className="w-full py-3 rounded-xl bg-[#141A20] border border-[#232B33] text-xs font-mono font-bold text-white flex items-center justify-center space-x-2 min-h-[44px]"
+                onClick={openLivePreview}
+                className="w-full py-3 rounded-xl bg-[#171A21] hover:bg-[#1E222B] border border-white/[0.08] text-xs font-semibold text-[#F4F0E8] flex items-center justify-center space-x-2 min-h-[44px]"
               >
-                <Eye className="w-4 h-4 text-[#FF5722]" />
-                <span>Launch Mobile Preview</span>
+                <Eye className="w-4 h-4 text-[#E4583B]" />
+                <span>Launch Mobile Draft Preview</span>
               </button>
 
               <button
                 type="button"
                 onClick={handleSignOut}
-                className="w-full py-3 rounded-xl bg-rose-950/20 border border-rose-500/30 text-xs font-mono font-bold text-rose-400 hover:text-rose-300 flex items-center justify-center space-x-2 min-h-[44px]"
+                className="w-full py-3 rounded-xl bg-rose-950/20 border border-rose-500/30 text-xs font-semibold text-rose-400 hover:text-rose-300 flex items-center justify-center space-x-2 min-h-[44px]"
               >
                 <LogOut className="w-4 h-4" />
                 <span>Sign Out from Admin</span>
@@ -2165,49 +2437,49 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
         return (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-mono text-neutral-400">
+              <span className="text-xs text-[#8E8A82] tabular-nums">
                 {leads.length} Inquiries Received
               </span>
               <button
                 type="button"
                 onClick={loadLeadsData}
                 disabled={loadingLeads}
-                className="px-3 py-1.5 rounded-xl bg-[#141A20] border border-[#232B33] text-xs font-mono text-[#FF5722] min-h-[44px] flex items-center"
+                className="px-3 py-1.5 rounded-xl bg-[#121419] border border-white/[0.08] text-xs font-medium text-[#E4583B] min-h-[44px] flex items-center"
               >
                 {loadingLeads ? 'Refreshing...' : 'Refresh'}
               </button>
             </div>
 
             {leads.length === 0 ? (
-              <div className="p-8 text-center rounded-2xl bg-[#0F1419] border border-[#232B33]">
-                <Inbox className="w-8 h-8 text-neutral-600 mx-auto mb-2" />
-                <p className="text-xs text-neutral-400 font-mono">No contact submissions yet</p>
+              <div className="p-8 text-center rounded-2xl bg-[#121419] border border-white/[0.08]">
+                <Inbox className="w-8 h-8 text-[#6F6B64] mx-auto mb-2" />
+                <p className="text-xs text-[#8E8A82]">No contact submissions yet</p>
               </div>
             ) : (
               leads.map((lead) => (
                 <div
                   key={lead.id}
-                  className="p-4 rounded-2xl bg-[#0F1419] border border-[#232B33] space-y-2.5"
+                  className="p-4 rounded-2xl bg-[#121419] border border-white/[0.08] space-y-2.5"
                 >
-                  <div className="flex items-start justify-between">
+                  <div className="flex items-start justify-between gap-2">
                     <div>
-                      <h4 className="text-sm font-bold text-white">{lead.name}</h4>
-                      <p className="text-xs text-neutral-400 font-mono">{lead.email}</p>
+                      <h4 className="text-sm font-semibold text-[#F4F0E8]">{lead.name}</h4>
+                      <p className="text-xs text-[#8E8A82] font-mono">{lead.email}</p>
                     </div>
                     <span
-                      className={`text-[10px] font-mono uppercase px-2 py-0.5 rounded-full ${
+                      className={`text-xs font-medium capitalize ${
                         lead.status === 'completed'
-                          ? 'bg-emerald-500/20 text-emerald-400'
+                          ? 'text-emerald-400'
                           : lead.status === 'contacted'
-                          ? 'bg-sky-500/20 text-sky-400'
-                          : 'bg-[#FF5722]/20 text-[#FF5722]'
+                          ? 'text-sky-400'
+                          : 'text-[#E4583B]'
                       }`}
                     >
                       {lead.status}
                     </span>
                   </div>
 
-                  <p className="text-xs text-neutral-300 bg-[#070A0C] p-2.5 rounded-xl border border-[#232B33]">
+                  <p className="text-xs text-[#D7D2C8] bg-[#0B0C0F] p-3 rounded-xl border border-white/[0.06]">
                     {lead.message}
                   </p>
 
@@ -2221,7 +2493,7 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
                           showToast('Status updated to Contacted');
                         }
                       }}
-                      className="px-2.5 py-1.5 rounded-lg bg-[#141A20] text-xs font-mono text-neutral-300 min-h-[44px] flex items-center"
+                      className="px-3 py-1.5 rounded-lg bg-[#171A21] border border-white/[0.08] text-xs font-medium text-[#D7D2C8] min-h-[44px] flex items-center"
                     >
                       Mark Contacted
                     </button>
@@ -2234,7 +2506,7 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
                           showToast('Status updated to Completed');
                         }
                       }}
-                      className="px-2.5 py-1.5 rounded-lg bg-emerald-500/10 text-xs font-mono text-emerald-400 min-h-[44px] flex items-center"
+                      className="px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-xs font-medium text-emerald-400 min-h-[44px] flex items-center"
                     >
                       Mark Completed
                     </button>
@@ -2251,14 +2523,14 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
       case 'sheets':
         return (
           <div className="space-y-4">
-            <div className="p-4 rounded-2xl bg-[#0F1419] border border-[#232B33] space-y-3">
-              <h3 className="text-sm font-bold text-white font-mono">Google Sheets Webhook</h3>
-              <p className="text-xs text-neutral-400 font-mono">
+            <div className="p-4 rounded-2xl bg-[#121419] border border-white/[0.08] space-y-3">
+              <h3 className="text-sm font-semibold text-[#F4F0E8]">Google Sheets Webhook</h3>
+              <p className="text-xs text-[#8E8A82]">
                 Enter your Google Apps Script Web App URL to receive inquiries directly into your
                 spreadsheet.
               </p>
               <div>
-                <label className="block text-xs font-mono text-neutral-400 mb-1">
+                <label className="block text-xs text-[#8E8A82] mb-1">
                   Webhook URL
                 </label>
                 <input
@@ -2271,7 +2543,7 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
                     }))
                   }
                   placeholder="https://script.google.com/macros/s/.../exec"
-                  className="w-full px-3 py-2 rounded-xl bg-[#070A0C] border border-[#232B33] text-xs text-white font-mono min-h-[44px]"
+                  className="w-full px-3 py-2 rounded-xl bg-[#0B0C0F] border border-white/[0.08] text-xs font-mono text-[#F4F0E8] focus:border-[#E4583B] focus:outline-none min-h-[44px]"
                 />
               </div>
             </div>
@@ -2279,14 +2551,14 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
         );
 
       // ----------------------------------------
-      // THEME COLORS (Exact desktop features only!)
+      // THEME COLORS
       // ----------------------------------------
       case 'theme-colors':
         return (
           <div className="space-y-4">
-            <div className="p-4 rounded-2xl bg-[#0F1419] border border-[#232B33] space-y-4">
+            <div className="p-4 rounded-2xl bg-[#121419] border border-white/[0.08] space-y-4">
               <div className="flex items-center justify-between">
-                <h3 className="text-sm font-bold text-white font-mono">Brand Colors</h3>
+                <h3 className="text-sm font-semibold text-[#F4F0E8]">Brand Colors</h3>
                 <button
                   type="button"
                   onClick={() => {
@@ -2300,7 +2572,7 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
                     }));
                     showToast('Colors reset to default');
                   }}
-                  className="text-xs font-mono text-[#FF5722] flex items-center space-x-1 min-h-[44px]"
+                  className="text-xs font-medium text-[#E4583B] flex items-center space-x-1 min-h-[44px]"
                 >
                   <RotateCcw className="w-3.5 h-3.5" />
                   <span>Reset Default</span>
@@ -2317,13 +2589,13 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
               ].map((c) => (
                 <div
                   key={c.key}
-                  className="p-3 rounded-xl bg-[#070A0C] border border-[#232B33] flex items-center justify-between"
+                  className="p-3 rounded-xl bg-[#0B0C0F] border border-white/[0.08] flex items-center justify-between"
                 >
                   <div>
-                    <span className="text-xs font-mono text-white font-semibold block">
+                    <span className="text-xs text-[#F4F0E8] font-medium block">
                       {c.label}
                     </span>
-                    <span className="text-[11px] font-mono text-neutral-500 uppercase">
+                    <span className="text-[11px] font-mono text-[#8E8A82] uppercase">
                       {themeColors[c.key]}
                     </span>
                   </div>
@@ -2340,14 +2612,14 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
         );
 
       // ----------------------------------------
-      // THEME FONTS (Exact desktop features only!)
+      // THEME FONTS
       // ----------------------------------------
       case 'theme-fonts':
         return (
           <div className="space-y-4">
-            <div className="p-4 rounded-2xl bg-[#0F1419] border border-[#232B33] space-y-4">
+            <div className="p-4 rounded-2xl bg-[#121419] border border-white/[0.08] space-y-4">
               <div className="flex items-center justify-between">
-                <h3 className="text-sm font-bold text-white font-mono">Typography Selection</h3>
+                <h3 className="text-sm font-semibold text-[#F4F0E8]">Typography Selection</h3>
                 <button
                   type="button"
                   onClick={() => {
@@ -2361,7 +2633,7 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
                     }));
                     showToast('Fonts reset to default');
                   }}
-                  className="text-xs font-mono text-[#FF5722] flex items-center space-x-1 min-h-[44px]"
+                  className="text-xs font-medium text-[#E4583B] flex items-center space-x-1 min-h-[44px]"
                 >
                   <RotateCcw className="w-3.5 h-3.5" />
                   <span>Reset Default</span>
@@ -2369,13 +2641,13 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
               </div>
 
               <div>
-                <label className="block text-xs font-mono text-neutral-300 font-semibold mb-1.5">
+                <label className="block text-xs font-medium text-[#D7D2C8] mb-1.5">
                   বাংলা ফন্ট (Bangla Font)
                 </label>
                 <select
                   value={themeFonts.bangla}
                   onChange={(e) => updateThemeFont('bangla', e.target.value)}
-                  className="w-full px-3 py-2.5 rounded-xl bg-[#070A0C] border border-[#232B33] text-sm text-white font-mono focus:border-[#FF5722] focus:outline-none min-h-[44px]"
+                  className="w-full px-3 py-2.5 rounded-xl bg-[#0B0C0F] border border-white/[0.08] text-sm text-[#F4F0E8] focus:border-[#E4583B] focus:outline-none min-h-[44px]"
                 >
                   <option value="Li Ador Noirrit">Li Ador Noirrit (আদর নৈঋত - Default Locked)</option>
                   <option value="Hind Siliguri">Hind Siliguri (হিন্দ শিলিগুড়ি)</option>
@@ -2385,13 +2657,13 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
               </div>
 
               <div>
-                <label className="block text-xs font-mono text-neutral-300 font-semibold mb-1.5">
+                <label className="block text-xs font-medium text-[#D7D2C8] mb-1.5">
                   English Font
                 </label>
                 <select
                   value={themeFonts.english}
                   onChange={(e) => updateThemeFont('english', e.target.value)}
-                  className="w-full px-3 py-2.5 rounded-xl bg-[#070A0C] border border-[#232B33] text-sm text-white font-mono focus:border-[#FF5722] focus:outline-none min-h-[44px]"
+                  className="w-full px-3 py-2.5 rounded-xl bg-[#0B0C0F] border border-white/[0.08] text-sm text-[#F4F0E8] focus:border-[#E4583B] focus:outline-none min-h-[44px]"
                 >
                   <option value="Plus Jakarta Sans">Plus Jakarta Sans (Default Locked)</option>
                   <option value="Space Grotesk">Space Grotesk</option>
@@ -2402,13 +2674,13 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
               </div>
 
               <div>
-                <label className="block text-xs font-mono text-neutral-300 font-semibold mb-1.5">
+                <label className="block text-xs font-medium text-[#D7D2C8] mb-1.5">
                   الخط العربي (Arabic Font)
                 </label>
                 <select
                   value={themeFonts.arabic}
                   onChange={(e) => updateThemeFont('arabic', e.target.value)}
-                  className="w-full px-3 py-2.5 rounded-xl bg-[#070A0C] border border-[#232B33] text-sm text-white font-mono focus:border-[#FF5722] focus:outline-none min-h-[44px]"
+                  className="w-full px-3 py-2.5 rounded-xl bg-[#0B0C0F] border border-white/[0.08] text-sm text-[#F4F0E8] focus:border-[#E4583B] focus:outline-none min-h-[44px]"
                 >
                   <option value="Cairo">Cairo (القاهرة - Default Locked)</option>
                   <option value="Amiri">Amiri (أميري)</option>
@@ -2420,20 +2692,20 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
         );
 
       // ----------------------------------------
-      // VISITOR THEME SELECTOR (Exact desktop features only!)
+      // VISITOR THEME SELECTOR
       // ----------------------------------------
       case 'theme-visitor':
         return (
           <div className="space-y-4">
-            <div className="p-4 rounded-2xl bg-[#0F1419] border border-[#232B33] space-y-3">
-              <h3 className="text-sm font-bold text-white font-mono">Visitor Theme Selector</h3>
-              <p className="text-xs text-neutral-400 font-mono">
+            <div className="p-4 rounded-2xl bg-[#121419] border border-white/[0.08] space-y-3">
+              <h3 className="text-sm font-semibold text-[#F4F0E8]">Visitor Theme Selector</h3>
+              <p className="text-xs text-[#8E8A82]">
                 Choose which themes visitors can preview in the website navbar dropdown
               </p>
 
               <div className="space-y-2 pt-1">
                 {[
-                  { id: 'dark' as ThemeId, label: 'Dark (Default Locked)', dot: '#FF5722', locked: true },
+                  { id: 'dark' as ThemeId, label: 'Dark (Default Locked)', dot: '#E4583B', locked: true },
                   { id: 'light' as ThemeId, label: 'Light Theme', dot: '#EA580C', locked: false },
                   { id: 'blue' as ThemeId, label: 'Blue Ocean', dot: '#38BDF8', locked: false },
                   { id: 'green' as ThemeId, label: 'Emerald Green', dot: '#10B981', locked: false },
@@ -2448,8 +2720,8 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
                       onClick={() => !th.locked && toggleVisitorTheme(th.id)}
                       className={`p-3 rounded-xl border flex items-center justify-between cursor-pointer min-h-[48px] ${
                         isEnabled
-                          ? 'bg-[#141A20] border-[#FF5722]/50'
-                          : 'bg-[#070A0C] border-[#232B33] opacity-60'
+                          ? 'bg-[#171A21] border-[#E4583B]/50'
+                          : 'bg-[#0B0C0F] border-white/[0.08] opacity-60'
                       }`}
                     >
                       <div className="flex items-center space-x-2.5">
@@ -2457,13 +2729,13 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
                           className="w-3.5 h-3.5 rounded-full border border-black/30"
                           style={{ backgroundColor: th.dot }}
                         />
-                        <span className="text-xs font-mono text-white font-semibold">{th.label}</span>
+                        <span className="text-xs text-[#F4F0E8] font-medium">{th.label}</span>
                       </div>
                       <div
                         className={`w-5 h-5 rounded flex items-center justify-center border ${
                           isEnabled
-                            ? 'bg-[#FF5722] border-[#FF5722] text-white'
-                            : 'border-[#333D48]'
+                            ? 'bg-[#E4583B] border-[#E4583B] text-white'
+                            : 'border-white/20'
                         }`}
                       >
                         {isEnabled && <Check className="w-3.5 h-3.5" />}
@@ -2485,15 +2757,15 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
   // 4. MAIN MOBILE ADMIN LAYOUT
   // ==========================================
   return (
-    <div className="min-h-screen bg-[#070A0C] text-neutral-100 flex flex-col font-sans pb-24">
+    <div className="min-h-screen bg-[#0B0C0F] text-[#F4F0E8] flex flex-col font-sans pb-24">
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed top-4 left-4 right-4 z-50 animate-in fade-in slide-in-from-top duration-200">
+        <div className="fixed top-4 left-4 right-4 z-50">
           <div
-            className={`p-3.5 rounded-2xl shadow-2xl border text-xs font-mono font-semibold flex items-center space-x-2.5 ${
+            className={`p-3.5 rounded-xl shadow-2xl border text-xs font-medium flex items-center space-x-2.5 ${
               toastType === 'success'
-                ? 'bg-[#141A20]/95 border-emerald-500/50 text-emerald-300'
-                : 'bg-[#141A20]/95 border-rose-500/50 text-rose-300'
+                ? 'bg-[#121419]/95 border-emerald-500/40 text-emerald-300'
+                : 'bg-[#121419]/95 border-rose-500/40 text-rose-300'
             }`}
           >
             {toastType === 'success' ? (
@@ -2507,63 +2779,52 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
       )}
 
       {/* Sticky Top App Bar */}
-      <header className="sticky top-0 z-40 bg-[#0B0F12]/95 border-b border-[#1A222B] px-4 py-3 backdrop-blur-xl flex items-center justify-between">
-        <div className="flex items-center space-x-2.5 rtl:space-x-reverse">
+      <header className="sticky top-0 z-40 bg-[#121419]/95 border-b border-white/[0.08] px-4 py-2.5 backdrop-blur-md flex items-center justify-between">
+        <div className="flex items-center space-x-2.5 rtl:space-x-reverse min-w-0">
           {activeSection ? (
             <button
               type="button"
               onClick={() => setActiveSection(null)}
-              className="p-2 -ml-2 rounded-xl text-neutral-300 hover:text-white hover:bg-white/5 min-h-[44px] min-w-[44px] flex items-center justify-center"
+              className="p-2 -ml-2 rounded-xl text-[#D7D2C8] hover:text-white hover:bg-white/[0.05] min-h-[44px] min-w-[44px] flex items-center justify-center"
             >
-              <ArrowLeft className="w-5 h-5 text-[#FF5722]" />
+              <ArrowLeft className="w-5 h-5 text-[#E4583B]" />
             </button>
           ) : (
-            <div className="w-8 h-8 rounded-xl bg-[#141A20] border border-[#232B33] flex items-center justify-center font-bold text-xs text-white font-mono">
-              <span>M</span>
-              <span className="text-[#FF5722]">J</span>
+            <div className="w-8 h-8 rounded-lg bg-[#E4583B] flex items-center justify-center font-bold text-xs text-white shrink-0">
+              MJ
             </div>
           )}
 
-          <div>
-            <h2 className="text-xs font-bold text-white font-mono uppercase tracking-wide">
+          <div className="min-w-0">
+            <h2 className="text-xs font-semibold text-[#F4F0E8] capitalize truncate">
               {activeSection
-                ? activeSection.replace('-', ' ')
-                : activeTab.toUpperCase()}
+                ? activeSection.replace(/-/g, ' ')
+                : activeTab === 'overview'
+                ? 'Mobile Control Center'
+                : activeTab.replace(/-/g, ' ')}
             </h2>
-            <div className="flex items-center space-x-1.5">
-              <span
-                className={`w-1.5 h-1.5 rounded-full ${
-                  hasUnsavedChanges ? 'bg-amber-400 animate-pulse' : 'bg-emerald-400'
-                }`}
-              />
-              <span className="text-[10px] text-neutral-400 font-mono">
-                {hasUnsavedChanges ? 'Unsaved Changes' : 'All Saved'}
-              </span>
-            </div>
+            <span className={`text-[11px] block ${hasUnsavedChanges ? 'text-amber-400' : 'text-emerald-400'}`}>
+              {hasUnsavedChanges ? 'Unsaved draft changes' : 'All changes saved'}
+            </span>
           </div>
         </div>
 
         {/* Action Controls */}
-        <div className="flex items-center space-x-2 rtl:space-x-reverse">
-          {/* Live Preview Button */}
+        <div className="flex items-center space-x-2 rtl:space-x-reverse shrink-0">
           <button
             type="button"
-            onClick={() => {
-              setIsPreviewDraft(true);
-              setShowLivePreview(true);
-            }}
-            className="p-2 rounded-xl bg-[#141A20] border border-[#232B33] text-neutral-300 hover:text-white min-h-[44px] min-w-[44px] flex items-center justify-center"
-            title="Live Preview on Mobile"
+            onClick={openLivePreview}
+            className="p-2 rounded-lg bg-[#171A21] border border-white/[0.08] text-[#D7D2C8] hover:text-white min-h-[44px] min-w-[44px] flex items-center justify-center"
+            title="Live Draft Preview on Mobile"
           >
-            <Eye className="w-4 h-4 text-[#FF5722]" />
+            <Eye className="w-4 h-4 text-[#E4583B]" />
           </button>
 
-          {/* Sticky Publish Button */}
           <button
             type="button"
             onClick={handlePublishLive}
             disabled={publishing}
-            className="px-3.5 py-2 rounded-xl font-bold font-mono text-xs text-white bg-[#FF5722] hover:bg-[#F4511E] shadow-lg shadow-orange-900/30 flex items-center space-x-1.5 disabled:opacity-50 min-h-[44px]"
+            className="px-3.5 py-2 rounded-lg font-semibold text-xs text-white bg-[#E4583B] hover:bg-[#D0492D] flex items-center space-x-1.5 disabled:opacity-50 min-h-[44px]"
           >
             <Send className="w-3.5 h-3.5" />
             <span>{publishing ? 'Publishing...' : 'Publish'}</span>
@@ -2573,14 +2834,14 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
 
       {/* Real Error Notification & Retry Banner */}
       {(saveError || publishError) && (
-        <div className="bg-rose-950/90 border-b border-rose-800/80 px-4 py-3 backdrop-blur-md">
+        <div className="bg-rose-950/90 border-b border-rose-500/40 px-4 py-3 backdrop-blur-md">
           <div className="max-w-lg mx-auto flex items-start space-x-3">
             <AlertCircle className="w-5 h-5 text-rose-400 shrink-0 mt-0.5" />
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-bold text-rose-200 font-mono">
+              <p className="text-xs font-semibold text-rose-200">
                 {saveError ? 'Draft Save Failed' : 'Publish Failed'}
               </p>
-              <p className="text-[11px] text-rose-300 font-mono break-words mt-0.5">
+              <p className="text-[11px] text-rose-300 break-words mt-0.5">
                 {saveError || publishError}
               </p>
               {(saveError || publishError)?.includes('securetoken.googleapis.com') && (
@@ -2589,7 +2850,7 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
                     href="https://console.developers.google.com/apis/api/securetoken.googleapis.com/overview?project=142615067158"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="underline text-orange-400 font-bold text-[11px] hover:text-orange-300"
+                    className="underline text-amber-300 font-medium text-[11px] hover:text-amber-200"
                   >
                     Click to enable Token Service API &rarr;
                   </a>
@@ -2601,7 +2862,7 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
                     type="button"
                     onClick={handleSaveDraft}
                     disabled={savingDraft}
-                    className="px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-500 text-white text-[11px] font-mono font-bold flex items-center space-x-1 min-h-[36px]"
+                    className="px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-500 text-white text-[11px] font-semibold flex items-center space-x-1 min-h-[36px]"
                   >
                     <RefreshCw className={`w-3.5 h-3.5 ${savingDraft ? 'animate-spin' : ''}`} />
                     <span>{savingDraft ? 'Retrying...' : 'Retry Save Draft'}</span>
@@ -2612,7 +2873,7 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
                     type="button"
                     onClick={handlePublishLive}
                     disabled={publishing}
-                    className="px-3 py-1.5 rounded-lg bg-[#FF5722] hover:bg-[#F4511E] text-white text-[11px] font-mono font-bold flex items-center space-x-1 min-h-[36px]"
+                    className="px-3 py-1.5 rounded-lg bg-[#E4583B] hover:bg-[#D0492D] text-white text-[11px] font-semibold flex items-center space-x-1 min-h-[36px]"
                   >
                     <RefreshCw className={`w-3.5 h-3.5 ${publishing ? 'animate-spin' : ''}`} />
                     <span>{publishing ? 'Retrying...' : 'Retry Publish'}</span>
@@ -2624,7 +2885,7 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
                     setSaveError(null);
                     setPublishError(null);
                   }}
-                  className="px-2.5 py-1.5 rounded-lg bg-[#141A20] text-neutral-400 hover:text-white text-[11px] font-mono min-h-[36px]"
+                  className="px-2.5 py-1.5 rounded-lg bg-[#171A21] text-[#A7A298] hover:text-white text-[11px] min-h-[36px]"
                 >
                   Dismiss
                 </button>
@@ -2646,9 +2907,9 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
                 type="button"
                 onClick={handleSaveDraft}
                 disabled={savingDraft}
-                className="w-full py-3.5 rounded-2xl bg-[#141A20] hover:bg-[#1A222B] border border-[#FF5722]/50 text-white font-mono font-bold text-xs flex items-center justify-center space-x-2 shadow-xl min-h-[48px]"
+                className="w-full py-3 rounded-xl bg-[#171A21] hover:bg-[#1E222B] border border-[#E4583B]/50 text-[#F4F0E8] font-semibold text-xs flex items-center justify-center space-x-2 shadow-xl min-h-[48px]"
               >
-                <Save className="w-4 h-4 text-[#FF5722]" />
+                <Save className="w-4 h-4 text-[#E4583B]" />
                 <span>{savingDraft ? 'Saving Draft...' : 'Save Draft Changes'}</span>
               </button>
             </div>
@@ -2659,18 +2920,18 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
             {activeTab === 'overview' && (
               <div className="space-y-4">
                 {/* Status Card */}
-                <div className="p-4 rounded-3xl bg-[#0F1419] border border-[#232B33] space-y-3">
+                <div className="p-4 rounded-2xl bg-[#121419] border border-white/[0.08] space-y-3">
                   <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="text-sm font-bold text-white font-mono">Mobile Control Center</h3>
-                      <p className="text-xs text-neutral-400 font-mono">
-                        Logged in as sbmc.3925@gmail.com
+                    <div className="min-w-0">
+                      <h3 className="text-sm font-semibold text-[#F4F0E8]">Mobile Control Center</h3>
+                      <p className="text-xs text-[#8E8A82] font-mono truncate">
+                        {loggedInLabel}
                       </p>
                     </div>
                     <button
                       type="button"
                       onClick={handleSignOut}
-                      className="p-2 rounded-xl bg-[#141A20] text-neutral-400 hover:text-white border border-[#232B33] min-h-[44px] min-w-[44px] flex items-center justify-center"
+                      className="p-2 rounded-lg bg-[#171A21] text-[#A7A298] hover:text-white border border-white/[0.08] min-h-[44px] min-w-[44px] flex items-center justify-center shrink-0"
                       title="Sign Out"
                     >
                       <LogOut className="w-4 h-4" />
@@ -2678,40 +2939,37 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
                   </div>
 
                   <div className="grid grid-cols-3 gap-2 pt-1">
-                    <div className="p-3 rounded-2xl bg-[#070A0C] border border-[#232B33] text-center">
-                      <span className="text-lg font-bold font-mono text-[#FF5722]">
+                    <div className="p-3 rounded-xl bg-[#0B0C0F] border border-white/[0.06] text-center">
+                      <span className="text-lg font-bold tabular-nums text-[#E4583B]">
                         {draftPortfolio.projects?.length || 0}
                       </span>
-                      <p className="text-[10px] text-neutral-400 font-mono mt-0.5">Projects</p>
+                      <p className="text-[11px] text-[#8E8A82] mt-0.5">Projects</p>
                     </div>
-                    <div className="p-3 rounded-2xl bg-[#070A0C] border border-[#232B33] text-center">
-                      <span className="text-lg font-bold font-mono text-[#FF5722]">
+                    <div className="p-3 rounded-xl bg-[#0B0C0F] border border-white/[0.06] text-center">
+                      <span className="text-lg font-bold tabular-nums text-[#E4583B]">
                         {draftPortfolio.videos?.length || 0}
                       </span>
-                      <p className="text-[10px] text-neutral-400 font-mono mt-0.5">Videos</p>
+                      <p className="text-[11px] text-[#8E8A82] mt-0.5">Videos</p>
                     </div>
                     <div
                       onClick={() => setActiveSection('leads')}
-                      className="p-3 rounded-2xl bg-[#070A0C] border border-[#232B33] text-center cursor-pointer"
+                      className="p-3 rounded-xl bg-[#0B0C0F] border border-white/[0.06] text-center cursor-pointer"
                     >
-                      <span className="text-lg font-bold font-mono text-emerald-400">
+                      <span className="text-lg font-bold tabular-nums text-emerald-400">
                         {leads.length || 0}
                       </span>
-                      <p className="text-[10px] text-neutral-400 font-mono mt-0.5">Leads</p>
+                      <p className="text-[11px] text-[#8E8A82] mt-0.5">Leads</p>
                     </div>
                   </div>
 
-                  {/* One-Tap Live Preview Launcher */}
+                  {/* One-Tap Interactive Draft Preview Launcher */}
                   <button
                     type="button"
-                    onClick={() => {
-                      setIsPreviewDraft(true);
-                      setShowLivePreview(true);
-                    }}
-                    className="w-full py-3 rounded-2xl bg-gradient-to-r from-[#FF5722]/20 to-[#FF7043]/10 border border-[#FF5722]/40 text-xs font-mono font-bold text-white flex items-center justify-center space-x-2 min-h-[48px]"
+                    onClick={openLivePreview}
+                    className="w-full py-3 rounded-xl bg-[#E4583B] hover:bg-[#D0492D] text-xs font-semibold text-white flex items-center justify-center space-x-2 min-h-[48px]"
                   >
-                    <Eye className="w-4 h-4 text-[#FF5722]" />
-                    <span>Launch Live Phone Preview</span>
+                    <Eye className="w-4 h-4" />
+                    <span>Launch Live Draft Preview</span>
                   </button>
 
                   {/* Backup JSON Button */}
@@ -2721,17 +2979,17 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
                       exportPortfolioBackup();
                       showToast('Backup JSON downloaded successfully!');
                     }}
-                    className="w-full py-2.5 rounded-2xl bg-[#141A20] hover:bg-[#1A222B] border border-[#232B33] text-xs font-mono text-neutral-300 hover:text-white flex items-center justify-center space-x-2 min-h-[44px]"
+                    className="w-full py-2.5 rounded-xl bg-[#171A21] hover:bg-[#1E222B] border border-white/[0.08] text-xs text-[#D7D2C8] hover:text-white flex items-center justify-center space-x-2 min-h-[44px]"
                   >
-                    <Download className="w-4 h-4 text-[#FF5722]" />
+                    <Download className="w-4 h-4 text-[#E4583B]" />
                     <span>Download Backup JSON</span>
                   </button>
                 </div>
 
-                {/* 8 Admin Groups Grid */}
-                <div className="space-y-2 pt-2">
-                  <h4 className="text-xs font-mono uppercase text-neutral-400 tracking-wider px-1">
-                    Management Groups
+                {/* Admin Groups Grid */}
+                <div className="space-y-2.5 pt-2">
+                  <h4 className="text-xs font-semibold text-[#8E8A82] px-1">
+                    Content Sections
                   </h4>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                     {ADMIN_GROUPS.map((group) => {
@@ -2744,19 +3002,19 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
                             setActiveTab(group.id);
                             setActiveSection(null);
                           }}
-                          className="p-3.5 rounded-2xl bg-[#0F1419] hover:bg-[#141A20] border border-[#232B33] hover:border-[#FF5722]/50 text-left transition-all min-h-[56px] flex items-center space-x-3"
+                          className="p-3.5 rounded-xl bg-[#121419] hover:bg-[#171A21] border border-white/[0.08] hover:border-[#E4583B]/40 text-left transition-colors min-h-[56px] flex items-center space-x-3"
                         >
-                          <div className="w-9 h-9 rounded-xl bg-[#141A20] border border-[#232B33] text-[#FF5722] flex items-center justify-center shrink-0">
+                          <div className="w-9 h-9 rounded-lg bg-[#171A21] border border-white/[0.08] text-[#E4583B] flex items-center justify-center shrink-0">
                             <Icon className="w-4 h-4" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-center justify-between">
-                              <p className="text-xs font-bold font-mono text-white truncate">{group.label}</p>
-                              <span className="text-[10px] text-neutral-500 font-mono ml-2 shrink-0">
-                                {group.subSections.length} items
+                            <div className="flex items-center justify-between gap-2">
+                              <p className="text-xs font-semibold text-[#F4F0E8] truncate">{group.label}</p>
+                              <span className="text-[11px] text-[#6F6B64] tabular-nums shrink-0">
+                                {group.subSections.length}
                               </span>
                             </div>
-                            <p className="text-[10px] text-neutral-400 font-mono truncate mt-0.5">{group.desc}</p>
+                            <p className="text-[11px] text-[#8E8A82] truncate mt-0.5">{group.desc}</p>
                           </div>
                         </button>
                       );
@@ -2765,14 +3023,13 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
                 </div>
 
                 {/* Theme Live Edit Note for Mobile */}
-                <div className="p-3.5 rounded-2xl bg-[#0F1419] border border-[#232B33] space-y-1 mt-2">
-                  <div className="flex items-center space-x-2 text-xs font-mono font-bold text-neutral-300">
-                    <Sparkles className="w-3.5 h-3.5 text-[#FF5722]" />
+                <div className="p-3.5 rounded-xl bg-[#121419] border border-white/[0.08] space-y-1 mt-2">
+                  <div className="flex items-center space-x-2 text-xs font-semibold text-[#EAE5DC]">
+                    <Sparkles className="w-3.5 h-3.5 text-[#E4583B]" />
                     <span>Theme Live Edit</span>
-                    <span className="text-[9px] uppercase tracking-wider bg-[#FF5722]/15 text-[#FF5722] px-1.5 py-0.5 rounded font-mono font-bold">Desktop</span>
                   </div>
-                  <p className="text-[11px] text-neutral-400 font-mono leading-relaxed">
-                    Use desktop for Live Edit (click & customize visual layout with live side panel).
+                  <p className="text-xs text-[#8E8A82] leading-relaxed">
+                    Open on desktop to click and customize visual typography or layout spacing live.
                   </p>
                 </div>
 
@@ -2780,15 +3037,15 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
                 <button
                   type="button"
                   onClick={onBackToSite}
-                  className="w-full py-3 rounded-2xl bg-[#0F1419] border border-[#232B33] text-xs font-mono text-neutral-300 hover:text-white flex items-center justify-center space-x-2 min-h-[48px] mt-2"
+                  className="w-full py-3 rounded-xl bg-[#121419] border border-white/[0.08] text-xs font-medium text-[#D7D2C8] hover:text-white flex items-center justify-center space-x-2 min-h-[48px] mt-2"
                 >
                   <ExternalLink className="w-4 h-4" />
-                  <span>Exit Admin & Return to Site</span>
+                  <span>Exit Admin &amp; Return to Site</span>
                 </button>
               </div>
             )}
 
-            {/* GROUP SUB-SECTIONS (When any of the 8 groups is active) */}
+            {/* GROUP SUB-SECTIONS */}
             {activeTab !== 'overview' && (() => {
               const currentGroup = ADMIN_GROUPS.find((g) => g.id === activeTab);
               if (!currentGroup) return null;
@@ -2796,48 +3053,45 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
 
               return (
                 <div className="space-y-3">
-                  {/* Group Header & Back Navigation */}
                   <div className="flex items-center justify-between pb-1">
                     <button
                       type="button"
                       onClick={() => setActiveTab('overview')}
-                      className="px-3 py-1.5 rounded-xl bg-[#0F1419] hover:bg-[#141A20] border border-[#232B33] text-xs font-mono text-neutral-300 hover:text-white flex items-center space-x-1.5 min-h-[40px]"
+                      className="px-3 py-1.5 rounded-xl bg-[#121419] hover:bg-[#171A21] border border-white/[0.08] text-xs font-medium text-[#D7D2C8] hover:text-white flex items-center space-x-1.5 min-h-[40px]"
                     >
-                      <ArrowLeft className="w-3.5 h-3.5 text-[#FF5722]" />
+                      <ArrowLeft className="w-3.5 h-3.5 text-[#E4583B]" />
                       <span>All Groups</span>
                     </button>
-                    <span className="text-[11px] font-mono text-neutral-500">
-                      {currentGroup.subSections.length} Sub-sections
+                    <span className="text-xs text-[#8E8A82] tabular-nums">
+                      {currentGroup.subSections.length} sections
                     </span>
                   </div>
 
-                  {/* Group Banner */}
-                  <div className="p-4 rounded-2xl bg-[#0F1419] border border-[#232B33] flex items-center space-x-3">
-                    <div className="w-10 h-10 rounded-xl bg-[#FF5722]/10 border border-[#FF5722]/30 text-[#FF5722] flex items-center justify-center shrink-0">
+                  <div className="p-4 rounded-xl bg-[#121419] border border-white/[0.08] flex items-center space-x-3">
+                    <div className="w-10 h-10 rounded-lg bg-[#171A21] border border-white/[0.08] text-[#E4583B] flex items-center justify-center shrink-0">
                       <GroupIcon className="w-5 h-5" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-sm font-bold text-white font-mono">{currentGroup.label}</h3>
-                      <p className="text-xs text-neutral-400 font-mono mt-0.5">{currentGroup.desc}</p>
+                      <h3 className="text-sm font-semibold text-[#F4F0E8]">{currentGroup.label}</h3>
+                      <p className="text-xs text-[#8E8A82] mt-0.5">{currentGroup.desc}</p>
                     </div>
                   </div>
 
-                  {/* Sub-sections list */}
-                  <div className="space-y-2.5">
+                  <div className="space-y-2">
                     {currentGroup.subSections.map((sec) => (
                       <button
                         key={sec.id}
                         type="button"
                         onClick={() => setActiveSection(sec.id)}
-                        className="w-full p-4 rounded-2xl bg-[#0F1419] hover:bg-[#141A20] border border-[#232B33] hover:border-[#FF5722]/40 text-left flex items-center justify-between transition-colors min-h-[52px]"
+                        className="w-full p-4 rounded-xl bg-[#121419] hover:bg-[#171A21] border border-white/[0.08] hover:border-[#E4583B]/40 text-left flex items-center justify-between transition-colors min-h-[52px]"
                       >
                         <div className="pr-3 flex-1 min-w-0">
-                          <h4 className="text-xs font-bold font-mono text-white">{sec.label}</h4>
+                          <h4 className="text-xs font-semibold text-[#F4F0E8]">{sec.label}</h4>
                           {sec.desc && (
-                            <p className="text-[11px] text-neutral-400 font-mono mt-0.5 line-clamp-1">{sec.desc}</p>
+                            <p className="text-[11px] text-[#8E8A82] mt-0.5 line-clamp-1">{sec.desc}</p>
                           )}
                         </div>
-                        <span className="text-[#FF5722] text-xs font-mono shrink-0">&rarr;</span>
+                        <span className="text-[#E4583B] text-xs shrink-0">&rarr;</span>
                       </button>
                     ))}
                   </div>
@@ -2848,8 +3102,8 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
         )}
       </main>
 
-      {/* Sticky Bottom Tab Bar - 8 Groups + Overview */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 bg-[#0B0F12]/95 border-t border-[#1A222B] backdrop-blur-xl px-2 py-1.5">
+      {/* Sticky Bottom Tab Bar */}
+      <nav className="fixed bottom-0 left-0 right-0 z-40 bg-[#121419]/95 border-t border-white/[0.08] backdrop-blur-md px-2 py-1.5">
         <div className="flex items-center space-x-1 overflow-x-auto no-scrollbar scroll-smooth">
           <button
             type="button"
@@ -2857,14 +3111,14 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
               setActiveTab('overview');
               setActiveSection(null);
             }}
-            className={`px-3 py-1.5 rounded-xl flex flex-col items-center justify-center space-y-0.5 transition-colors shrink-0 min-w-[56px] min-h-[44px] ${
+            className={`px-3 py-1.5 rounded-lg flex flex-col items-center justify-center space-y-0.5 transition-colors shrink-0 min-w-[56px] min-h-[44px] ${
               activeTab === 'overview' && !activeSection
-                ? 'bg-[#FF5722]/20 text-[#FF5722] border border-[#FF5722]/40 font-bold'
-                : 'text-neutral-400 hover:text-white'
+                ? 'bg-[#E4583B]/15 text-[#F07C63] border border-[#E4583B]/40 font-semibold'
+                : 'text-[#8E8A82] hover:text-white'
             }`}
           >
             <Layers className="w-4 h-4" />
-            <span className="text-[9px] font-mono tracking-wider">Home</span>
+            <span className="text-[10px]">Home</span>
           </button>
           {ADMIN_GROUPS.map((grp) => {
             const GrpIcon = grp.icon;
@@ -2877,14 +3131,14 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
                   setActiveTab(grp.id);
                   setActiveSection(null);
                 }}
-                className={`px-2.5 py-1.5 rounded-xl flex flex-col items-center justify-center space-y-0.5 transition-colors shrink-0 min-w-[62px] min-h-[44px] ${
+                className={`px-2.5 py-1.5 rounded-lg flex flex-col items-center justify-center space-y-0.5 transition-colors shrink-0 min-w-[62px] min-h-[44px] ${
                   isActive
-                    ? 'bg-[#FF5722]/20 text-[#FF5722] border border-[#FF5722]/40 font-bold'
-                    : 'text-neutral-400 hover:text-white'
+                    ? 'bg-[#E4583B]/15 text-[#F07C63] border border-[#E4583B]/40 font-semibold'
+                    : 'text-[#8E8A82] hover:text-white'
                 }`}
               >
                 <GrpIcon className="w-4 h-4" />
-                <span className="text-[9px] font-mono tracking-wider truncate max-w-[68px]">
+                <span className="text-[10px] truncate max-w-[68px]">
                   {grp.label.split(' ')[0]}
                 </span>
               </button>

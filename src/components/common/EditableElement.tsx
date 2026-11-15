@@ -57,8 +57,8 @@ export const EditableElement: React.FC<EditableElementProps> = ({
     {
       className: `relative transition-all duration-150 ${className} ${
         isSelected
-          ? 'outline-2 outline-[#FF5722] outline-solid ring-4 ring-[#FF5722]/25 rounded-md z-20'
-          : 'outline-1 outline-dashed outline-neutral-400/60 hover:outline-2 hover:outline-[#FF5722] hover:outline-dashed rounded-md cursor-pointer'
+          ? 'outline-2 outline-[#E4583B] outline-solid ring-4 ring-[#E4583B]/20 rounded-md z-20'
+          : 'outline-1 outline-dashed outline-white/25 hover:outline-2 hover:outline-[#E4583B] hover:outline-dashed rounded-md cursor-pointer'
       }`,
       style: combinedStyle,
       onClick: handleClick,
@@ -66,9 +66,9 @@ export const EditableElement: React.FC<EditableElementProps> = ({
     },
     <>
       {children}
-      {/* Small indicator badge visible only in Live Edit mode when selected or hovered */}
+      {/* Small indicator badge visible only in Live Edit mode when selected */}
       {isSelected && (
-        <span className="absolute -top-6 left-0 px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#FF5722] text-white shadow-md z-30 pointer-events-none select-none flex items-center space-x-1">
+        <span className="absolute -top-6 left-0 px-2 py-0.5 rounded text-[11px] font-sans font-semibold bg-[#E4583B] text-white shadow-md z-30 pointer-events-none select-none flex items-center space-x-1 whitespace-nowrap">
           <span>{label}</span>
         </span>
       )}

@@ -18,11 +18,11 @@ import { usePortfolio } from '../../context/PortfolioContext';
 import { BestWorkVideoItem, BestWorkSectionConfig } from '../../types/portfolio';
 import { ConfirmDeleteModal } from './ConfirmDeleteModal';
 import { extractYouTubeId } from '../VideoModal';
-import { 
-  extractVimeoInfo, 
-  detectVideoType, 
-  fetchVideoAutoMetadata, 
-  VimeoIcon 
+import {
+  extractVimeoInfo,
+  detectVideoType,
+  fetchVideoAutoMetadata,
+  VimeoIcon
 } from '../../lib/videoUtils';
 import { uploadMediaToStorage } from '../../lib/mediaUpload';
 
@@ -130,12 +130,9 @@ export const BestWorkVideoEditor: React.FC<BestWorkVideoEditorProps> = ({ onNoti
     const currentItem = (draftPortfolio.bestVideoWorks || [])[idx];
     if (!currentItem) return;
 
-    // Detect platform
     const detected = detectVideoType(cleanUrl);
     const ytId = extractYouTubeId(cleanUrl);
-    const vimeoInfo = extractVimeoInfo(cleanUrl);
 
-    // YouTube quick local preview
     if (detected === 'youtube' && ytId) {
       const defaultYt = `https://img.youtube.com/vi/${ytId}/maxresdefault.jpg`;
       updateDraft((prev) => ({
@@ -248,24 +245,24 @@ export const BestWorkVideoEditor: React.FC<BestWorkVideoEditorProps> = ({ onNoti
   return (
     <div className="space-y-6 max-w-4xl">
       {/* Header Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#232B33]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/[0.08]">
         <div>
-          <h2 className="text-xl font-bold text-white flex items-center space-x-2 rtl:space-x-reverse">
-            <Film className="w-5 h-5 text-[#FF5722]" />
-            <span>Video Editing - Best Work</span>
-            <span className="text-xs font-mono px-2 py-0.5 rounded bg-[#FF5722]/15 text-[#FF5722] border border-[#FF5722]/30">
-              {items.length} Videos
+          <h2 className="text-lg font-semibold text-white flex items-center space-x-2.5 rtl:space-x-reverse">
+            <Film className="w-4 h-4 text-[#E4583B]" />
+            <span>Video Editing — Best Work</span>
+            <span className="text-xs text-neutral-400 tabular-nums font-normal">
+              ({items.length} videos)
             </span>
           </h2>
-          <p className="text-xs text-neutral-400 mt-1 font-mono">
-            Connected to the public "Watch My Best Work" section. Supports Vimeo, YouTube and Facebook video embeds.
+          <p className="text-xs text-neutral-400 mt-1">
+            Connected to the public &quot;Watch My Best Work&quot; section. Supports Vimeo, YouTube and Facebook video embeds.
           </p>
         </div>
 
         <button
           type="button"
           onClick={handleAddItem}
-          className="inline-flex items-center space-x-1.5 rtl:space-x-reverse px-4 py-2 rounded-xl text-xs font-bold text-white bg-[#FF5722] hover:bg-[#F4511E] shadow-lg shadow-orange-900/30 transition-all shrink-0 self-start sm:self-auto min-h-[44px]"
+          className="inline-flex items-center space-x-1.5 rtl:space-x-reverse px-4 py-2 rounded-lg text-xs font-medium text-white bg-[#E4583B] hover:bg-[#D0492D] transition-colors shrink-0 self-start sm:self-auto"
         >
           <Plus className="w-4 h-4" />
           <span>Add Best Video</span>
@@ -273,79 +270,79 @@ export const BestWorkVideoEditor: React.FC<BestWorkVideoEditorProps> = ({ onNoti
       </div>
 
       {/* Section Headings in 3 Languages */}
-      <div className="p-5 rounded-3xl bg-[#141A20] border border-[#232B33] space-y-4 shadow-lg">
+      <div className="p-5 rounded-2xl bg-[#121419] border border-white/[0.08] space-y-4">
         <div className="flex items-center space-x-2 rtl:space-x-reverse">
-          <Layers className="w-4 h-4 text-[#FF5722]" />
-          <h3 className="text-xs font-mono font-bold text-white uppercase tracking-wider">
+          <Layers className="w-4 h-4 text-[#E4583B]" />
+          <h3 className="text-xs font-medium text-white uppercase tracking-wider">
             Public Section Headings & Description (Multilingual)
           </h3>
         </div>
 
-        {/* Section Title */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <div>
-            <label className="block text-[11px] font-mono text-neutral-400 mb-1">Section Title (EN)</label>
+            <label className="block text-[11px] font-medium text-neutral-400 mb-1">Section Title (EN)</label>
             <input
               type="text"
               value={sectionConfig.title?.en || ''}
               onChange={(e) => updateSectionField('title', 'en', e.target.value)}
-              className="w-full px-3 py-2 rounded-xl bg-[#0B0F12] border border-[#232B33] text-xs text-white font-mono focus:border-[#FF5722] focus:outline-none"
+              className="w-full px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] text-xs text-white focus:border-[#E4583B] focus:outline-none"
             />
           </div>
           <div>
-            <label className="block text-[11px] font-mono text-neutral-400 mb-1">Section Title (BN)</label>
+            <label className="block text-[11px] font-medium text-neutral-400 mb-1">Section Title (BN)</label>
             <input
               type="text"
               value={sectionConfig.title?.bn || ''}
               onChange={(e) => updateSectionField('title', 'bn', e.target.value)}
-              className="w-full px-3 py-2 rounded-xl bg-[#0B0F12] border border-[#232B33] text-xs text-white font-mono focus:border-[#FF5722] focus:outline-none"
+              className="w-full px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] text-xs text-white focus:border-[#E4583B] focus:outline-none"
             />
           </div>
           <div>
-            <label className="block text-[11px] font-mono text-neutral-400 mb-1">Section Title (AR)</label>
+            <label className="block text-[11px] font-medium text-neutral-400 mb-1">Section Title (AR)</label>
             <input
               type="text"
+              dir="rtl"
               value={sectionConfig.title?.ar || ''}
               onChange={(e) => updateSectionField('title', 'ar', e.target.value)}
-              className="w-full px-3 py-2 rounded-xl bg-[#0B0F12] border border-[#232B33] text-xs text-white font-mono focus:border-[#FF5722] focus:outline-none"
+              className="w-full px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] text-xs text-white focus:border-[#E4583B] focus:outline-none"
             />
           </div>
         </div>
 
-        {/* Section Subtitle */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <div>
-            <label className="block text-[11px] font-mono text-neutral-400 mb-1">Subtitle / Description (EN)</label>
+            <label className="block text-[11px] font-medium text-neutral-400 mb-1">Subtitle / Description (EN)</label>
             <textarea
               rows={2}
               value={sectionConfig.subtitle?.en || ''}
               onChange={(e) => updateSectionField('subtitle', 'en', e.target.value)}
-              className="w-full px-3 py-2 rounded-xl bg-[#0B0F12] border border-[#232B33] text-xs text-white font-mono focus:border-[#FF5722] focus:outline-none"
+              className="w-full px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] text-xs text-white focus:border-[#E4583B] focus:outline-none resize-none"
             />
           </div>
           <div>
-            <label className="block text-[11px] font-mono text-neutral-400 mb-1">Subtitle / Description (BN)</label>
+            <label className="block text-[11px] font-medium text-neutral-400 mb-1">Subtitle / Description (BN)</label>
             <textarea
               rows={2}
               value={sectionConfig.subtitle?.bn || ''}
               onChange={(e) => updateSectionField('subtitle', 'bn', e.target.value)}
-              className="w-full px-3 py-2 rounded-xl bg-[#0B0F12] border border-[#232B33] text-xs text-white font-mono focus:border-[#FF5722] focus:outline-none"
+              className="w-full px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] text-xs text-white focus:border-[#E4583B] focus:outline-none resize-none"
             />
           </div>
           <div>
-            <label className="block text-[11px] font-mono text-neutral-400 mb-1">Subtitle / Description (AR)</label>
+            <label className="block text-[11px] font-medium text-neutral-400 mb-1">Subtitle / Description (AR)</label>
             <textarea
               rows={2}
+              dir="rtl"
               value={sectionConfig.subtitle?.ar || ''}
               onChange={(e) => updateSectionField('subtitle', 'ar', e.target.value)}
-              className="w-full px-3 py-2 rounded-xl bg-[#0B0F12] border border-[#232B33] text-xs text-white font-mono focus:border-[#FF5722] focus:outline-none"
+              className="w-full px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] text-xs text-white focus:border-[#E4583B] focus:outline-none resize-none"
             />
           </div>
         </div>
       </div>
 
       {/* Items List */}
-      <div className="space-y-6">
+      <div className="space-y-5">
         {items.map((item, idx) => {
           const ytId = extractYouTubeId(item.videoUrl);
           const vimeoInfo = extractVimeoInfo(item.videoUrl);
@@ -361,20 +358,19 @@ export const BestWorkVideoEditor: React.FC<BestWorkVideoEditorProps> = ({ onNoti
           return (
             <div
               key={item.id || idx}
-              className={`p-5 sm:p-6 rounded-3xl bg-[#141A20] border transition-all space-y-4 shadow-xl ${
-                isVisible ? 'border-[#232B33] hover:border-neutral-700' : 'border-neutral-800 opacity-70'
+              className={`p-5 rounded-2xl bg-[#121419] border transition-colors space-y-4 ${
+                isVisible ? 'border-white/[0.08] hover:border-white/[0.14]' : 'border-white/[0.05] opacity-70'
               }`}
             >
               {/* Top Item Header */}
-              <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-[#232B33]">
+              <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-white/[0.06]">
                 <div className="flex items-center space-x-3 rtl:space-x-reverse">
-                  <span className="w-7 h-7 rounded-full bg-[#181E24] border border-[#232B33] flex items-center justify-center text-xs font-mono font-bold text-[#FF5722]">
+                  <span className="w-7 h-7 rounded-lg bg-[#171A21] border border-white/[0.08] flex items-center justify-center text-xs font-semibold text-[#E4583B] tabular-nums">
                     #{idx + 1}
                   </span>
 
-                  {/* Platform Selector */}
                   <div className="flex items-center space-x-1.5 rtl:space-x-reverse">
-                    <label className="text-[11px] font-mono text-neutral-400">Platform:</label>
+                    <label className="text-[11px] text-neutral-400">Platform:</label>
                     <select
                       value={item.videoType || 'vimeo'}
                       onChange={(e) => {
@@ -386,7 +382,7 @@ export const BestWorkVideoEditor: React.FC<BestWorkVideoEditorProps> = ({ onNoti
                           )
                         }));
                       }}
-                      className="px-2.5 py-1 rounded-lg bg-[#0F1419] border border-[#232B33] text-xs font-mono text-[#FF5722] uppercase focus:outline-none"
+                      className="px-2.5 py-1 rounded-lg bg-[#0B0C0F] border border-white/[0.08] text-xs font-medium text-[#E4583B] uppercase focus:outline-none"
                     >
                       <option value="vimeo">Vimeo</option>
                       <option value="youtube">YouTube</option>
@@ -396,24 +392,24 @@ export const BestWorkVideoEditor: React.FC<BestWorkVideoEditorProps> = ({ onNoti
                   </div>
 
                   <span
-                    className={`text-[10px] font-mono px-2 py-0.5 rounded border ${
+                    className={`text-[11px] px-2 py-0.5 rounded border font-medium ${
                       isVisible
-                        ? 'bg-emerald-950/60 text-emerald-400 border-emerald-500/30'
-                        : 'bg-neutral-900 text-neutral-500 border-neutral-700'
+                        ? 'bg-emerald-950/50 text-emerald-400 border-emerald-500/30'
+                        : 'bg-[#171A21] text-neutral-500 border-white/[0.08]'
                     }`}
                   >
                     {isVisible ? 'Visible' : 'Hidden'}
                   </span>
                 </div>
 
-                {/* Controls: Visibility, Reorder, Delete */}
+                {/* Controls */}
                 <div className="flex items-center space-x-1.5 rtl:space-x-reverse">
                   <button
                     type="button"
                     onClick={() => handleToggleVisible(idx)}
-                    className={`inline-flex items-center space-x-1 px-2.5 py-1.5 rounded-lg text-xs font-mono transition-colors ${
+                    className={`inline-flex items-center space-x-1 px-2.5 py-1.5 rounded-lg text-xs transition-colors ${
                       isVisible
-                        ? 'bg-[#181E24] text-neutral-300 hover:text-white border border-[#232B33]'
+                        ? 'bg-[#171A21] text-neutral-300 hover:text-white border border-white/[0.08]'
                         : 'bg-amber-950/40 text-amber-300 border border-amber-500/30'
                     }`}
                     title={isVisible ? 'Hide from public site' : 'Show on public site'}
@@ -426,7 +422,7 @@ export const BestWorkVideoEditor: React.FC<BestWorkVideoEditorProps> = ({ onNoti
                     type="button"
                     onClick={() => handleMove(idx, idx - 1)}
                     disabled={idx === 0}
-                    className="p-1.5 rounded-lg text-neutral-400 hover:text-white hover:bg-neutral-800 disabled:opacity-30 disabled:pointer-events-none transition-colors"
+                    className="p-1.5 rounded-lg text-neutral-400 hover:text-white hover:bg-[#171A21] disabled:opacity-30 disabled:pointer-events-none transition-colors"
                     title="Move Up"
                   >
                     <ArrowUp className="w-4 h-4" />
@@ -436,7 +432,7 @@ export const BestWorkVideoEditor: React.FC<BestWorkVideoEditorProps> = ({ onNoti
                     type="button"
                     onClick={() => handleMove(idx, idx + 1)}
                     disabled={idx === items.length - 1}
-                    className="p-1.5 rounded-lg text-neutral-400 hover:text-white hover:bg-neutral-800 disabled:opacity-30 disabled:pointer-events-none transition-colors"
+                    className="p-1.5 rounded-lg text-neutral-400 hover:text-white hover:bg-[#171A21] disabled:opacity-30 disabled:pointer-events-none transition-colors"
                     title="Move Down"
                   >
                     <ArrowDown className="w-4 h-4" />
@@ -451,7 +447,7 @@ export const BestWorkVideoEditor: React.FC<BestWorkVideoEditorProps> = ({ onNoti
                         name: item.title?.en || `Video #${idx + 1}`
                       })
                     }
-                    className="p-1.5 rounded-lg text-rose-400 hover:text-rose-300 hover:bg-rose-950/40 transition-colors"
+                    className="p-1.5 rounded-lg text-rose-400 hover:text-rose-300 hover:bg-rose-950/30 transition-colors"
                     title="Delete item"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -459,9 +455,9 @@ export const BestWorkVideoEditor: React.FC<BestWorkVideoEditorProps> = ({ onNoti
                 </div>
               </div>
 
-              {/* Video URL Input with Auto-detection */}
+              {/* Video URL Input */}
               <div>
-                <label className="block text-[11px] font-mono text-neutral-400 mb-1">
+                <label className="block text-[11px] font-medium text-neutral-400 mb-1">
                   Video URL (Vimeo, YouTube or Facebook)
                 </label>
                 <div className="relative">
@@ -494,7 +490,7 @@ export const BestWorkVideoEditor: React.FC<BestWorkVideoEditorProps> = ({ onNoti
                       }
                     }}
                     placeholder="https://vimeo.com/... or https://youtube.com/watch?v=... or FB video"
-                    className="w-full px-3 py-2 rounded-xl bg-[#0B0F12] border border-[#232B33] text-xs text-white font-mono focus:border-[#FF5722] focus:outline-none"
+                    className="w-full px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] text-xs text-white font-mono focus:border-[#E4583B] focus:outline-none pr-10"
                   />
                   <div className="absolute right-3 top-2.5 flex items-center space-x-1 pointer-events-none">
                     {isVimeo && <VimeoIcon className="w-4 h-4 text-[#1AB7EA]" />}
@@ -504,10 +500,10 @@ export const BestWorkVideoEditor: React.FC<BestWorkVideoEditorProps> = ({ onNoti
                 </div>
               </div>
 
-              {/* Multilingual Titles (Leave empty if unknown) */}
+              {/* Multilingual Titles */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
-                  <label className="block text-[11px] font-mono text-neutral-400 mb-1">
+                  <label className="block text-[11px] font-medium text-neutral-400 mb-1">
                     Title (EN) <span className="text-neutral-500">(Optional)</span>
                   </label>
                   <input
@@ -523,11 +519,11 @@ export const BestWorkVideoEditor: React.FC<BestWorkVideoEditorProps> = ({ onNoti
                       }));
                     }}
                     placeholder="Optional title"
-                    className="w-full px-3 py-2 rounded-xl bg-[#0B0F12] border border-[#232B33] text-xs text-white font-mono focus:border-[#FF5722] focus:outline-none"
+                    className="w-full px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] text-xs text-white focus:border-[#E4583B] focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-mono text-neutral-400 mb-1">
+                  <label className="block text-[11px] font-medium text-neutral-400 mb-1">
                     Title (BN) <span className="text-neutral-500">(Optional)</span>
                   </label>
                   <input
@@ -543,15 +539,16 @@ export const BestWorkVideoEditor: React.FC<BestWorkVideoEditorProps> = ({ onNoti
                       }));
                     }}
                     placeholder="ঐচ্ছিক শিরোনাম"
-                    className="w-full px-3 py-2 rounded-xl bg-[#0B0F12] border border-[#232B33] text-xs text-white font-mono focus:border-[#FF5722] focus:outline-none"
+                    className="w-full px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] text-xs text-white focus:border-[#E4583B] focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-mono text-neutral-400 mb-1">
+                  <label className="block text-[11px] font-medium text-neutral-400 mb-1">
                     Title (AR) <span className="text-neutral-500">(Optional)</span>
                   </label>
                   <input
                     type="text"
+                    dir="rtl"
                     value={item.title?.ar || ''}
                     onChange={(e) => {
                       const val = e.target.value;
@@ -563,25 +560,25 @@ export const BestWorkVideoEditor: React.FC<BestWorkVideoEditorProps> = ({ onNoti
                       }));
                     }}
                     placeholder="عنوان اختياري"
-                    className="w-full px-3 py-2 rounded-xl bg-[#0B0F12] border border-[#232B33] text-xs text-white font-mono focus:border-[#FF5722] focus:outline-none"
+                    className="w-full px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] text-xs text-white focus:border-[#E4583B] focus:outline-none"
                   />
                 </div>
               </div>
 
               {/* Thumbnail Display & Actions */}
               <div className="space-y-2">
-                <label className="block text-[11px] font-mono text-neutral-400">
+                <label className="block text-[11px] font-medium text-neutral-400">
                   Video Thumbnail (Auto or Custom Upload)
                 </label>
 
                 {activeThumb && (
-                  <div className="relative w-full max-w-sm aspect-video rounded-xl overflow-hidden bg-[#080B0D] border border-[#232B33] mb-3 flex items-center justify-center">
+                  <div className="relative w-full max-w-sm aspect-video rounded-xl overflow-hidden bg-[#0B0C0F] border border-white/[0.08] mb-3 flex items-center justify-center">
                     <img
                       src={activeThumb}
                       alt="Thumbnail preview"
                       className="w-full h-full object-contain"
                     />
-                    <div className="absolute top-2 left-2 flex items-center space-x-1.5 bg-black/85 backdrop-blur-sm px-2 py-0.5 rounded text-[10px] font-mono border border-[#232B33]">
+                    <div className="absolute top-2 left-2 flex items-center space-x-1.5 bg-black/80 backdrop-blur-sm px-2 py-0.5 rounded text-[10px] font-medium border border-white/10">
                       {item.customThumbnailUrl ? (
                         <span className="text-emerald-400">Custom Upload Active</span>
                       ) : isVimeo ? (
@@ -596,7 +593,6 @@ export const BestWorkVideoEditor: React.FC<BestWorkVideoEditorProps> = ({ onNoti
                 )}
 
                 <div className="flex flex-wrap items-center gap-2">
-                  {/* Reset to Automatic Thumbnail Button */}
                   {item.customThumbnailUrl && (
                     <button
                       type="button"
@@ -612,7 +608,7 @@ export const BestWorkVideoEditor: React.FC<BestWorkVideoEditorProps> = ({ onNoti
                         }
                         notify('Reset to automatic thumbnail');
                       }}
-                      className="px-3.5 py-2 rounded-xl bg-amber-950/40 hover:bg-amber-950/60 border border-amber-500/30 text-xs font-mono font-semibold text-amber-300 flex items-center space-x-1.5 transition-colors min-h-[44px]"
+                      className="px-3.5 py-2 rounded-lg bg-amber-950/30 hover:bg-amber-950/50 border border-amber-500/30 text-xs font-medium text-amber-300 flex items-center space-x-1.5 transition-colors"
                       title="Remove custom thumbnail and restore automatic thumbnail"
                     >
                       <RotateCcw className="w-3.5 h-3.5 text-amber-400" />
@@ -620,20 +616,18 @@ export const BestWorkVideoEditor: React.FC<BestWorkVideoEditorProps> = ({ onNoti
                     </button>
                   )}
 
-                  {/* Auto Fetch Thumbnail */}
                   <button
                     type="button"
                     disabled={isFetching || !item.videoUrl}
                     onClick={() => handleFetchOg(item, idx)}
-                    className="px-3.5 py-2 rounded-xl bg-[#181E24] hover:bg-[#1E252D] border border-[#232B33] text-xs font-mono font-semibold text-neutral-200 flex items-center space-x-1.5 disabled:opacity-40 min-h-[44px]"
+                    className="px-3.5 py-2 rounded-lg bg-[#171A21] hover:bg-[#1E222B] border border-white/[0.08] text-xs font-medium text-neutral-200 flex items-center space-x-1.5 disabled:opacity-40 transition-colors"
                   >
-                    <Sparkles className="w-3.5 h-3.5 text-[#FF5722]" />
+                    <Sparkles className="w-3.5 h-3.5 text-[#E4583B]" />
                     <span>{isFetching ? 'Fetching...' : 'Re-fetch Automatic Thumbnail'}</span>
                   </button>
 
-                  {/* Custom Upload */}
-                  <label className="px-3.5 py-2 rounded-xl bg-[#181E24] hover:bg-[#1E252D] border border-[#232B33] text-xs font-mono font-semibold text-neutral-200 flex items-center space-x-1.5 cursor-pointer min-h-[44px]">
-                    <Upload className="w-3.5 h-3.5 text-[#FF5722]" />
+                  <label className="px-3.5 py-2 rounded-lg bg-[#171A21] hover:bg-[#1E222B] border border-white/[0.08] text-xs font-medium text-neutral-200 flex items-center space-x-1.5 cursor-pointer transition-colors">
+                    <Upload className="w-3.5 h-3.5 text-[#E4583B]" />
                     <span>Upload Custom Thumbnail</span>
                     <input
                       type="file"
@@ -644,7 +638,7 @@ export const BestWorkVideoEditor: React.FC<BestWorkVideoEditorProps> = ({ onNoti
                   </label>
 
                   {uploadProgress[idx] && (
-                    <span className="text-xs font-mono text-[#FF5722]">
+                    <span className="text-xs font-medium text-[#E4583B] tabular-nums">
                       Uploading: {uploadProgress[idx]}%
                     </span>
                   )}
@@ -655,12 +649,12 @@ export const BestWorkVideoEditor: React.FC<BestWorkVideoEditorProps> = ({ onNoti
         })}
 
         {items.length === 0 && (
-          <div className="p-8 text-center rounded-3xl bg-[#141A20] border border-[#232B33] text-neutral-400 space-y-2">
-            <p className="text-xs font-mono">No video best works added yet.</p>
+          <div className="p-8 text-center rounded-2xl bg-[#121419] border border-dashed border-white/[0.09] text-neutral-400 space-y-3">
+            <p className="text-xs">No video best works added yet.</p>
             <button
               type="button"
               onClick={handleAddItem}
-              className="px-4 py-2 rounded-xl text-xs font-mono font-bold text-[#FF5722] bg-[#FF5722]/10 border border-[#FF5722]/30 hover:bg-[#FF5722]/20 transition-all inline-flex items-center space-x-1.5"
+              className="px-4 py-2 rounded-lg text-xs font-medium text-white bg-[#E4583B] hover:bg-[#D0492D] transition-colors inline-flex items-center space-x-1.5"
             >
               <Plus className="w-4 h-4" />
               <span>Add Your First Best Video</span>

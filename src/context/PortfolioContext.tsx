@@ -962,17 +962,17 @@ export const PortfolioProvider: React.FC<{ children: ReactNode }> = ({ children 
     >
       {/* Condition 2: Clear conflict banner if another device saved a newer version while admin has local edits */}
       {isAdmin && remoteDraftConflict && (
-        <div 
+        <div
           role="alert"
-          className="fixed top-0 left-0 right-0 z-[999999] bg-[#1a1309] border-b-2 border-amber-500 shadow-2xl px-4 py-3 text-amber-100 flex flex-col sm:flex-row items-center justify-between gap-3 animate-in fade-in slide-in-from-top duration-300"
+          className="fixed top-0 left-0 right-0 z-[999999] bg-[#17130E] border-b border-amber-500/50 shadow-xl px-4 py-3 text-amber-100 flex flex-col sm:flex-row items-center justify-between gap-3"
         >
           <div className="flex items-center space-x-3 rtl:space-x-reverse">
-            <span className="w-3 h-3 rounded-full bg-amber-400 animate-ping shrink-0" />
+            <span className="w-2.5 h-2.5 rounded-full bg-amber-400 shrink-0" />
             <div>
-              <p className="font-bold text-sm text-amber-200">
+              <p className="font-semibold text-sm text-amber-200">
                 A newer version was saved from another device{remoteDraftConflict.incomingTime ? ` at ${remoteDraftConflict.incomingTime}` : ''}.
               </p>
-              <p className="text-xs text-neutral-300">
+              <p className="text-xs text-[#D7D2C8]">
                 Load the newer version from the cloud or keep your current edits?
               </p>
             </div>
@@ -981,14 +981,14 @@ export const PortfolioProvider: React.FC<{ children: ReactNode }> = ({ children 
             <button
               type="button"
               onClick={() => resolveDraftConflict('load')}
-              className="px-3.5 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-neutral-950 font-bold text-xs shadow-md transition-all cursor-pointer"
+              className="px-3.5 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-neutral-950 font-semibold text-xs transition-colors cursor-pointer"
             >
               Load newer version
             </button>
             <button
               type="button"
               onClick={() => resolveDraftConflict('keep')}
-              className="px-3.5 py-1.5 rounded-lg bg-[#25201A] hover:bg-[#322B22] text-neutral-200 border border-amber-700/60 font-semibold text-xs transition-all cursor-pointer"
+              className="px-3.5 py-1.5 rounded-lg bg-[#241F19] hover:bg-[#302920] text-[#EAE5DC] border border-amber-500/35 font-medium text-xs transition-colors cursor-pointer"
             >
               Keep mine
             </button>

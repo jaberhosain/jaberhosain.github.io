@@ -74,6 +74,8 @@ export interface ProjectItem {
   client?: string;
   year?: string;
   order?: number;
+  visible?: boolean;
+  hidden?: boolean;
   isPlaceholder?: boolean;
 }
 
@@ -91,6 +93,8 @@ export interface VideoShowcaseItem {
   views?: string;
   category?: 'video_best' | 'video';
   order?: number;
+  visible?: boolean;
+  hidden?: boolean;
   isPlaceholder?: boolean;
 }
 

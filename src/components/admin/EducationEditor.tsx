@@ -12,7 +12,6 @@ export const EducationEditor: React.FC<EducationEditorProps> = ({ activeSection 
   const { draftPortfolio, updateDraft } = usePortfolio();
   const { academicRecords = [] } = draftPortfolio;
 
-  // Resolve institutes list safely with backward compatibility
   const institutes: ProfessionalInstitute[] = (draftPortfolio.professionalInstitutes && draftPortfolio.professionalInstitutes.length > 0)
     ? draftPortfolio.professionalInstitutes
     : (draftPortfolio.professionalInstitute ? [draftPortfolio.professionalInstitute] : []);
@@ -23,9 +22,6 @@ export const EducationEditor: React.FC<EducationEditorProps> = ({ activeSection 
     title: string;
   } | null>(null);
 
-  // ----------------------------------------------------
-  // Academic Background Handlers
-  // ----------------------------------------------------
   const handleAddAcademic = () => {
     const newRecord: AcademicRecord = {
       id: 'acad-' + Date.now(),
@@ -47,9 +43,6 @@ export const EducationEditor: React.FC<EducationEditorProps> = ({ activeSection 
     }));
   };
 
-  // ----------------------------------------------------
-  // Professional Institutes Handlers
-  // ----------------------------------------------------
   const handleAddInstitute = () => {
     const newInst: ProfessionalInstitute = {
       id: 'inst-' + Date.now(),
@@ -160,599 +153,599 @@ export const EducationEditor: React.FC<EducationEditorProps> = ({ activeSection 
   };
 
   return (
-    <div className="space-y-8 max-w-4xl">
+    <div className="space-y-6 max-w-4xl">
       {/* 1. Academic Background */}
       {(activeSection === 'all' || activeSection === 'academic') && (
-        <div className="p-6 rounded-3xl bg-[#12161A] border border-[#232B33] space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[#1D232A]">
-          <div className="flex items-center space-x-3 rtl:space-x-reverse">
-            <div className="w-10 h-10 rounded-xl bg-[#181E24] border border-[#232B33] flex items-center justify-center text-[#FF5722]">
-              <GraduationCap className="w-5 h-5" />
+        <div className="p-5 sm:p-6 rounded-2xl bg-[#121419] border border-white/[0.08] space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-white/[0.06]">
+            <div className="flex items-center space-x-3 rtl:space-x-reverse">
+              <div className="w-9 h-9 rounded-lg bg-[#171A21] border border-white/[0.08] flex items-center justify-center text-[#E4583B]">
+                <GraduationCap className="w-4 h-4" />
+              </div>
+              <div>
+                <h3 className="text-base font-semibold text-white tracking-tight">Academic Records</h3>
+                <p className="text-xs text-neutral-400">
+                  Manage academic qualifications, board examinations, and years
+                </p>
+              </div>
             </div>
-            <div>
-              <h3 className="text-lg font-bold text-white tracking-wide">Academic Records</h3>
-              <p className="text-xs text-neutral-400 font-mono">
-                Manage academic qualifications, board examinations, and years
-              </p>
-            </div>
+
+            <button
+              type="button"
+              onClick={handleAddAcademic}
+              className="inline-flex items-center space-x-1.5 px-3.5 py-2 rounded-lg bg-[#E4583B] hover:bg-[#D0492D] text-xs font-medium text-white transition-colors"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Add Record</span>
+            </button>
           </div>
 
-          <button
-            type="button"
-            onClick={handleAddAcademic}
-            className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-[#FF5722] hover:bg-[#F4511E] text-xs font-bold text-white transition-all shadow-md"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Add Record</span>
-          </button>
-        </div>
-
-        <div className="space-y-4">
-          {academicRecords.map((rec, idx) => (
-            <div key={rec.id || idx} className="p-5 rounded-2xl bg-[#181E24] border border-[#232B33] space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-mono font-bold text-[#FF5722]">Record #{idx + 1}</span>
-                <button
-                  type="button"
-                  onClick={() => setDeleteTarget({ type: 'academic', id: rec.id, title: rec.title?.en || `Record #${idx + 1}` })}
-                  className="p-1.5 text-rose-400 hover:text-rose-300 hover:bg-rose-950/30 rounded-lg transition-colors"
-                  title="Delete Academic Record"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-[11px] font-mono text-neutral-400 mb-1">Year / Session</label>
-                  <input
-                    type="text"
-                    value={rec.year}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      updateDraft(prev => ({
-                        ...prev,
-                        academicRecords: (prev.academicRecords || []).map(r => r.id === rec.id ? { ...r, year: val } : r)
-                      }));
-                    }}
-                    placeholder="e.g. 2021 - 2022"
-                    className="w-full px-3 py-1.5 rounded-lg bg-[#0F1419] border border-[#232B33] text-xs text-white font-mono"
-                  />
+          <div className="space-y-4">
+            {academicRecords.map((rec, idx) => (
+              <div key={rec.id || idx} className="p-4 sm:p-5 rounded-xl bg-[#171A21] border border-white/[0.08] space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold text-[#E4583B] tabular-nums">Record #{idx + 1}</span>
+                  <button
+                    type="button"
+                    onClick={() => setDeleteTarget({ type: 'academic', id: rec.id, title: rec.title?.en || `Record #${idx + 1}` })}
+                    className="p-1.5 text-rose-400 hover:text-rose-300 hover:bg-rose-950/30 rounded-lg transition-colors"
+                    title="Delete Academic Record"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
                 </div>
 
-                <div>
-                  <label className="block text-[11px] font-mono text-neutral-400 mb-1">Status (English)</label>
-                  <input
-                    type="text"
-                    value={rec.status?.en || ''}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      updateDraft(prev => ({
-                        ...prev,
-                        academicRecords: (prev.academicRecords || []).map(r => r.id === rec.id ? { ...r, status: { ...(r.status || { en: '', bn: '', ar: '' }), en: val } } : r)
-                      }));
-                    }}
-                    placeholder="e.g. Completed"
-                    className="w-full px-3 py-1.5 rounded-lg bg-[#0F1419] border border-[#232B33] text-xs text-white"
-                  />
-                </div>
-              </div>
-
-              {/* Title Translations */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div>
-                  <label className="block text-[11px] font-mono text-neutral-400 mb-1">Title (English)</label>
-                  <input
-                    type="text"
-                    value={rec.title?.en || ''}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      updateDraft(prev => ({
-                        ...prev,
-                        academicRecords: (prev.academicRecords || []).map(r => r.id === rec.id ? { ...r, title: { ...(r.title || { en: '', bn: '', ar: '' }), en: val } } : r)
-                      }));
-                    }}
-                    className="w-full px-3 py-1.5 rounded-lg bg-[#0F1419] border border-[#232B33] text-xs text-white"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[11px] font-mono text-neutral-400 mb-1">Title (বাংলা)</label>
-                  <input
-                    type="text"
-                    value={rec.title?.bn || ''}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      updateDraft(prev => ({
-                        ...prev,
-                        academicRecords: (prev.academicRecords || []).map(r => r.id === rec.id ? { ...r, title: { ...(r.title || { en: '', bn: '', ar: '' }), bn: val } } : r)
-                      }));
-                    }}
-                    className="w-full px-3 py-1.5 rounded-lg bg-[#0F1419] border border-[#232B33] text-xs text-white"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[11px] font-mono text-neutral-400 mb-1">Title (العربية)</label>
-                  <input
-                    type="text"
-                    dir="rtl"
-                    value={rec.title?.ar || ''}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      updateDraft(prev => ({
-                        ...prev,
-                        academicRecords: (prev.academicRecords || []).map(r => r.id === rec.id ? { ...r, title: { ...(r.title || { en: '', bn: '', ar: '' }), ar: val } } : r)
-                      }));
-                    }}
-                    className="w-full px-3 py-1.5 rounded-lg bg-[#0F1419] border border-[#232B33] text-xs text-white"
-                  />
-                </div>
-              </div>
-
-              {/* Description Translations */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div>
-                  <label className="block text-[11px] font-mono text-neutral-400 mb-1">Description (English)</label>
-                  <textarea
-                    rows={2}
-                    value={rec.description?.en || ''}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      updateDraft(prev => ({
-                        ...prev,
-                        academicRecords: (prev.academicRecords || []).map(r => r.id === rec.id ? { ...r, description: { ...(r.description || { en: '', bn: '', ar: '' }), en: val } } : r)
-                      }));
-                    }}
-                    className="w-full px-3 py-1.5 rounded-lg bg-[#0F1419] border border-[#232B33] text-xs text-white resize-none"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[11px] font-mono text-neutral-400 mb-1">Description (বাংলা)</label>
-                  <textarea
-                    rows={2}
-                    value={rec.description?.bn || ''}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      updateDraft(prev => ({
-                        ...prev,
-                        academicRecords: (prev.academicRecords || []).map(r => r.id === rec.id ? { ...r, description: { ...(r.description || { en: '', bn: '', ar: '' }), bn: val } } : r)
-                      }));
-                    }}
-                    className="w-full px-3 py-1.5 rounded-lg bg-[#0F1419] border border-[#232B33] text-xs text-white resize-none"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[11px] font-mono text-neutral-400 mb-1">Description (العربية)</label>
-                  <textarea
-                    rows={2}
-                    dir="rtl"
-                    value={rec.description?.ar || ''}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      updateDraft(prev => ({
-                        ...prev,
-                        academicRecords: (prev.academicRecords || []).map(r => r.id === rec.id ? { ...r, description: { ...(r.description || { en: '', bn: '', ar: '' }), ar: val } } : r)
-                      }));
-                    }}
-                    className="w-full px-3 py-1.5 rounded-lg bg-[#0F1419] border border-[#232B33] text-xs text-white resize-none"
-                  />
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-      )}
-
-      {/* 2. Professional Courses & Institutes (Multi-institute with full multilingual editing) */}
-      {(activeSection === 'all' || activeSection === 'professional') && (
-        <div className="p-6 rounded-3xl bg-[#12161A] border border-[#232B33] space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[#1D232A]">
-          <div className="flex items-center space-x-3 rtl:space-x-reverse">
-            <div className="w-10 h-10 rounded-xl bg-[#181E24] border border-[#232B33] flex items-center justify-center text-[#FF5722]">
-              <Award className="w-5 h-5" />
-            </div>
-            <div>
-              <h3 className="text-lg font-bold text-white tracking-wide">Professional Courses & Institutes</h3>
-              <p className="text-xs text-neutral-400 font-mono">
-                Manage skill training institutes, courses, batches, and competencies
-              </p>
-            </div>
-          </div>
-
-          <button
-            type="button"
-            onClick={handleAddInstitute}
-            className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-[#FF5722] hover:bg-[#F4511E] text-xs font-bold text-white transition-all shadow-md"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Add Institute</span>
-          </button>
-        </div>
-
-        {institutes.length === 0 ? (
-          <div className="p-8 text-center rounded-2xl bg-[#181E24] border border-[#232B33] text-neutral-400 text-xs font-mono">
-            No institutes currently listed. Click &quot;Add Institute&quot; above to create one.
-          </div>
-        ) : (
-          <div className="space-y-6">
-            {institutes.map((inst, idx) => (
-              <div key={inst.id || idx} className="p-6 rounded-2xl bg-[#181E24] border border-[#232B33] space-y-5">
-                {/* Institute Header with Reorder and Delete */}
-                <div className="flex items-center justify-between pb-3 border-b border-[#232B33]">
-                  <div className="flex items-center space-x-2">
-                    <span className="px-2.5 py-1 rounded-md text-xs font-mono font-bold bg-[#FF5722]/10 text-[#FF5722] border border-[#FF5722]/30">
-                      Institute #{idx + 1}
-                    </span>
-                    <span className="text-xs text-white font-semibold truncate max-w-[200px] sm:max-w-xs">
-                      {inst.institution?.en || 'Untitled'}
-                    </span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[11px] font-medium text-neutral-400 mb-1">Year / Session</label>
+                    <input
+                      type="text"
+                      value={rec.year}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        updateDraft(prev => ({
+                          ...prev,
+                          academicRecords: (prev.academicRecords || []).map(r => r.id === rec.id ? { ...r, year: val } : r)
+                        }));
+                      }}
+                      placeholder="e.g. 2021 - 2022"
+                      className="w-full px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] focus:border-[#E4583B] outline-none text-xs text-white tabular-nums"
+                    />
                   </div>
 
-                  <div className="flex items-center space-x-1">
-                    <button
-                      type="button"
-                      disabled={idx === 0}
-                      onClick={() => handleMoveInstitute(idx, 'up')}
-                      className="p-1.5 text-neutral-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed rounded-lg hover:bg-[#232B33] transition-colors"
-                      title="Move Up"
-                    >
-                      <ArrowUp className="w-4 h-4" />
-                    </button>
-                    <button
-                      type="button"
-                      disabled={idx === institutes.length - 1}
-                      onClick={() => handleMoveInstitute(idx, 'down')}
-                      className="p-1.5 text-neutral-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed rounded-lg hover:bg-[#232B33] transition-colors"
-                      title="Move Down"
-                    >
-                      <ArrowDown className="w-4 h-4" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setDeleteTarget({
-                        type: 'institute',
-                        id: inst.id,
-                        title: inst.institution?.en || `Institute #${idx + 1}`
-                      })}
-                      className="p-1.5 text-rose-400 hover:text-rose-300 hover:bg-rose-950/30 rounded-lg transition-colors ml-1"
-                      title="Delete Institute"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                  <div>
+                    <label className="block text-[11px] font-medium text-neutral-400 mb-1">Status (English)</label>
+                    <input
+                      type="text"
+                      value={rec.status?.en || ''}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        updateDraft(prev => ({
+                          ...prev,
+                          academicRecords: (prev.academicRecords || []).map(r => r.id === rec.id ? { ...r, status: { ...(r.status || { en: '', bn: '', ar: '' }), en: val } } : r)
+                        }));
+                      }}
+                      placeholder="e.g. Completed"
+                      className="w-full px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] focus:border-[#E4583B] outline-none text-xs text-white"
+                    />
                   </div>
                 </div>
 
-                {/* Institution Name (3 Languages) */}
-                <div>
-                  <label className="block text-[11px] font-mono text-neutral-400 mb-1.5 font-semibold">
-                    Institution Name (English, বাংলা, العربية)
-                  </label>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {/* Title Translations */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div>
+                    <label className="block text-[11px] font-medium text-neutral-400 mb-1">Title (English)</label>
                     <input
                       type="text"
-                      placeholder="English name"
-                      value={inst.institution?.en || ''}
+                      value={rec.title?.en || ''}
                       onChange={(e) => {
                         const val = e.target.value;
-                        handleUpdateInstitute(inst.id, current => ({
-                          ...current,
-                          institution: { ...(current.institution || { en: '', bn: '', ar: '' }), en: val }
+                        updateDraft(prev => ({
+                          ...prev,
+                          academicRecords: (prev.academicRecords || []).map(r => r.id === rec.id ? { ...r, title: { ...(r.title || { en: '', bn: '', ar: '' }), en: val } } : r)
                         }));
                       }}
-                      className="w-full px-3 py-1.5 rounded-lg bg-[#0F1419] border border-[#232B33] text-xs text-white"
+                      className="w-full px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] focus:border-[#E4583B] outline-none text-xs text-white"
                     />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-medium text-neutral-400 mb-1">Title (বাংলা)</label>
                     <input
                       type="text"
-                      placeholder="বাংলা নাম"
-                      value={inst.institution?.bn || ''}
+                      value={rec.title?.bn || ''}
                       onChange={(e) => {
                         const val = e.target.value;
-                        handleUpdateInstitute(inst.id, current => ({
-                          ...current,
-                          institution: { ...(current.institution || { en: '', bn: '', ar: '' }), bn: val }
+                        updateDraft(prev => ({
+                          ...prev,
+                          academicRecords: (prev.academicRecords || []).map(r => r.id === rec.id ? { ...r, title: { ...(r.title || { en: '', bn: '', ar: '' }), bn: val } } : r)
                         }));
                       }}
-                      className="w-full px-3 py-1.5 rounded-lg bg-[#0F1419] border border-[#232B33] text-xs text-white"
+                      className="w-full px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] focus:border-[#E4583B] outline-none text-xs text-white"
                     />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-medium text-neutral-400 mb-1">Title (العربية)</label>
                     <input
                       type="text"
                       dir="rtl"
-                      placeholder="الاسم بالعربية"
-                      value={inst.institution?.ar || ''}
+                      value={rec.title?.ar || ''}
                       onChange={(e) => {
                         const val = e.target.value;
-                        handleUpdateInstitute(inst.id, current => ({
-                          ...current,
-                          institution: { ...(current.institution || { en: '', bn: '', ar: '' }), ar: val }
+                        updateDraft(prev => ({
+                          ...prev,
+                          academicRecords: (prev.academicRecords || []).map(r => r.id === rec.id ? { ...r, title: { ...(r.title || { en: '', bn: '', ar: '' }), ar: val } } : r)
                         }));
                       }}
-                      className="w-full px-3 py-1.5 rounded-lg bg-[#0F1419] border border-[#232B33] text-xs text-white"
+                      className="w-full px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] focus:border-[#E4583B] outline-none text-xs text-white"
                     />
                   </div>
                 </div>
 
-                {/* Course Name (3 Languages) & Batch */}
-                <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
-                  <div className="sm:col-span-3">
-                    <label className="block text-[11px] font-mono text-neutral-400 mb-1.5 font-semibold">
-                      Course Name (English, বাংলা, العربية)
-                    </label>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                      <input
-                        type="text"
-                        placeholder="Course (English)"
-                        value={inst.course?.en || ''}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          handleUpdateInstitute(inst.id, current => ({
-                            ...current,
-                            course: { ...(current.course || { en: '', bn: '', ar: '' }), en: val }
-                          }));
-                        }}
-                        className="w-full px-3 py-1.5 rounded-lg bg-[#0F1419] border border-[#232B33] text-xs text-white"
-                      />
-                      <input
-                        type="text"
-                        placeholder="কোর্স (বাংলা)"
-                        value={inst.course?.bn || ''}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          handleUpdateInstitute(inst.id, current => ({
-                            ...current,
-                            course: { ...(current.course || { en: '', bn: '', ar: '' }), bn: val }
-                          }));
-                        }}
-                        className="w-full px-3 py-1.5 rounded-lg bg-[#0F1419] border border-[#232B33] text-xs text-white"
-                      />
-                      <input
-                        type="text"
-                        dir="rtl"
-                        placeholder="الدورة (العربية)"
-                        value={inst.course?.ar || ''}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          handleUpdateInstitute(inst.id, current => ({
-                            ...current,
-                            course: { ...(current.course || { en: '', bn: '', ar: '' }), ar: val }
-                          }));
-                        }}
-                        className="w-full px-3 py-1.5 rounded-lg bg-[#0F1419] border border-[#232B33] text-xs text-white"
-                      />
-                    </div>
-                  </div>
-
+                {/* Description Translations */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div>
-                    <label className="block text-[11px] font-mono text-neutral-400 mb-1.5 font-semibold">
-                      Batch Info
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="e.g. Batch 08"
-                      value={inst.batch || ''}
+                    <label className="block text-[11px] font-medium text-neutral-400 mb-1">Description (English)</label>
+                    <textarea
+                      rows={2}
+                      value={rec.description?.en || ''}
                       onChange={(e) => {
                         const val = e.target.value;
-                        handleUpdateInstitute(inst.id, current => ({
-                          ...current,
-                          batch: val
+                        updateDraft(prev => ({
+                          ...prev,
+                          academicRecords: (prev.academicRecords || []).map(r => r.id === rec.id ? { ...r, description: { ...(r.description || { en: '', bn: '', ar: '' }), en: val } } : r)
                         }));
                       }}
-                      className="w-full px-3 py-1.5 rounded-lg bg-[#0F1419] border border-[#232B33] text-xs text-white font-mono"
+                      className="w-full px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] focus:border-[#E4583B] outline-none text-xs text-white resize-none"
                     />
                   </div>
-                </div>
-
-                {/* Footer Tags */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
                   <div>
-                    <label className="block text-[11px] font-mono text-neutral-400 mb-1 flex items-center space-x-1.5">
-                      <Sparkles className="w-3.5 h-3.5 text-[#FF5722]" />
-                      <span>Footer Tag 1 (English, বাংলা, العربية)</span>
-                    </label>
-                    <div className="grid grid-cols-1 gap-1.5">
-                      <input
-                        type="text"
-                        placeholder="English: Hands-on Real Project Execution"
-                        value={inst.footerTag1?.en || ''}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          handleUpdateInstitute(inst.id, current => ({
-                            ...current,
-                            footerTag1: { ...(current.footerTag1 || { en: '', bn: '', ar: '' }), en: val }
-                          }));
-                        }}
-                        className="w-full px-3 py-1 rounded bg-[#0F1419] border border-[#232B33] text-xs text-white"
-                      />
-                      <input
-                        type="text"
-                        placeholder="বাংলা: হাতে-কলমে বাস্তব প্রজেক্ট সম্পাদন"
-                        value={inst.footerTag1?.bn || ''}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          handleUpdateInstitute(inst.id, current => ({
-                            ...current,
-                            footerTag1: { ...(current.footerTag1 || { en: '', bn: '', ar: '' }), bn: val }
-                          }));
-                        }}
-                        className="w-full px-3 py-1 rounded bg-[#0F1419] border border-[#232B33] text-xs text-white"
-                      />
-                    </div>
+                    <label className="block text-[11px] font-medium text-neutral-400 mb-1">Description (বাংলা)</label>
+                    <textarea
+                      rows={2}
+                      value={rec.description?.bn || ''}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        updateDraft(prev => ({
+                          ...prev,
+                          academicRecords: (prev.academicRecords || []).map(r => r.id === rec.id ? { ...r, description: { ...(r.description || { en: '', bn: '', ar: '' }), bn: val } } : r)
+                        }));
+                      }}
+                      className="w-full px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] focus:border-[#E4583B] outline-none text-xs text-white resize-none"
+                    />
                   </div>
-
                   <div>
-                    <label className="block text-[11px] font-mono text-neutral-400 mb-1 flex items-center space-x-1.5">
-                      <CheckCircle className="w-3.5 h-3.5 text-[#FF5722]" />
-                      <span>Footer Tag 2 (Badge)</span>
-                    </label>
-                    <div className="grid grid-cols-1 gap-1.5">
-                      <input
-                        type="text"
-                        placeholder="English: Industry Ready"
-                        value={inst.footerTag2?.en || ''}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          handleUpdateInstitute(inst.id, current => ({
-                            ...current,
-                            footerTag2: { ...(current.footerTag2 || { en: '', bn: '', ar: '' }), en: val }
-                          }));
-                        }}
-                        className="w-full px-3 py-1 rounded bg-[#0F1419] border border-[#232B33] text-xs text-white"
-                      />
-                      <input
-                        type="text"
-                        placeholder="বাংলা: ইন্ডাস্ট্রি রেডি"
-                        value={inst.footerTag2?.bn || ''}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          handleUpdateInstitute(inst.id, current => ({
-                            ...current,
-                            footerTag2: { ...(current.footerTag2 || { en: '', bn: '', ar: '' }), bn: val }
-                          }));
-                        }}
-                        className="w-full px-3 py-1 rounded bg-[#0F1419] border border-[#232B33] text-xs text-white"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Competencies Sub-list */}
-                <div className="space-y-3 pt-3 border-t border-[#232B33]">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-mono font-bold text-neutral-300 uppercase tracking-wider">
-                      Competencies Acquired ({inst.competencies?.length || 0})
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => handleAddCompetency(inst.id)}
-                      className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-[#232B33] hover:bg-[#2C3640] text-xs font-mono text-[#FF5722] transition-colors"
-                    >
-                      <Plus className="w-3.5 h-3.5" />
-                      <span>Add Competency</span>
-                    </button>
-                  </div>
-
-                  <div className="space-y-2.5">
-                    {(inst.competencies || []).map((comp: InstituteCompetency, cIdx: number) => (
-                      <div key={comp.id || cIdx} className="p-3.5 rounded-xl bg-[#0F1419] border border-[#232B33] space-y-2.5">
-                        <div className="flex items-center justify-between">
-                          <span className="text-[11px] font-mono text-[#FF5722] font-semibold">
-                            Skill #{cIdx + 1}
-                          </span>
-                          <div className="flex items-center space-x-1">
-                            <button
-                              type="button"
-                              disabled={cIdx === 0}
-                              onClick={() => handleMoveCompetency(inst.id, cIdx, 'up')}
-                              className="p-1 text-neutral-400 hover:text-white disabled:opacity-30 rounded hover:bg-[#181E24]"
-                              title="Move Up"
-                            >
-                              <ArrowUp className="w-3.5 h-3.5" />
-                            </button>
-                            <button
-                              type="button"
-                              disabled={cIdx === (inst.competencies || []).length - 1}
-                              onClick={() => handleMoveCompetency(inst.id, cIdx, 'down')}
-                              className="p-1 text-neutral-400 hover:text-white disabled:opacity-30 rounded hover:bg-[#181E24]"
-                              title="Move Down"
-                            >
-                              <ArrowDown className="w-3.5 h-3.5" />
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => handleRemoveCompetency(inst.id, cIdx)}
-                              className="p-1 text-rose-400 hover:text-rose-300 rounded hover:bg-rose-950/30 ml-1"
-                              title="Delete Competency"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                          <div>
-                            <label className="block text-[10px] font-mono text-neutral-400 mb-0.5">Category (English)</label>
-                            <input
-                              type="text"
-                              value={comp.category?.en || ''}
-                              onChange={(e) => {
-                                const val = e.target.value;
-                                handleUpdateInstitute(inst.id, current => ({
-                                  ...current,
-                                  competencies: current.competencies.map((c, i) => i === cIdx ? {
-                                    ...c,
-                                    category: { ...(c.category || { en: '', bn: '', ar: '' }), en: val }
-                                  } : c)
-                                }));
-                              }}
-                              className="w-full px-2.5 py-1.5 rounded-lg bg-[#181E24] border border-[#232B33] text-xs text-white"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-[10px] font-mono text-neutral-400 mb-0.5">Category (বাংলা)</label>
-                            <input
-                              type="text"
-                              value={comp.category?.bn || ''}
-                              onChange={(e) => {
-                                const val = e.target.value;
-                                handleUpdateInstitute(inst.id, current => ({
-                                  ...current,
-                                  competencies: current.competencies.map((c, i) => i === cIdx ? {
-                                    ...c,
-                                    category: { ...(c.category || { en: '', bn: '', ar: '' }), bn: val }
-                                  } : c)
-                                }));
-                              }}
-                              className="w-full px-2.5 py-1.5 rounded-lg bg-[#181E24] border border-[#232B33] text-xs text-white"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-[10px] font-mono text-neutral-400 mb-0.5">Category (العربية)</label>
-                            <input
-                              type="text"
-                              dir="rtl"
-                              value={comp.category?.ar || ''}
-                              onChange={(e) => {
-                                const val = e.target.value;
-                                handleUpdateInstitute(inst.id, current => ({
-                                  ...current,
-                                  competencies: current.competencies.map((c, i) => i === cIdx ? {
-                                    ...c,
-                                    category: { ...(c.category || { en: '', bn: '', ar: '' }), ar: val }
-                                  } : c)
-                                }));
-                              }}
-                              className="w-full px-2.5 py-1.5 rounded-lg bg-[#181E24] border border-[#232B33] text-xs text-white"
-                            />
-                          </div>
-                        </div>
-
-                        <div>
-                          <label className="block text-[10px] font-mono text-neutral-400 mb-0.5">Tools & Software (e.g. Premiere Pro & After Effects)</label>
-                          <input
-                            type="text"
-                            value={comp.tools || ''}
-                            onChange={(e) => {
-                              const val = e.target.value;
-                              handleUpdateInstitute(inst.id, current => ({
-                                ...current,
-                                competencies: current.competencies.map((c, i) => i === cIdx ? {
-                                  ...c,
-                                  tools: val
-                                } : c)
-                              }));
-                            }}
-                            placeholder="e.g. Photoshop, Illustrator & Canva Pro"
-                            className="w-full px-2.5 py-1.5 rounded-lg bg-[#181E24] border border-[#232B33] text-xs text-white font-mono"
-                          />
-                        </div>
-                      </div>
-                    ))}
+                    <label className="block text-[11px] font-medium text-neutral-400 mb-1">Description (العربية)</label>
+                    <textarea
+                      rows={2}
+                      dir="rtl"
+                      value={rec.description?.ar || ''}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        updateDraft(prev => ({
+                          ...prev,
+                          academicRecords: (prev.academicRecords || []).map(r => r.id === rec.id ? { ...r, description: { ...(r.description || { en: '', bn: '', ar: '' }), ar: val } } : r)
+                        }));
+                      }}
+                      className="w-full px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] focus:border-[#E4583B] outline-none text-xs text-white resize-none"
+                    />
                   </div>
                 </div>
               </div>
             ))}
           </div>
-        )}
-      </div>
+        </div>
+      )}
+
+      {/* 2. Professional Courses & Institutes */}
+      {(activeSection === 'all' || activeSection === 'professional') && (
+        <div className="p-5 sm:p-6 rounded-2xl bg-[#121419] border border-white/[0.08] space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-white/[0.06]">
+            <div className="flex items-center space-x-3 rtl:space-x-reverse">
+              <div className="w-9 h-9 rounded-lg bg-[#171A21] border border-white/[0.08] flex items-center justify-center text-[#E4583B]">
+                <Award className="w-4 h-4" />
+              </div>
+              <div>
+                <h3 className="text-base font-semibold text-white tracking-tight">Professional Courses & Institutes</h3>
+                <p className="text-xs text-neutral-400">
+                  Manage skill training institutes, courses, batches, and competencies
+                </p>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleAddInstitute}
+              className="inline-flex items-center space-x-1.5 px-3.5 py-2 rounded-lg bg-[#E4583B] hover:bg-[#D0492D] text-xs font-medium text-white transition-colors"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Add Institute</span>
+            </button>
+          </div>
+
+          {institutes.length === 0 ? (
+            <div className="p-8 text-center rounded-xl bg-[#171A21] border border-dashed border-white/[0.09] text-neutral-400 text-xs">
+              No institutes currently listed. Click &quot;Add Institute&quot; above to create one.
+            </div>
+          ) : (
+            <div className="space-y-6">
+              {institutes.map((inst, idx) => (
+                <div key={inst.id || idx} className="p-5 rounded-xl bg-[#171A21] border border-white/[0.08] space-y-5">
+                  {/* Institute Header with Reorder and Delete */}
+                  <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
+                    <div className="flex items-center space-x-2.5">
+                      <span className="text-xs font-semibold text-[#E4583B] tabular-nums">
+                        Institute #{idx + 1}
+                      </span>
+                      <span className="text-xs text-white font-medium truncate max-w-[200px] sm:max-w-xs">
+                        {inst.institution?.en || 'Untitled'}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center space-x-1">
+                      <button
+                        type="button"
+                        disabled={idx === 0}
+                        onClick={() => handleMoveInstitute(idx, 'up')}
+                        className="p-1.5 text-neutral-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed rounded-lg hover:bg-[#1E222B] transition-colors"
+                        title="Move Up"
+                      >
+                        <ArrowUp className="w-4 h-4" />
+                      </button>
+                      <button
+                        type="button"
+                        disabled={idx === institutes.length - 1}
+                        onClick={() => handleMoveInstitute(idx, 'down')}
+                        className="p-1.5 text-neutral-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed rounded-lg hover:bg-[#1E222B] transition-colors"
+                        title="Move Down"
+                      >
+                        <ArrowDown className="w-4 h-4" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setDeleteTarget({
+                          type: 'institute',
+                          id: inst.id,
+                          title: inst.institution?.en || `Institute #${idx + 1}`
+                        })}
+                        className="p-1.5 text-rose-400 hover:text-rose-300 hover:bg-rose-950/30 rounded-lg transition-colors ml-1"
+                        title="Delete Institute"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Institution Name */}
+                  <div>
+                    <label className="block text-[11px] font-medium text-neutral-400 mb-1.5">
+                      Institution Name (English, বাংলা, العربية)
+                    </label>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <input
+                        type="text"
+                        placeholder="English name"
+                        value={inst.institution?.en || ''}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          handleUpdateInstitute(inst.id, current => ({
+                            ...current,
+                            institution: { ...(current.institution || { en: '', bn: '', ar: '' }), en: val }
+                          }));
+                        }}
+                        className="w-full px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] focus:border-[#E4583B] outline-none text-xs text-white"
+                      />
+                      <input
+                        type="text"
+                        placeholder="বাংলা নাম"
+                        value={inst.institution?.bn || ''}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          handleUpdateInstitute(inst.id, current => ({
+                            ...current,
+                            institution: { ...(current.institution || { en: '', bn: '', ar: '' }), bn: val }
+                          }));
+                        }}
+                        className="w-full px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] focus:border-[#E4583B] outline-none text-xs text-white"
+                      />
+                      <input
+                        type="text"
+                        dir="rtl"
+                        placeholder="الاسم بالعربية"
+                        value={inst.institution?.ar || ''}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          handleUpdateInstitute(inst.id, current => ({
+                            ...current,
+                            institution: { ...(current.institution || { en: '', bn: '', ar: '' }), ar: val }
+                          }));
+                        }}
+                        className="w-full px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] focus:border-[#E4583B] outline-none text-xs text-white"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Course Name & Batch */}
+                  <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                    <div className="sm:col-span-3">
+                      <label className="block text-[11px] font-medium text-neutral-400 mb-1.5">
+                        Course Name (English, বাংলা, العربية)
+                      </label>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                        <input
+                          type="text"
+                          placeholder="Course (English)"
+                          value={inst.course?.en || ''}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            handleUpdateInstitute(inst.id, current => ({
+                              ...current,
+                              course: { ...(current.course || { en: '', bn: '', ar: '' }), en: val }
+                            }));
+                          }}
+                          className="w-full px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] focus:border-[#E4583B] outline-none text-xs text-white"
+                        />
+                        <input
+                          type="text"
+                          placeholder="কোর্স (বাংলা)"
+                          value={inst.course?.bn || ''}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            handleUpdateInstitute(inst.id, current => ({
+                              ...current,
+                              course: { ...(current.course || { en: '', bn: '', ar: '' }), bn: val }
+                            }));
+                          }}
+                          className="w-full px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] focus:border-[#E4583B] outline-none text-xs text-white"
+                        />
+                        <input
+                          type="text"
+                          dir="rtl"
+                          placeholder="الدورة (العربية)"
+                          value={inst.course?.ar || ''}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            handleUpdateInstitute(inst.id, current => ({
+                              ...current,
+                              course: { ...(current.course || { en: '', bn: '', ar: '' }), ar: val }
+                            }));
+                          }}
+                          className="w-full px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] focus:border-[#E4583B] outline-none text-xs text-white"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-medium text-neutral-400 mb-1.5">
+                        Batch Info
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g. Batch 08"
+                        value={inst.batch || ''}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          handleUpdateInstitute(inst.id, current => ({
+                            ...current,
+                            batch: val
+                          }));
+                        }}
+                        className="w-full px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] focus:border-[#E4583B] outline-none text-xs text-white"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Footer Tags */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+                    <div>
+                      <label className="block text-[11px] font-medium text-neutral-400 mb-1 flex items-center space-x-1.5">
+                        <Sparkles className="w-3.5 h-3.5 text-[#E4583B]" />
+                        <span>Footer Tag 1 (English, বাংলা)</span>
+                      </label>
+                      <div className="grid grid-cols-1 gap-1.5">
+                        <input
+                          type="text"
+                          placeholder="English: Hands-on Real Project Execution"
+                          value={inst.footerTag1?.en || ''}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            handleUpdateInstitute(inst.id, current => ({
+                              ...current,
+                              footerTag1: { ...(current.footerTag1 || { en: '', bn: '', ar: '' }), en: val }
+                            }));
+                          }}
+                          className="w-full px-3 py-1.5 rounded-lg bg-[#0B0C0F] border border-white/[0.08] focus:border-[#E4583B] outline-none text-xs text-white"
+                        />
+                        <input
+                          type="text"
+                          placeholder="বাংলা: হাতে-কলমে বাস্তব প্রজেক্ট সম্পাদন"
+                          value={inst.footerTag1?.bn || ''}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            handleUpdateInstitute(inst.id, current => ({
+                              ...current,
+                              footerTag1: { ...(current.footerTag1 || { en: '', bn: '', ar: '' }), bn: val }
+                            }));
+                          }}
+                          className="w-full px-3 py-1.5 rounded-lg bg-[#0B0C0F] border border-white/[0.08] focus:border-[#E4583B] outline-none text-xs text-white"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-medium text-neutral-400 mb-1 flex items-center space-x-1.5">
+                        <CheckCircle className="w-3.5 h-3.5 text-[#E4583B]" />
+                        <span>Footer Tag 2 (Badge)</span>
+                      </label>
+                      <div className="grid grid-cols-1 gap-1.5">
+                        <input
+                          type="text"
+                          placeholder="English: Industry Ready"
+                          value={inst.footerTag2?.en || ''}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            handleUpdateInstitute(inst.id, current => ({
+                              ...current,
+                              footerTag2: { ...(current.footerTag2 || { en: '', bn: '', ar: '' }), en: val }
+                            }));
+                          }}
+                          className="w-full px-3 py-1.5 rounded-lg bg-[#0B0C0F] border border-white/[0.08] focus:border-[#E4583B] outline-none text-xs text-white"
+                        />
+                        <input
+                          type="text"
+                          placeholder="বাংলা: ইন্ডাস্ট্রি রেডি"
+                          value={inst.footerTag2?.bn || ''}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            handleUpdateInstitute(inst.id, current => ({
+                              ...current,
+                              footerTag2: { ...(current.footerTag2 || { en: '', bn: '', ar: '' }), bn: val }
+                            }));
+                          }}
+                          className="w-full px-3 py-1.5 rounded-lg bg-[#0B0C0F] border border-white/[0.08] focus:border-[#E4583B] outline-none text-xs text-white"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Competencies Sub-list */}
+                  <div className="space-y-3 pt-3 border-t border-white/[0.06]">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-medium text-neutral-300 uppercase tracking-wider tabular-nums">
+                        Competencies Acquired ({inst.competencies?.length || 0})
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => handleAddCompetency(inst.id)}
+                        className="inline-flex items-center space-x-1 px-2.5 py-1.5 rounded-lg bg-[#121419] hover:bg-[#1E222B] border border-white/[0.08] text-xs font-medium text-[#E4583B] transition-colors"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>Add Competency</span>
+                      </button>
+                    </div>
+
+                    <div className="space-y-2.5">
+                      {(inst.competencies || []).map((comp: InstituteCompetency, cIdx: number) => (
+                        <div key={comp.id || cIdx} className="p-3.5 rounded-lg bg-[#0B0C0F] border border-white/[0.06] space-y-2.5">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-medium text-[#E4583B] tabular-nums">
+                              Skill #{cIdx + 1}
+                            </span>
+                            <div className="flex items-center space-x-1">
+                              <button
+                                type="button"
+                                disabled={cIdx === 0}
+                                onClick={() => handleMoveCompetency(inst.id, cIdx, 'up')}
+                                className="p-1 text-neutral-400 hover:text-white disabled:opacity-30 rounded hover:bg-[#171A21]"
+                                title="Move Up"
+                              >
+                                <ArrowUp className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                type="button"
+                                disabled={cIdx === (inst.competencies || []).length - 1}
+                                onClick={() => handleMoveCompetency(inst.id, cIdx, 'down')}
+                                className="p-1 text-neutral-400 hover:text-white disabled:opacity-30 rounded hover:bg-[#171A21]"
+                                title="Move Down"
+                              >
+                                <ArrowDown className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveCompetency(inst.id, cIdx)}
+                                className="p-1 text-rose-400 hover:text-rose-300 rounded hover:bg-rose-950/30 ml-1"
+                                title="Delete Competency"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                            <div>
+                              <label className="block text-[11px] font-medium text-neutral-400 mb-0.5">Category (English)</label>
+                              <input
+                                type="text"
+                                value={comp.category?.en || ''}
+                                onChange={(e) => {
+                                  const val = e.target.value;
+                                  handleUpdateInstitute(inst.id, current => ({
+                                    ...current,
+                                    competencies: current.competencies.map((c, i) => i === cIdx ? {
+                                      ...c,
+                                      category: { ...(c.category || { en: '', bn: '', ar: '' }), en: val }
+                                    } : c)
+                                  }));
+                                }}
+                                className="w-full px-2.5 py-1.5 rounded-lg bg-[#171A21] border border-white/[0.08] focus:border-[#E4583B] outline-none text-xs text-white"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-[11px] font-medium text-neutral-400 mb-0.5">Category (বাংলা)</label>
+                              <input
+                                type="text"
+                                value={comp.category?.bn || ''}
+                                onChange={(e) => {
+                                  const val = e.target.value;
+                                  handleUpdateInstitute(inst.id, current => ({
+                                    ...current,
+                                    competencies: current.competencies.map((c, i) => i === cIdx ? {
+                                      ...c,
+                                      category: { ...(c.category || { en: '', bn: '', ar: '' }), bn: val }
+                                    } : c)
+                                  }));
+                                }}
+                                className="w-full px-2.5 py-1.5 rounded-lg bg-[#171A21] border border-white/[0.08] focus:border-[#E4583B] outline-none text-xs text-white"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-[11px] font-medium text-neutral-400 mb-0.5">Category (العربية)</label>
+                              <input
+                                type="text"
+                                dir="rtl"
+                                value={comp.category?.ar || ''}
+                                onChange={(e) => {
+                                  const val = e.target.value;
+                                  handleUpdateInstitute(inst.id, current => ({
+                                    ...current,
+                                    competencies: current.competencies.map((c, i) => i === cIdx ? {
+                                      ...c,
+                                      category: { ...(c.category || { en: '', bn: '', ar: '' }), ar: val }
+                                    } : c)
+                                  }));
+                                }}
+                                className="w-full px-2.5 py-1.5 rounded-lg bg-[#171A21] border border-white/[0.08] focus:border-[#E4583B] outline-none text-xs text-white"
+                              />
+                            </div>
+                          </div>
+
+                          <div>
+                            <label className="block text-[11px] font-medium text-neutral-400 mb-0.5">Tools & Software (e.g. Premiere Pro & After Effects)</label>
+                            <input
+                              type="text"
+                              value={comp.tools || ''}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                handleUpdateInstitute(inst.id, current => ({
+                                  ...current,
+                                  competencies: current.competencies.map((c, i) => i === cIdx ? {
+                                    ...c,
+                                    tools: val
+                                  } : c)
+                                }));
+                              }}
+                              placeholder="e.g. Photoshop, Illustrator & Canva Pro"
+                              className="w-full px-2.5 py-1.5 rounded-lg bg-[#171A21] border border-white/[0.08] focus:border-[#E4583B] outline-none text-xs text-white"
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       )}
 
       {/* Delete Confirmation Modal */}

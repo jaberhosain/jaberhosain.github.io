@@ -1,24 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Save, 
-  Send, 
-  Eye, 
-  CheckCircle, 
-  AlertCircle, 
-  ShieldAlert, 
-  LogIn, 
-  LogOut, 
-  Plus, 
-  Trash2, 
-  FileSpreadsheet, 
-  Inbox, 
-  Layers, 
-  Film, 
-  User as UserIcon, 
-  Share2, 
-  Sliders, 
-  Copy, 
-  GraduationCap,
+import {
+  Save,
+  Send,
+  Eye,
+  CheckCircle,
+  AlertCircle,
+  ShieldAlert,
+  LogIn,
+  LogOut,
+  Plus,
+  Trash2,
+  User as UserIcon,
+  Sliders,
+  Copy,
   ArrowLeft,
   KeyRound,
   Mail,
@@ -28,27 +22,23 @@ import {
   Upload,
   RefreshCw,
   Image as ImageIcon,
-  Facebook,
   Youtube,
   Play,
-  Palette,
   Sparkles,
-  Wrench,
-  Award,
-  Globe,
   Download,
   RotateCcw,
   ChevronDown,
   ChevronRight,
-  ArrowUpRight
+  ArrowUpRight,
+  Wand2,
+  Loader2
 } from 'lucide-react';
 import { usePortfolio } from '../../context/PortfolioContext';
-import { 
-  signInWithEmailAndPassword, 
-  createUserWithEmailAndPassword,
-  signInWithPopup, 
-  googleProvider, 
-  auth, 
+import {
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  googleProvider,
+  auth,
   signOut,
   EmailAuthProvider,
   reauthenticateWithCredential,
@@ -66,13 +56,13 @@ import { ConfirmDeleteModal } from './ConfirmDeleteModal';
 import { ProjectGalleryManager } from './ProjectGalleryManager';
 import { extractYouTubeId } from '../VideoModal';
 import { uploadMediaToStorage } from '../../lib/mediaUpload';
-import { 
-  extractVimeoInfo, 
-  detectVideoType, 
-  fetchVimeoMetadata, 
+import {
+  extractVimeoInfo,
+  detectVideoType,
   fetchVideoAutoMetadata,
-  VimeoIcon 
+  VimeoIcon
 } from '../../lib/videoUtils';
+import { resolveBehanceProjectFromUrl } from '../../lib/imageUrlResolver';
 import { BestWorkGraphicEditor } from './BestWorkGraphicEditor';
 import { BestWorkVideoEditor } from './BestWorkVideoEditor';
 import { ADMIN_GROUPS, AdminGroupId } from './adminNavigation';
@@ -199,6 +189,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToSite }) 
   const [ogFetchNotes, setOgFetchNotes] = useState<Record<string, string>>({});
   const [videoUploadProgress, setVideoUploadProgress] = useState<Record<number, number>>({});
 
+  // Behance project group extraction states
+  const [behanceImportUrl, setBehanceImportUrl] = useState('');
+  const [importingBehanceProject, setImportingBehanceProject] = useState(false);
+  const [extractingProjectId, setExtractingProjectId] = useState<string | null>(null);
+  const [behanceImportHint, setBehanceImportHint] = useState<{ type: 'ok' | 'err'; text: string } | null>(null);
+
   // Reusable Delete Confirmation State
   const [deleteConfirm, setDeleteConfirm] = useState<{
     isOpen: boolean;
@@ -226,6 +222,127 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToSite }) 
     setToastMessage(msg);
     setToastType(type);
     setTimeout(() => setToastMessage(null), 4500);
+  };
+
+  // 1-Click Import Entire Behance Project Group into Graphic Design showcase
+  const handleImportNewBehanceProject = async () => {
+    const url = behanceImportUrl.trim();
+    if (!url) {
+      setBehanceImportHint({ type: 'err', text: 'আগে একটি Behance প্রজেক্টের লিংক পেস্ট করুন (যেমন: https://www.behance.net/gallery/...)' });
+      return;
+    }
+
+    setImportingBehanceProject(true);
+    setBehanceImportHint(null);
+    try {
+      const res = await resolveBehanceProjectFromUrl(url);
+      if (res.success && res.images.length > 0) {
+        const newId = 'proj-' + Date.now();
+        const nextOrder = (draftPortfolio.projects?.length || 0) + 1;
+        const resolvedTitle = res.title?.trim() || 'Behance Poster Series';
+        const resolvedDesc =
+          res.description?.trim() ||
+          'High-resolution graphic design poster campaign and visual identity series.';
+
+        const newProject: ProjectItem = {
+          id: newId,
+          title: { en: resolvedTitle, bn: resolvedTitle, ar: resolvedTitle },
+          groupName: { en: resolvedTitle, bn: '', ar: '' },
+          category: 'graphic',
+          description: { en: resolvedDesc, bn: resolvedDesc, ar: resolvedDesc },
+          behanceUrl: url,
+          externalUrl: '',
+          coverImage: res.coverImage || res.images[0],
+          galleryImages: res.images,
+          galleryCaptions: res.images.map(() => ''),
+          order: nextOrder
+        };
+
+        updateDraft((prev) => ({
+          ...prev,
+          projects: [...(prev.projects || []), newProject]
+        }));
+        setBehanceImportUrl('');
+        setBehanceImportHint({
+          type: 'ok',
+          text: `"${resolvedTitle}" (${res.images.length}টি পোস্টার) প্রজেক্ট #${nextOrder} হিসেবে যুক্ত হয়েছে! নিচে কার্ড থেকে ক্যাপশন বা কভার চেক করুন।`
+        });
+        showToast(`Imported "${resolvedTitle}" (${res.images.length} posters)!`);
+        setTimeout(() => {
+          document.getElementById(`project-card-${newId}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 120);
+      } else {
+        setBehanceImportHint({
+          type: 'err',
+          text:
+            res.error ||
+            'Behance অটো-ব্লক করেছে। নিচে নতুন প্রজেক্ট খুলে "Smart Import / URLs" বাটনে পেজ সোর্স (Ctrl+U) অথবা ডিরেক্ট পোস্টার লিংক পেস্ট করুন।'
+        });
+        showToast('Behance blocked automated fetch — use Smart Import (Ctrl+U) inside the project card.', 'error');
+      }
+    } catch (err: any) {
+      setBehanceImportHint({
+        type: 'err',
+        text: err?.message || 'Behance থেকে ডেটা আনতে সমস্যা হয়েছে।'
+      });
+    } finally {
+      setImportingBehanceProject(false);
+    }
+  };
+
+  // Per-project Behance poster group extractor
+  const handleExtractProjectBehance = async (proj: ProjectItem) => {
+    const url = (proj.behanceUrl || '').trim();
+    if (!url || !url.toLowerCase().includes('behance.net')) {
+      showToast('প্রথমে এই প্রজেক্টের Behance Project URL ঘরে একটি Behance লিংক দিন।', 'error');
+      return;
+    }
+
+    setExtractingProjectId(proj.id);
+    try {
+      const res = await resolveBehanceProjectFromUrl(url);
+      if (res.success && res.images.length > 0) {
+        updateDraft((prev) => ({
+          ...prev,
+          projects: (prev.projects || []).map((p) => {
+            if (p.id !== proj.id) return p;
+            const merged = [...(p.galleryImages || [])];
+            for (const img of res.images) {
+              if (img && !merged.includes(img)) merged.push(img);
+            }
+            const nextCaptions = Array.from({ length: merged.length }, (_, i) => p.galleryCaptions?.[i] || '');
+            const isDefaultTitle =
+              !p.title?.en ||
+              p.title.en === 'New Graphic Project' ||
+              p.title.en === 'Untitled';
+            const isDefaultDesc =
+              !p.description?.en ||
+              p.description.en.startsWith('High-resolution graphic design concept');
+
+            return {
+              ...p,
+              coverImage: p.coverImage || res.coverImage || res.images[0],
+              galleryImages: merged,
+              galleryCaptions: nextCaptions,
+              title: isDefaultTitle && res.title ? { ...(p.title || { en: '', bn: '', ar: '' }), en: res.title } : p.title,
+              groupName: !p.groupName?.en && res.title ? { ...(p.groupName || { en: '', bn: '', ar: '' }), en: res.title } : p.groupName,
+              description:
+                isDefaultDesc && res.description
+                  ? { ...(p.description || { en: '', bn: '', ar: '' }), en: res.description }
+                  : p.description
+            };
+          })
+        }));
+        showToast(res.note || `Behance থেকে ${res.images.length}টি পোস্টার প্রজেক্টে যুক্ত হয়েছে!`);
+      } else {
+        showToast(
+          res.error || 'অটো-এক্সট্র্যাক্ট করা যায়নি। নিচে "Smart Import / URLs" এ Ctrl+U পেজ সোর্স দিন।',
+          'error'
+        );
+      }
+    } finally {
+      setExtractingProjectId(null);
+    }
   };
 
   // Automatically fetch video thumbnail & metadata for any platform (YouTube, Vimeo, Facebook)
@@ -672,14 +789,14 @@ function doPost(e) {
   // While auth session is restoring from browserLocalPersistence / IndexedDB, show clean loader
   if (authRestoring) {
     return (
-      <div className="min-h-screen bg-[#070A0C] text-neutral-100 flex flex-col justify-center items-center p-4 selection:bg-[#FF5722] selection:text-white">
+      <div className="min-h-screen bg-[#0B0C0F] text-[#F4F0E8] flex flex-col justify-center items-center p-4 font-sans selection:bg-[#E4583B] selection:text-white">
         <div className="flex flex-col items-center space-y-4">
-          <div className="w-12 h-12 rounded-2xl bg-[#141A20] border border-[#232B33] flex items-center justify-center font-bold text-xl text-white font-mono animate-pulse glow-orange-sm">
+          <div className="w-11 h-11 rounded-xl bg-[#121419] border border-white/[0.08] flex items-center justify-center font-bold text-lg text-[#F4F0E8]">
             <span>M</span>
-            <span className="text-[#FF5722]">J</span>
+            <span className="text-[#E4583B]">J</span>
           </div>
-          <div className="flex items-center space-x-2 text-xs font-mono text-neutral-400">
-            <RefreshCw className="w-3.5 h-3.5 animate-spin text-[#FF5722]" />
+          <div className="flex items-center space-x-2 text-xs text-[#8E8A82]">
+            <RefreshCw className="w-3.5 h-3.5 animate-spin text-[#E4583B]" />
             <span>Verifying session...</span>
           </div>
         </div>
@@ -690,32 +807,27 @@ function doPost(e) {
   // If not logged in or unauthorized: SHOW ONLY THE SECURE LOGIN SCREEN
   if (!currentUser || !isAdmin) {
     return (
-      <div className="min-h-screen bg-[#070A0C] text-neutral-100 flex flex-col justify-center items-center p-4 selection:bg-[#FF5722] selection:text-white">
-        
-        {/* Subtle ambient lighting */}
-        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[450px] h-[450px] bg-[#FF5722]/10 rounded-full blur-[130px] pointer-events-none" />
-
-        <div className="w-full max-w-md bg-[#0F1419] border border-[#232B33] rounded-3xl p-8 sm:p-10 shadow-2xl relative z-10">
-          
+      <div className="min-h-screen bg-[#0B0C0F] text-[#F4F0E8] flex flex-col justify-center items-center p-4 font-sans selection:bg-[#E4583B] selection:text-white">
+        <div className="w-full max-w-md bg-[#121419] border border-white/[0.08] rounded-2xl p-8 sm:p-10 shadow-2xl">
           {/* Brand header */}
           <div className="flex flex-col items-center text-center mb-8">
-            <div className="w-12 h-12 rounded-2xl bg-[#141A20] border border-[#232B33] flex items-center justify-center font-bold text-xl text-white font-mono mb-4 glow-orange-sm">
+            <div className="w-11 h-11 rounded-xl bg-[#171A21] border border-white/[0.08] flex items-center justify-center font-bold text-lg text-[#F4F0E8] mb-4">
               <span>M</span>
-              <span className="text-[#FF5722]">J</span>
+              <span className="text-[#E4583B]">J</span>
             </div>
 
-            <h1 className="text-xl sm:text-2xl font-extrabold text-white font-mono tracking-wider uppercase mb-1">
-              Admin Portal
+            <h1 className="text-xl font-semibold text-[#F4F0E8] tracking-tight mb-1">
+              Studio Admin Console
             </h1>
-            <p className="text-xs text-neutral-400 font-mono">
+            <p className="text-xs text-[#8E8A82]">
               Sign in with your owner credentials to manage site content.
             </p>
           </div>
 
           {/* Access Warning if signed in with non-owner account */}
           {currentUser && !isAdmin && (
-            <div className="p-4 rounded-xl bg-amber-950/40 border border-amber-500/30 text-amber-300 text-xs mb-6 space-y-2">
-              <div className="font-bold flex items-center space-x-1.5 rtl:space-x-reverse">
+            <div className="p-4 rounded-xl bg-amber-950/35 border border-amber-500/30 text-amber-300 text-xs mb-6 space-y-2">
+              <div className="font-semibold flex items-center space-x-1.5 rtl:space-x-reverse">
                 <ShieldAlert className="w-4 h-4 text-amber-400" />
                 <span>Unauthorized User</span>
               </div>
@@ -724,7 +836,7 @@ function doPost(e) {
               </p>
               <button
                 onClick={handleSignOut}
-                className="text-xs text-white underline hover:text-[#FF5722]"
+                className="text-xs text-white underline hover:text-[#E4583B]"
               >
                 Sign out and use owner account
               </button>
@@ -733,7 +845,7 @@ function doPost(e) {
 
           {/* Error notice */}
           {authError && (
-            <div className="p-3.5 rounded-xl bg-rose-950/60 border border-rose-500/40 text-rose-300 text-xs mb-6 flex items-start space-x-2.5 rtl:space-x-reverse">
+            <div className="p-3.5 rounded-xl bg-rose-950/50 border border-rose-500/35 text-rose-300 text-xs mb-6 flex items-start space-x-2.5 rtl:space-x-reverse">
               <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
               <span>{authError}</span>
             </div>
@@ -742,11 +854,11 @@ function doPost(e) {
           {/* Username + Password Form (Auto-maps to username@jabir.internal) */}
           <form onSubmit={handleUsernamePasswordAuth} className="space-y-4">
             <div>
-              <label className="block text-xs font-mono uppercase text-neutral-400 mb-1.5 font-semibold">
+              <label className="block text-xs font-medium text-[#A7A298] mb-1.5">
                 Username or Email
               </label>
               <div className="relative">
-                <UserIcon className="absolute left-3.5 rtl:left-auto rtl:right-3.5 top-3 w-4 h-4 text-neutral-500" />
+                <UserIcon className="absolute left-3.5 rtl:left-auto rtl:right-3.5 top-3 w-4 h-4 text-[#6F6B64]" />
                 <input
                   type="text"
                   required
@@ -754,17 +866,17 @@ function doPost(e) {
                   value={usernameInput}
                   onChange={(e) => setUsernameInput(e.target.value)}
                   placeholder="jabirbd"
-                  className="w-full pl-10 rtl:pl-4 rtl:pr-10 pr-4 py-2.5 rounded-xl bg-[#141A20] border border-[#232B33] text-sm text-white focus:outline-none focus:border-[#FF5722] font-mono transition-colors"
+                  className="w-full pl-10 rtl:pl-4 rtl:pr-10 pr-4 py-2.5 rounded-xl bg-[#0B0C0F] border border-white/[0.08] text-sm text-[#F4F0E8] focus:outline-none focus:border-[#E4583B] font-mono transition-colors"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-mono uppercase text-neutral-400 mb-1.5 font-semibold">
+              <label className="block text-xs font-medium text-[#A7A298] mb-1.5">
                 Password
               </label>
               <div className="relative">
-                <Lock className="absolute left-3.5 rtl:left-auto rtl:right-3.5 top-3 w-4 h-4 text-neutral-500" />
+                <Lock className="absolute left-3.5 rtl:left-auto rtl:right-3.5 top-3 w-4 h-4 text-[#6F6B64]" />
                 <input
                   type="password"
                   required
@@ -772,7 +884,7 @@ function doPost(e) {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••••••"
-                  className="w-full pl-10 rtl:pl-4 rtl:pr-10 pr-4 py-2.5 rounded-xl bg-[#141A20] border border-[#232B33] text-sm text-white focus:outline-none focus:border-[#FF5722] font-mono transition-colors"
+                  className="w-full pl-10 rtl:pl-4 rtl:pr-10 pr-4 py-2.5 rounded-xl bg-[#0B0C0F] border border-white/[0.08] text-sm text-[#F4F0E8] focus:outline-none focus:border-[#E4583B] transition-colors"
                 />
               </div>
             </div>
@@ -780,7 +892,7 @@ function doPost(e) {
             <button
               type="submit"
               disabled={authLoading}
-              className="w-full py-3 rounded-xl font-bold font-mono text-xs uppercase tracking-wider text-white bg-[#FF5722] hover:bg-[#F4511E] glow-orange transition-all flex items-center justify-center space-x-2 rtl:space-x-reverse disabled:opacity-50 cursor-pointer"
+              className="w-full py-2.5 rounded-xl font-semibold text-xs text-white bg-[#E4583B] hover:bg-[#D0492D] transition-colors flex items-center justify-center space-x-2 rtl:space-x-reverse disabled:opacity-50 cursor-pointer"
             >
               <KeyRound className="w-4 h-4" />
               <span>{authLoading ? 'Verifying...' : 'Sign In as Admin'}</span>
@@ -789,8 +901,8 @@ function doPost(e) {
 
           {/* Divider */}
           <div className="relative my-6 text-center">
-            <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-[#232B33]" /></div>
-            <span className="relative px-3 text-[10px] font-mono uppercase tracking-widest bg-[#0F1419] text-neutral-500">Or continue with</span>
+            <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-white/[0.08]" /></div>
+            <span className="relative px-3 text-[11px] bg-[#121419] text-[#6F6B64]">Or continue with</span>
           </div>
 
           {/* Backup Google Sign-In */}
@@ -798,23 +910,22 @@ function doPost(e) {
             type="button"
             onClick={handleGoogleLogin}
             disabled={authLoading}
-            className="w-full py-2.5 rounded-xl text-xs font-semibold text-neutral-200 bg-[#141A20] hover:bg-[#1A222B] border border-[#232B33] hover:border-neutral-500 transition-all flex items-center justify-center space-x-2 rtl:space-x-reverse cursor-pointer"
+            className="w-full py-2.5 rounded-xl text-xs font-medium text-[#EAE5DC] bg-[#171A21] hover:bg-[#1E222B] border border-white/[0.08] transition-colors flex items-center justify-center space-x-2 rtl:space-x-reverse cursor-pointer"
           >
-            <LogIn className="w-3.5 h-3.5 text-[#FF5722]" />
+            <LogIn className="w-3.5 h-3.5 text-[#E4583B]" />
             <span>Sign In with Google</span>
           </button>
 
           {/* Back to public site button */}
-          <div className="mt-6 pt-4 border-t border-[#232B33] text-center">
+          <div className="mt-6 pt-4 border-t border-white/[0.06] text-center">
             <button
               onClick={onBackToSite}
-              className="inline-flex items-center space-x-1.5 rtl:space-x-reverse text-xs font-mono text-neutral-400 hover:text-[#FF5722] transition-colors"
+              className="inline-flex items-center space-x-1.5 rtl:space-x-reverse text-xs text-[#8E8A82] hover:text-[#F4F0E8] transition-colors"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
               <span>Return to Public Website</span>
             </button>
           </div>
-
         </div>
       </div>
     );
@@ -827,36 +938,33 @@ function doPost(e) {
 
   // AUTHENTICATED OWNER: FULL CONTROL CENTER
   return (
-    <div className="min-h-screen bg-[#070A0C] text-neutral-100 flex flex-col selection:bg-[#FF5722] selection:text-white">
-      
+    <div className="min-h-screen bg-[#0B0C0F] text-[#F4F0E8] flex flex-col font-sans selection:bg-[#E4583B] selection:text-white">
+
       {/* Top Header Toolbar */}
-      <header className="sticky top-0 z-40 bg-[#0F1419]/90 backdrop-blur-xl border-b border-[#232B33] px-6 py-4 flex items-center justify-between shadow-xl">
-        <div className="flex items-center space-x-3 rtl:space-x-reverse">
-          <div className="w-9 h-9 rounded-xl bg-[#FF5722] text-white flex items-center justify-center font-bold font-mono shadow-md">
+      <header className="sticky top-0 z-40 bg-[#121419]/95 backdrop-blur-md border-b border-white/[0.08] px-6 py-3.5 flex items-center justify-between gap-4">
+        <div className="flex items-center space-x-3 rtl:space-x-reverse min-w-0">
+          <div className="w-9 h-9 rounded-lg bg-[#E4583B] text-white flex items-center justify-center font-bold text-sm shrink-0">
             MJ
           </div>
-          <div>
-            <h1 className="text-base sm:text-lg font-bold text-white flex items-center space-x-2 rtl:space-x-reverse">
-              <span>{ui.admin.title}</span>
-              <span className="text-[10px] font-mono font-normal px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                OWNER AUTHENTICATED
-              </span>
+          <div className="min-w-0">
+            <h1 className="text-sm sm:text-base font-semibold text-[#F4F0E8] tracking-tight truncate">
+              {ui.admin.title}
             </h1>
-            <p className="text-xs text-neutral-400 font-mono">
-              Logged in as <span className="text-neutral-200 font-semibold">{loggedInLabel}</span>
+            <p className="text-xs text-[#8E8A82] truncate">
+              Signed in as <span className="font-mono text-[#D7D2C8]">{loggedInLabel}</span>
             </p>
           </div>
         </div>
 
         {/* Actions: Save Draft, Preview, Publish Live, Back to site, Logout */}
-        <div className="flex items-center space-x-2.5 rtl:space-x-reverse">
+        <div className="flex items-center space-x-2 rtl:space-x-reverse shrink-0">
           {/* Backup & Export JSON */}
           <button
             onClick={exportPortfolioBackup}
-            className="inline-flex items-center space-x-1.5 rtl:space-x-reverse px-3 py-2 rounded-xl text-xs font-semibold text-neutral-300 hover:text-white bg-[#141A20] hover:bg-[#1E2630] border border-[#232B33] transition-all"
+            className="inline-flex items-center space-x-1.5 rtl:space-x-reverse px-3 py-2 rounded-lg text-xs font-medium text-[#D7D2C8] hover:text-white bg-[#171A21] hover:bg-[#1E222B] border border-white/[0.08] transition-colors whitespace-nowrap cursor-pointer"
             title="Download complete JSON backup of portfolio content"
           >
-            <Download className="w-3.5 h-3.5 text-[#FF5722]" />
+            <Download className="w-3.5 h-3.5 text-[#E4583B]" />
             <span className="hidden md:inline">Backup JSON</span>
           </button>
 
@@ -864,19 +972,19 @@ function doPost(e) {
           <button
             onClick={handleSaveDraft}
             disabled={savingDraft || publishing}
-            className="inline-flex items-center space-x-1.5 rtl:space-x-reverse px-3.5 py-2 rounded-xl text-xs font-semibold text-neutral-200 bg-[#141A20] hover:bg-[#1E2630] border border-[#232B33] transition-all disabled:opacity-50"
+            className="inline-flex items-center space-x-1.5 rtl:space-x-reverse px-3.5 py-2 rounded-lg text-xs font-medium text-[#F4F0E8] bg-[#171A21] hover:bg-[#1E222B] border border-white/[0.08] transition-colors disabled:opacity-50 whitespace-nowrap cursor-pointer"
           >
-            <Save className="w-3.5 h-3.5 text-[#FF5722]" />
+            <Save className="w-3.5 h-3.5 text-[#E4583B]" />
             <span className="hidden sm:inline">{savingDraft ? 'Saving...' : ui.admin.saveDraft}</span>
           </button>
 
           {/* Preview Toggle */}
           <button
             onClick={() => setIsPreviewDraft(!isPreviewDraft)}
-            className={`inline-flex items-center space-x-1.5 rtl:space-x-reverse px-3.5 py-2 rounded-xl text-xs font-semibold border transition-all ${
+            className={`inline-flex items-center space-x-1.5 rtl:space-x-reverse px-3.5 py-2 rounded-lg text-xs font-medium border transition-colors whitespace-nowrap cursor-pointer ${
               isPreviewDraft
-                ? 'bg-[#FF5722] text-white border-[#FF5722]'
-                : 'bg-[#141A20] text-neutral-300 border-[#232B33] hover:border-neutral-500'
+                ? 'bg-[#E4583B]/15 text-[#F07C63] border-[#E4583B]/60'
+                : 'bg-[#171A21] text-[#D7D2C8] border-white/[0.08] hover:text-white'
             }`}
           >
             <Eye className="w-3.5 h-3.5" />
@@ -889,7 +997,7 @@ function doPost(e) {
           <button
             onClick={handlePublishLive}
             disabled={publishing || savingDraft}
-            className="inline-flex items-center space-x-1.5 rtl:space-x-reverse px-4 py-2 rounded-xl text-xs font-bold text-white bg-[#FF5722] hover:bg-[#F4511E] glow-orange-sm transition-all disabled:opacity-50"
+            className="inline-flex items-center space-x-1.5 rtl:space-x-reverse px-4 py-2 rounded-lg text-xs font-semibold text-white bg-[#E4583B] hover:bg-[#D0492D] transition-colors disabled:opacity-50 whitespace-nowrap cursor-pointer"
           >
             <Send className="w-3.5 h-3.5" />
             <span>{publishing ? ui.admin.publishing : ui.admin.publishLive}</span>
@@ -898,16 +1006,16 @@ function doPost(e) {
           {/* View Website */}
           <button
             onClick={onBackToSite}
-            className="p-2 text-neutral-400 hover:text-white rounded-xl hover:bg-neutral-800 transition-colors"
+            className="p-2 text-[#A7A298] hover:text-white rounded-lg hover:bg-white/[0.06] transition-colors cursor-pointer"
             title="View Public Website"
           >
-            <ArrowLeft className="w-5 h-5" />
+            <ArrowLeft className="w-4 h-4" />
           </button>
 
           {/* LOGOUT BUTTON */}
           <button
             onClick={handleSignOut}
-            className="inline-flex items-center space-x-1 px-3 py-2 rounded-xl text-xs font-semibold text-rose-400 hover:text-rose-300 bg-rose-950/30 border border-rose-500/30 hover:bg-rose-950/50 transition-colors"
+            className="inline-flex items-center space-x-1 px-3 py-2 rounded-lg text-xs font-medium text-rose-400 hover:text-rose-300 bg-rose-950/25 border border-rose-500/25 hover:bg-rose-950/45 transition-colors whitespace-nowrap cursor-pointer"
             title="Logout"
           >
             <LogOut className="w-3.5 h-3.5" />
@@ -918,11 +1026,11 @@ function doPost(e) {
 
       {/* Save or Publish Error Banner with Retry Button */}
       {(saveError || publishError) && (
-        <div className="px-6 py-3 bg-rose-950/90 text-rose-200 border-b border-rose-500/50 flex flex-wrap items-center justify-between gap-3 text-xs">
+        <div className="px-6 py-3 bg-rose-950/85 text-rose-200 border-b border-rose-500/40 flex flex-wrap items-center justify-between gap-3 text-xs">
           <div className="flex items-center space-x-2.5 rtl:space-x-reverse">
             <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
             <div>
-              <span className="font-bold">Error: </span>
+              <span className="font-semibold">Error: </span>
               <span>{saveError || publishError}</span>
               {(saveError || publishError)?.includes('securetoken.googleapis.com') && (
                 <div className="mt-1">
@@ -930,7 +1038,7 @@ function doPost(e) {
                     href="https://console.developers.google.com/apis/api/securetoken.googleapis.com/overview?project=142615067158"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="underline text-orange-400 font-bold hover:text-orange-300"
+                    className="underline text-amber-300 font-medium hover:text-amber-200"
                   >
                     Click here to enable Google Token Service API in Google Cloud Console &rarr;
                   </a>
@@ -944,7 +1052,7 @@ function doPost(e) {
                 type="button"
                 onClick={handleSaveDraft}
                 disabled={savingDraft}
-                className="px-3 py-1 rounded-lg bg-[#FF5722] hover:bg-[#F4511E] text-white font-bold font-mono text-xs transition-colors"
+                className="px-3 py-1 rounded-lg bg-[#E4583B] hover:bg-[#D0492D] text-white font-semibold text-xs transition-colors"
               >
                 {savingDraft ? 'Retrying...' : 'Retry Save Draft'}
               </button>
@@ -954,7 +1062,7 @@ function doPost(e) {
                 type="button"
                 onClick={handlePublishLive}
                 disabled={publishing}
-                className="px-3 py-1 rounded-lg bg-[#FF5722] hover:bg-[#F4511E] text-white font-bold font-mono text-xs transition-colors"
+                className="px-3 py-1 rounded-lg bg-[#E4583B] hover:bg-[#D0492D] text-white font-semibold text-xs transition-colors"
               >
                 {publishing ? 'Retrying...' : 'Retry Publish'}
               </button>
@@ -965,7 +1073,7 @@ function doPost(e) {
                 setSaveError(null);
                 setPublishError(null);
               }}
-              className="text-xs text-neutral-400 hover:text-white underline ml-2"
+              className="text-xs text-[#A7A298] hover:text-white underline ml-2"
             >
               Dismiss
             </button>
@@ -978,8 +1086,8 @@ function doPost(e) {
         <div
           className={`px-6 py-2.5 text-xs font-medium flex items-center justify-between ${
             toastType === 'success'
-              ? 'bg-emerald-950/80 text-emerald-300 border-b border-emerald-500/30'
-              : 'bg-rose-950/80 text-rose-300 border-b border-rose-500/30'
+              ? 'bg-emerald-950/75 text-emerald-300 border-b border-emerald-500/30'
+              : 'bg-rose-950/75 text-rose-300 border-b border-rose-500/30'
           }`}
         >
           <div className="flex items-center space-x-2 rtl:space-x-reverse">
@@ -998,15 +1106,12 @@ function doPost(e) {
 
       {/* Main Admin Stage */}
       <div className="flex-1 flex flex-col md:flex-row max-w-7xl w-full mx-auto p-4 sm:p-6 gap-6">
-        
-        {/* Grouped Navigation Sidebar (Single source of truth from adminNavigation.ts) */}
-        <div className="w-full md:w-72 bg-[#0F1419] border border-[#232B33] rounded-3xl p-3.5 flex flex-col space-y-1.5 shrink-0 h-fit">
-          <div className="px-3 py-2 border-b border-[#232B33] mb-1 flex items-center justify-between">
-            <span className="text-[11px] font-mono uppercase text-neutral-400 font-bold tracking-wider">
-              Management Groups
-            </span>
-            <span className="text-[10px] font-mono text-neutral-500 bg-[#141A20] px-2 py-0.5 rounded-full border border-[#232B33]">
-              8 Groups
+
+        {/* Grouped Navigation Sidebar */}
+        <aside className="w-full md:w-72 bg-[#121419] border border-white/[0.08] rounded-2xl p-3 flex flex-col space-y-1 shrink-0 h-fit">
+          <div className="px-3 py-2 border-b border-white/[0.06] mb-1">
+            <span className="text-xs font-semibold text-[#8E8A82]">
+              Content Sections
             </span>
           </div>
 
@@ -1017,7 +1122,7 @@ function doPost(e) {
               const isGroupActive = getGroupFromTab(activeTab) === group.id;
 
               return (
-                <div key={group.id} className="rounded-2xl transition-all">
+                <div key={group.id} className="rounded-xl transition-colors">
                   {/* Group Header Button */}
                   <button
                     type="button"
@@ -1026,38 +1131,35 @@ function doPost(e) {
                         setExpandedGroup(group.id);
                         setActiveTab(getTabFromSubSection(group.subSections[0].id) as any);
                       } else {
-                        // Keep active group expanded
                         setExpandedGroup(group.id);
                       }
                     }}
-                    className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all ${
+                    className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-medium transition-colors cursor-pointer ${
                       isGroupActive
-                        ? 'bg-[#182029] text-white border border-[#2F3A46] shadow-sm'
-                        : 'text-neutral-400 hover:text-white hover:bg-neutral-800/40'
+                        ? 'bg-[#171A21] text-[#F4F0E8] border border-white/[0.08]'
+                        : 'text-[#A7A298] hover:text-[#F4F0E8] hover:bg-white/[0.03]'
                     }`}
                   >
                     <div className="flex items-center space-x-2.5 rtl:space-x-reverse min-w-0">
-                      <div className={`p-1.5 rounded-lg shrink-0 ${isGroupActive ? 'text-[#FF5722] bg-[#FF5722]/10' : 'text-neutral-400'}`}>
-                        <GroupIcon className="w-4 h-4" />
-                      </div>
-                      <span className="truncate text-xs font-semibold">{group.label}</span>
+                      <GroupIcon className={`w-4 h-4 shrink-0 ${isGroupActive ? 'text-[#E4583B]' : 'text-[#6F6B64]'}`} />
+                      <span className="truncate text-xs font-medium">{group.label}</span>
                     </div>
 
                     <div className="flex items-center space-x-1.5 rtl:space-x-reverse shrink-0">
-                      <span className="text-[10px] font-mono text-neutral-500 bg-[#12171E] px-1.5 py-0.5 rounded border border-[#232B33]">
+                      <span className="text-[11px] text-[#6F6B64] tabular-nums">
                         {group.subSections.length}
                       </span>
                       {isExpanded ? (
-                        <ChevronDown className="w-3.5 h-3.5 text-neutral-400" />
+                        <ChevronDown className="w-3.5 h-3.5 text-[#8E8A82]" />
                       ) : (
-                        <ChevronRight className="w-3.5 h-3.5 text-neutral-500" />
+                        <ChevronRight className="w-3.5 h-3.5 text-[#6F6B64]" />
                       )}
                     </div>
                   </button>
 
-                  {/* Collapsible Sub-sections (Visible only for the active expanded group) */}
+                  {/* Collapsible Sub-sections */}
                   {isExpanded && (
-                    <div className="mt-1 ml-3.5 pl-3 border-l border-[#232B33] space-y-1 py-1 animate-in fade-in slide-in-from-top-1 duration-150">
+                    <div className="mt-1 ml-3.5 pl-3 border-l border-white/[0.08] space-y-0.5 py-1">
                       {group.subSections.map((sub) => {
                         const targetTab = getTabFromSubSection(sub.id);
                         const isSubActive = activeTab === targetTab;
@@ -1067,14 +1169,13 @@ function doPost(e) {
                             key={sub.id}
                             type="button"
                             onClick={() => setActiveTab(targetTab as any)}
-                            className={`w-full text-left px-3 py-2 rounded-xl text-xs font-medium transition-all flex items-center justify-between ${
+                            className={`w-full text-left px-3 py-1.5 rounded-lg text-xs transition-colors flex items-center justify-between cursor-pointer ${
                               isSubActive
-                                ? 'bg-[#FF5722] text-white font-bold shadow-md glow-orange-sm'
-                                : 'text-neutral-400 hover:text-white hover:bg-neutral-800/50'
+                                ? 'bg-[#E4583B] text-white font-semibold'
+                                : 'text-[#A7A298] hover:text-[#F4F0E8] hover:bg-white/[0.04]'
                             }`}
                           >
                             <span className="truncate">{sub.label}</span>
-                            {isSubActive && <span className="text-[10px] font-mono ml-1">&bull;</span>}
                           </button>
                         );
                       })}
@@ -1085,83 +1186,81 @@ function doPost(e) {
             })}
           </div>
 
-          {/* Separate Dedicated Option at the bottom of sidebar: Theme Live Edit */}
-          <div className="pt-3.5 mt-2 border-t border-[#232B33]">
+          {/* Dedicated Option: Theme Live Edit */}
+          <div className="pt-3 mt-2 border-t border-white/[0.06]">
             <button
               type="button"
               onClick={() => setIsLiveEditOpen(true)}
-              className="w-full flex items-center justify-between p-3 rounded-2xl bg-gradient-to-r from-[#FF5722]/15 via-[#FF5722]/10 to-transparent border border-[#FF5722]/40 hover:border-[#FF5722] text-white text-xs font-bold transition-all shadow-lg hover:shadow-[#FF5722]/20 group"
+              className="w-full flex items-center justify-between p-3 rounded-xl bg-[#171A21] hover:bg-[#1E222B] border border-white/[0.08] hover:border-[#E4583B]/50 text-[#F4F0E8] text-xs font-medium transition-colors group cursor-pointer"
             >
               <div className="flex items-center space-x-2.5 rtl:space-x-reverse min-w-0">
-                <div className="p-1.5 rounded-xl bg-[#FF5722] text-white shadow-sm">
-                  <Sparkles className="w-4 h-4" />
+                <div className="p-1.5 rounded-lg bg-[#E4583B] text-white shrink-0">
+                  <Sparkles className="w-3.5 h-3.5" />
                 </div>
                 <div className="text-left rtl:text-right">
-                  <div className="text-xs font-bold text-white flex items-center space-x-1.5">
-                    <span>Theme Live Edit</span>
-                    <span className="text-[9px] uppercase tracking-wider bg-[#FF5722] text-white px-1.5 py-0.2 rounded font-mono font-bold">New</span>
+                  <div className="text-xs font-semibold text-[#F4F0E8]">
+                    Theme Live Edit
                   </div>
-                  <div className="text-[10px] text-neutral-400 font-normal">Click & edit public site</div>
+                  <div className="text-[11px] text-[#8E8A82]">Click &amp; edit public site</div>
                 </div>
               </div>
-              <ArrowUpRight className="w-4 h-4 text-[#FF5722] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+              <ArrowUpRight className="w-4 h-4 text-[#E4583B] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform shrink-0" />
             </button>
           </div>
-        </div>
+        </aside>
 
         {/* Content Workspace */}
-        <div className="flex-1 bg-[#0F1419] border border-[#232B33] rounded-3xl p-6 sm:p-8 overflow-y-auto">
-          
+        <div className="flex-1 bg-[#121419] border border-white/[0.08] rounded-2xl p-6 sm:p-8 overflow-y-auto">
+
           {/* Media Group Sub-tabs */}
           {['projects', 'graphic-best', 'videos', 'video-best'].includes(activeTab) && (
-            <div className="mb-6 pb-4 border-b border-[#232B33] flex flex-wrap items-center gap-2">
-              <span className="text-[11px] font-mono text-neutral-400 uppercase tracking-wider mr-1">
-                Media Group:
-              </span>
-              <button
-                type="button"
-                onClick={() => setActiveTab('projects')}
-                className={`px-3 py-1.5 rounded-xl text-xs font-mono font-medium transition-colors ${
-                  activeTab === 'projects'
-                    ? 'bg-[#FF5722] text-white shadow-sm'
-                    : 'bg-[#141A20] text-neutral-400 hover:text-white border border-[#232B33]'
-                }`}
-              >
-                1. Graphic Design
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveTab('graphic-best')}
-                className={`px-3 py-1.5 rounded-xl text-xs font-mono font-medium transition-colors ${
-                  activeTab === 'graphic-best'
-                    ? 'bg-[#FF5722] text-white shadow-sm'
-                    : 'bg-[#141A20] text-neutral-400 hover:text-white border border-[#232B33]'
-                }`}
-              >
-                2. Graphic Design - Best Work
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveTab('videos')}
-                className={`px-3 py-1.5 rounded-xl text-xs font-mono font-medium transition-colors ${
-                  activeTab === 'videos'
-                    ? 'bg-[#FF5722] text-white shadow-sm'
-                    : 'bg-[#141A20] text-neutral-400 hover:text-white border border-[#232B33]'
-                }`}
-              >
-                3. Video Editing
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveTab('video-best')}
-                className={`px-3 py-1.5 rounded-xl text-xs font-mono font-medium transition-colors ${
-                  activeTab === 'video-best'
-                    ? 'bg-[#FF5722] text-white shadow-sm'
-                    : 'bg-[#141A20] text-neutral-400 hover:text-white border border-[#232B33]'
-                }`}
-              >
-                4. Video Editing - Best Work
-              </button>
+            <div className="mb-6 pb-4 border-b border-white/[0.08] flex flex-wrap items-center gap-2">
+              <div className="inline-flex flex-wrap items-center gap-1 p-1 rounded-xl bg-[#0B0C0F] border border-white/[0.08]">
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('projects')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap cursor-pointer ${
+                    activeTab === 'projects'
+                      ? 'bg-[#E4583B] text-white'
+                      : 'text-[#A7A298] hover:text-white'
+                  }`}
+                >
+                  Graphic Design
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('graphic-best')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap cursor-pointer ${
+                    activeTab === 'graphic-best'
+                      ? 'bg-[#E4583B] text-white'
+                      : 'text-[#A7A298] hover:text-white'
+                  }`}
+                >
+                  Graphic Best Work
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('videos')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap cursor-pointer ${
+                    activeTab === 'videos'
+                      ? 'bg-[#E4583B] text-white'
+                      : 'text-[#A7A298] hover:text-white'
+                  }`}
+                >
+                  Video Editing
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('video-best')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap cursor-pointer ${
+                    activeTab === 'video-best'
+                      ? 'bg-[#E4583B] text-white'
+                      : 'text-[#A7A298] hover:text-white'
+                  }`}
+                >
+                  Video Best Work
+                </button>
+              </div>
             </div>
           )}
           
@@ -1171,13 +1270,13 @@ function doPost(e) {
           {/* TAB: BRANDING */}
           {activeTab === 'branding' && (
             <div className="space-y-6 max-w-3xl">
-              <div className="pb-4 border-b border-[#1D232A]">
-                <h2 className="text-xl font-bold text-white mb-1">Site Branding & Title</h2>
-                <p className="text-xs text-neutral-400 font-mono">Control browser window title and navbar brand monogram</p>
+              <div className="pb-4 border-b border-white/[0.08]">
+                <h2 className="text-lg font-semibold text-[#F4F0E8] mb-0.5">Site Branding &amp; Title</h2>
+                <p className="text-xs text-[#8E8A82]">Control browser window title and navbar brand monogram</p>
               </div>
 
               <div>
-                <label className="block text-xs font-mono text-neutral-400 mb-1">Browser Page Title</label>
+                <label className="block text-xs font-medium text-[#A7A298] mb-1.5">Browser Page Title</label>
                 <input
                   type="text"
                   value={draftPortfolio.branding?.title || ''}
@@ -1189,13 +1288,13 @@ function doPost(e) {
                     }));
                   }}
                   placeholder="MD JABER HOSAIN | Creative Portfolio"
-                  className="w-full px-3 py-2 rounded-xl bg-[#141A20] border border-[#232B33] text-sm text-white font-mono"
+                  className="w-full px-3.5 py-2 rounded-xl bg-[#0B0C0F] border border-white/[0.08] text-sm text-[#F4F0E8] focus:border-[#E4583B] focus:outline-none"
                 />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-mono text-neutral-400 mb-1">Navbar Logo Monogram (Initials)</label>
+                  <label className="block text-xs font-medium text-[#A7A298] mb-1.5">Navbar Logo Monogram (Initials)</label>
                   <input
                     type="text"
                     maxLength={4}
@@ -1208,13 +1307,13 @@ function doPost(e) {
                       }));
                     }}
                     placeholder="MJ"
-                    className="w-full px-3 py-2 rounded-xl bg-[#141A20] border border-[#232B33] text-sm text-white font-mono uppercase"
+                    className="w-full px-3.5 py-2 rounded-xl bg-[#0B0C0F] border border-white/[0.08] text-sm text-[#F4F0E8] uppercase focus:border-[#E4583B] focus:outline-none"
                   />
-                  <span className="text-[11px] text-neutral-500 font-mono">Example: "MJ"</span>
+                  <span className="text-[11px] text-[#6F6B64] mt-1 block">Example: "MJ"</span>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-mono text-neutral-400 mb-1">Navbar Brand Text</label>
+                  <label className="block text-xs font-medium text-[#A7A298] mb-1.5">Navbar Brand Text</label>
                   <input
                     type="text"
                     value={draftPortfolio.branding?.logoText || ''}
@@ -1226,26 +1325,26 @@ function doPost(e) {
                       }));
                     }}
                     placeholder="MD JABER HOSAIN"
-                    className="w-full px-3 py-2 rounded-xl bg-[#141A20] border border-[#232B33] text-sm text-white font-mono"
+                    className="w-full px-3.5 py-2 rounded-xl bg-[#0B0C0F] border border-white/[0.08] text-sm text-[#F4F0E8] focus:border-[#E4583B] focus:outline-none"
                   />
                 </div>
               </div>
 
               {/* Change Admin Password Section */}
-              <div className="pt-8 mt-8 border-t border-[#1D232A]">
+              <div className="pt-8 mt-8 border-t border-white/[0.08]">
                 <div className="mb-4">
-                  <h3 className="text-lg font-bold text-white flex items-center space-x-2">
-                    <KeyRound className="w-4 h-4 text-[#FF5722]" />
+                  <h3 className="text-base font-semibold text-[#F4F0E8] flex items-center space-x-2">
+                    <KeyRound className="w-4 h-4 text-[#E4583B]" />
                     <span>Change Admin Password</span>
                   </h3>
-                  <p className="text-xs text-neutral-400 font-mono mt-0.5">
+                  <p className="text-xs text-[#8E8A82] mt-0.5">
                     Update the password for your username/password login (minimum 10 characters). Requires current password verification.
                   </p>
                 </div>
 
                 {passwordChangeMessage && (
                   <div
-                    className={`mb-4 p-3 rounded-xl border text-xs font-mono flex items-center space-x-2 ${
+                    className={`mb-4 p-3 rounded-xl border text-xs flex items-center space-x-2 ${
                       passwordChangeMessage.type === 'success'
                         ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
                         : 'bg-rose-500/10 border-rose-500/30 text-rose-300'
@@ -1260,22 +1359,22 @@ function doPost(e) {
                   </div>
                 )}
 
-                <form onSubmit={handleChangePassword} className="space-y-4 bg-[#141A20]/60 p-5 rounded-2xl border border-[#232B33]">
+                <form onSubmit={handleChangePassword} className="space-y-4 bg-[#171A21] p-5 rounded-xl border border-white/[0.08]">
                   <div>
-                    <label className="block text-xs font-mono text-neutral-300 mb-1">Current Password</label>
+                    <label className="block text-xs font-medium text-[#D7D2C8] mb-1.5">Current Password</label>
                     <input
                       type="password"
                       required
                       value={currentPasswordInput}
                       onChange={(e) => setCurrentPasswordInput(e.target.value)}
                       placeholder="••••••••••"
-                      className="w-full px-3 py-2 rounded-xl bg-[#0B0F12] border border-[#232B33] text-sm text-white font-mono focus:border-[#FF5722] focus:outline-none"
+                      className="w-full px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] text-sm text-[#F4F0E8] focus:border-[#E4583B] focus:outline-none"
                     />
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-mono text-neutral-300 mb-1">New Password (min 10 chars)</label>
+                      <label className="block text-xs font-medium text-[#D7D2C8] mb-1.5">New Password (min 10 chars)</label>
                       <input
                         type="password"
                         required
@@ -1283,12 +1382,12 @@ function doPost(e) {
                         value={newPasswordInput}
                         onChange={(e) => setNewPasswordInput(e.target.value)}
                         placeholder="At least 10 characters"
-                        className="w-full px-3 py-2 rounded-xl bg-[#0B0F12] border border-[#232B33] text-sm text-white font-mono focus:border-[#FF5722] focus:outline-none"
+                        className="w-full px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] text-sm text-[#F4F0E8] focus:border-[#E4583B] focus:outline-none"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-xs font-mono text-neutral-300 mb-1">Confirm New Password</label>
+                      <label className="block text-xs font-medium text-[#D7D2C8] mb-1.5">Confirm New Password</label>
                       <input
                         type="password"
                         required
@@ -1296,7 +1395,7 @@ function doPost(e) {
                         value={confirmPasswordInput}
                         onChange={(e) => setConfirmPasswordInput(e.target.value)}
                         placeholder="Repeat new password"
-                        className="w-full px-3 py-2 rounded-xl bg-[#0B0F12] border border-[#232B33] text-sm text-white font-mono focus:border-[#FF5722] focus:outline-none"
+                        className="w-full px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] text-sm text-[#F4F0E8] focus:border-[#E4583B] focus:outline-none"
                       />
                     </div>
                   </div>
@@ -1305,7 +1404,7 @@ function doPost(e) {
                     <button
                       type="submit"
                       disabled={changingPassword}
-                      className="px-4 py-2.5 rounded-xl bg-[#FF5722] hover:bg-[#F4511E] text-white font-mono font-bold text-xs transition-colors disabled:opacity-50 flex items-center space-x-2"
+                      className="px-4 py-2 rounded-lg bg-[#E4583B] hover:bg-[#D0492D] text-white font-semibold text-xs transition-colors disabled:opacity-50 inline-flex items-center space-x-2 cursor-pointer"
                     >
                       <Lock className="w-3.5 h-3.5" />
                       <span>{changingPassword ? 'Updating Password...' : 'Update Password'}</span>
@@ -1315,28 +1414,28 @@ function doPost(e) {
               </div>
 
               {/* Optional Inactivity Auto-Logout Section */}
-              <div className="pt-8 mt-8 border-t border-[#1D232A]">
+              <div className="pt-8 mt-8 border-t border-white/[0.08]">
                 <div className="mb-4">
-                  <h3 className="text-lg font-bold text-white flex items-center space-x-2">
-                    <Sliders className="w-4 h-4 text-[#FF5722]" />
-                    <span>Session Safety & Inactivity Auto-Logout</span>
+                  <h3 className="text-base font-semibold text-[#F4F0E8] flex items-center space-x-2">
+                    <Sliders className="w-4 h-4 text-[#E4583B]" />
+                    <span>Session Safety &amp; Inactivity Auto-Logout</span>
                   </h3>
-                  <p className="text-xs text-neutral-400 font-mono mt-0.5">
+                  <p className="text-xs text-[#8E8A82] mt-0.5">
                     By default, your login stays active permanently on this browser (Off). Enable an inactivity timer only if you are using a shared computer.
                   </p>
                 </div>
 
-                <div className="bg-[#141A20]/60 p-5 rounded-2xl border border-[#232B33] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="bg-[#171A21] p-5 rounded-xl border border-white/[0.08] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div>
-                    <p className="text-xs font-mono text-white font-bold">Auto-Logout After Inactivity</p>
-                    <p className="text-[11px] font-mono text-neutral-400 mt-0.5">
+                    <p className="text-xs font-semibold text-[#F4F0E8]">Auto-Logout After Inactivity</p>
+                    <p className="text-xs text-[#8E8A82] mt-0.5">
                       Current status: {autoLogoutMinutes === 0 ? 'Disabled (Keep me signed in)' : `Auto-sign out after ${autoLogoutMinutes} minutes of inactivity`}
                     </p>
                   </div>
                   <select
                     value={autoLogoutMinutes}
                     onChange={(e) => handleAutoLogoutChange(Number(e.target.value))}
-                    className="px-3.5 py-2 rounded-xl bg-[#0B0F12] border border-[#232B33] text-xs text-white font-mono focus:border-[#FF5722] focus:outline-none"
+                    className="px-3.5 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] text-xs text-[#F4F0E8] focus:border-[#E4583B] focus:outline-none"
                   >
                     <option value={0}>Off — Keep me logged in (Default)</option>
                     <option value={15}>After 15 minutes of inactivity</option>
@@ -1356,10 +1455,13 @@ function doPost(e) {
           {/* TAB 2: ABOUT */}
           {activeTab === 'about' && (
             <div className="space-y-6 max-w-3xl">
-              <h2 className="text-xl font-bold text-white mb-2">About Bio</h2>
-              
+              <div className="pb-4 border-b border-white/[0.08]">
+                <h2 className="text-lg font-semibold text-[#F4F0E8] mb-0.5">About Bio &amp; Portrait</h2>
+                <p className="text-xs text-[#8E8A82]">Manage bilingual biography copy and your portrait photo</p>
+              </div>
+
               <div>
-                <label className="block text-xs font-mono text-neutral-400 mb-1">Bio (English)</label>
+                <label className="block text-xs font-medium text-[#A7A298] mb-1.5">Bio (English)</label>
                 <textarea
                   rows={4}
                   value={draftPortfolio.about.bio.en}
@@ -1370,12 +1472,12 @@ function doPost(e) {
                       about: { ...prev.about, bio: { ...prev.about.bio, en: val } }
                     }));
                   }}
-                  className="w-full px-3 py-2 rounded-xl bg-[#141A20] border border-[#232B33] text-sm text-white resize-none"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-[#0B0C0F] border border-white/[0.08] text-sm text-[#F4F0E8] focus:border-[#E4583B] focus:outline-none resize-none"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-mono text-neutral-400 mb-1">Bio (বাংলা)</label>
+                <label className="block text-xs font-medium text-[#A7A298] mb-1.5">Bio (বাংলা)</label>
                 <textarea
                   rows={4}
                   value={draftPortfolio.about.bio.bn}
@@ -1386,7 +1488,7 @@ function doPost(e) {
                       about: { ...prev.about, bio: { ...prev.about.bio, bn: val } }
                     }));
                   }}
-                  className="w-full px-3 py-2 rounded-xl bg-[#141A20] border border-[#232B33] text-sm text-white resize-none"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-[#0B0C0F] border border-white/[0.08] text-sm text-[#F4F0E8] focus:border-[#E4583B] focus:outline-none resize-none"
                 />
               </div>
 
@@ -1411,9 +1513,9 @@ function doPost(e) {
                     }));
                     showToast('About portrait also applied to Hero section!');
                   }}
-                  className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-[#181E24] hover:bg-[#232B33] border border-[#232B33] text-[11px] font-mono text-neutral-300 hover:text-white transition-colors cursor-pointer"
+                  className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-[#171A21] hover:bg-[#1E222B] border border-white/[0.08] text-xs font-medium text-[#D7D2C8] hover:text-white transition-colors cursor-pointer"
                 >
-                  <CheckCircle className="w-3.5 h-3.5 text-[#FF5722]" />
+                  <CheckCircle className="w-3.5 h-3.5 text-[#E4583B]" />
                   <span>Also use this photo for Hero section</span>
                 </button>
               </div>
@@ -1423,10 +1525,10 @@ function doPost(e) {
           {/* TAB: SERVICES */}
           {activeTab === 'services' && (
             <div className="space-y-6 max-w-3xl">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#1D232A]">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/[0.08]">
                 <div>
-                  <h2 className="text-xl font-bold text-white mb-1">Services Management</h2>
-                  <p className="text-xs text-neutral-400 font-mono">Edit offered services across English, Bengali, and Arabic</p>
+                  <h2 className="text-lg font-semibold text-[#F4F0E8] mb-0.5">Services Management</h2>
+                  <p className="text-xs text-[#8E8A82]">Edit offered services across English, Bengali, and Arabic</p>
                 </div>
                 <button
                   type="button"
@@ -1443,7 +1545,7 @@ function doPost(e) {
                     }));
                     showToast('New service added');
                   }}
-                  className="inline-flex items-center space-x-1.5 rtl:space-x-reverse px-4 py-2 rounded-xl text-xs font-bold text-white bg-[#FF5722] hover:bg-[#F4511E] glow-orange-sm transition-all shrink-0 self-start sm:self-auto"
+                  className="inline-flex items-center space-x-1.5 rtl:space-x-reverse px-4 py-2 rounded-lg text-xs font-semibold text-white bg-[#E4583B] hover:bg-[#D0492D] transition-colors shrink-0 self-start sm:self-auto cursor-pointer"
                 >
                   <Plus className="w-4 h-4" />
                   <span>Add Service</span>
@@ -1451,9 +1553,9 @@ function doPost(e) {
               </div>
 
               {(draftPortfolio.services || []).map((service, sIdx) => (
-                <div key={service.id || sIdx} className="p-5 rounded-2xl bg-[#141A20] border border-[#232B33] space-y-4">
+                <div key={service.id || sIdx} className="p-5 rounded-xl bg-[#171A21] border border-white/[0.08] space-y-4">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-mono font-bold text-[#FF5722]">Service #{sIdx + 1}</span>
+                    <span className="text-xs font-semibold text-[#E4583B] tabular-nums">Service #{sIdx + 1}</span>
                     <button
                       type="button"
                       onClick={() => {
@@ -1471,7 +1573,7 @@ function doPost(e) {
                           'Are you sure you want to delete this service? It will be removed from your draft portfolio. Changes take effect on the live website when you click Publish.'
                         );
                       }}
-                      className="p-1.5 text-rose-400 hover:text-rose-300 hover:bg-rose-950/40 rounded-lg transition-colors"
+                      className="p-1.5 text-rose-400 hover:text-rose-300 hover:bg-rose-950/40 rounded-lg transition-colors cursor-pointer"
                       title="Delete Service"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -1480,7 +1582,7 @@ function doPost(e) {
 
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <div>
-                      <label className="block text-[11px] font-mono text-neutral-400 mb-1">Title (English)</label>
+                      <label className="block text-[11px] font-medium text-[#8E8A82] mb-1">Title (English)</label>
                       <input
                         type="text"
                         value={service.title.en}
@@ -1491,11 +1593,11 @@ function doPost(e) {
                             services: prev.services.map((s, i) => i === sIdx ? { ...s, title: { ...s.title, en: val } } : s)
                           }));
                         }}
-                        className="w-full px-3 py-1.5 rounded-lg bg-[#0F1419] border border-[#232B33] text-xs text-white"
+                        className="w-full px-3 py-1.5 rounded-lg bg-[#0B0C0F] border border-white/[0.08] text-xs text-[#F4F0E8] focus:border-[#E4583B] focus:outline-none"
                       />
                     </div>
                     <div>
-                      <label className="block text-[11px] font-mono text-neutral-400 mb-1">Title (বাংলা)</label>
+                      <label className="block text-[11px] font-medium text-[#8E8A82] mb-1">Title (বাংলা)</label>
                       <input
                         type="text"
                         value={service.title.bn}
@@ -1506,11 +1608,11 @@ function doPost(e) {
                             services: prev.services.map((s, i) => i === sIdx ? { ...s, title: { ...s.title, bn: val } } : s)
                           }));
                         }}
-                        className="w-full px-3 py-1.5 rounded-lg bg-[#0F1419] border border-[#232B33] text-xs text-white"
+                        className="w-full px-3 py-1.5 rounded-lg bg-[#0B0C0F] border border-white/[0.08] text-xs text-[#F4F0E8] focus:border-[#E4583B] focus:outline-none"
                       />
                     </div>
                     <div>
-                      <label className="block text-[11px] font-mono text-neutral-400 mb-1">Title (العربية)</label>
+                      <label className="block text-[11px] font-medium text-[#8E8A82] mb-1">Title (العربية)</label>
                       <input
                         type="text"
                         dir="rtl"
@@ -1522,14 +1624,14 @@ function doPost(e) {
                             services: prev.services.map((s, i) => i === sIdx ? { ...s, title: { ...s.title, ar: val } } : s)
                           }));
                         }}
-                        className="w-full px-3 py-1.5 rounded-lg bg-[#0F1419] border border-[#232B33] text-xs text-white"
+                        className="w-full px-3 py-1.5 rounded-lg bg-[#0B0C0F] border border-white/[0.08] text-xs text-[#F4F0E8] focus:border-[#E4583B] focus:outline-none"
                       />
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <div>
-                      <label className="block text-[11px] font-mono text-neutral-400 mb-1">Description (English)</label>
+                      <label className="block text-[11px] font-medium text-[#8E8A82] mb-1">Description (English)</label>
                       <textarea
                         rows={2}
                         value={service.description.en}
@@ -1540,11 +1642,11 @@ function doPost(e) {
                             services: prev.services.map((s, i) => i === sIdx ? { ...s, description: { ...s.description, en: val } } : s)
                           }));
                         }}
-                        className="w-full px-3 py-1.5 rounded-lg bg-[#0F1419] border border-[#232B33] text-xs text-white resize-none"
+                        className="w-full px-3 py-1.5 rounded-lg bg-[#0B0C0F] border border-white/[0.08] text-xs text-[#F4F0E8] focus:border-[#E4583B] focus:outline-none resize-none"
                       />
                     </div>
                     <div>
-                      <label className="block text-[11px] font-mono text-neutral-400 mb-1">Description (বাংলা)</label>
+                      <label className="block text-[11px] font-medium text-[#8E8A82] mb-1">Description (বাংলা)</label>
                       <textarea
                         rows={2}
                         value={service.description.bn}
@@ -1555,11 +1657,11 @@ function doPost(e) {
                             services: prev.services.map((s, i) => i === sIdx ? { ...s, description: { ...s.description, bn: val } } : s)
                           }));
                         }}
-                        className="w-full px-3 py-1.5 rounded-lg bg-[#0F1419] border border-[#232B33] text-xs text-white resize-none"
+                        className="w-full px-3 py-1.5 rounded-lg bg-[#0B0C0F] border border-white/[0.08] text-xs text-[#F4F0E8] focus:border-[#E4583B] focus:outline-none resize-none"
                       />
                     </div>
                     <div>
-                      <label className="block text-[11px] font-mono text-neutral-400 mb-1">Description (العربية)</label>
+                      <label className="block text-[11px] font-medium text-[#8E8A82] mb-1">Description (العربية)</label>
                       <textarea
                         rows={2}
                         dir="rtl"
@@ -1571,7 +1673,7 @@ function doPost(e) {
                             services: prev.services.map((s, i) => i === sIdx ? { ...s, description: { ...s.description, ar: val } } : s)
                           }));
                         }}
-                        className="w-full px-3 py-1.5 rounded-lg bg-[#0F1419] border border-[#232B33] text-xs text-white resize-none"
+                        className="w-full px-3 py-1.5 rounded-lg bg-[#0B0C0F] border border-white/[0.08] text-xs text-[#F4F0E8] focus:border-[#E4583B] focus:outline-none resize-none"
                       />
                     </div>
                   </div>
@@ -1583,10 +1685,10 @@ function doPost(e) {
           {/* TAB: SKILLS */}
           {activeTab === 'skills' && (
             <div className="space-y-6 max-w-3xl">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#1D232A]">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/[0.08]">
                 <div>
-                  <h2 className="text-xl font-bold text-white mb-1">Skills & Tools Management</h2>
-                  <p className="text-xs text-neutral-400 font-mono">Manage skill categories, descriptions and software tool badges</p>
+                  <h2 className="text-lg font-semibold text-[#F4F0E8] mb-0.5">Skills &amp; Tools Management</h2>
+                  <p className="text-xs text-[#8E8A82]">Manage skill categories and software tool lists</p>
                 </div>
                 <button
                   type="button"
@@ -1604,7 +1706,7 @@ function doPost(e) {
                     }));
                     showToast('New skill category added');
                   }}
-                  className="inline-flex items-center space-x-1.5 rtl:space-x-reverse px-4 py-2 rounded-xl text-xs font-bold text-white bg-[#FF5722] hover:bg-[#F4511E] glow-orange-sm transition-all shrink-0 self-start sm:self-auto"
+                  className="inline-flex items-center space-x-1.5 rtl:space-x-reverse px-4 py-2 rounded-lg text-xs font-semibold text-white bg-[#E4583B] hover:bg-[#D0492D] transition-colors shrink-0 self-start sm:self-auto cursor-pointer"
                 >
                   <Plus className="w-4 h-4" />
                   <span>Add Skill</span>
@@ -1612,9 +1714,9 @@ function doPost(e) {
               </div>
 
               {(draftPortfolio.skills || []).map((skill, skIdx) => (
-                <div key={skill.id || skIdx} className="p-5 rounded-2xl bg-[#141A20] border border-[#232B33] space-y-4">
+                <div key={skill.id || skIdx} className="p-5 rounded-xl bg-[#171A21] border border-white/[0.08] space-y-4">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-mono font-bold text-[#FF5722]">Category #{skIdx + 1}</span>
+                    <span className="text-xs font-semibold text-[#E4583B] tabular-nums">Category #{skIdx + 1}</span>
                     <button
                       type="button"
                       onClick={() => {
@@ -1632,7 +1734,7 @@ function doPost(e) {
                           'Are you sure you want to delete this skill category? It will be removed from your draft portfolio. Changes take effect on the live website when you click Publish.'
                         );
                       }}
-                      className="p-1.5 text-rose-400 hover:text-rose-300 hover:bg-rose-950/40 rounded-lg transition-colors"
+                      className="p-1.5 text-rose-400 hover:text-rose-300 hover:bg-rose-950/40 rounded-lg transition-colors cursor-pointer"
                       title="Delete Skill"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -1641,7 +1743,7 @@ function doPost(e) {
 
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <div>
-                      <label className="block text-[11px] font-mono text-neutral-400 mb-1">Title (English)</label>
+                      <label className="block text-[11px] font-medium text-[#8E8A82] mb-1">Title (English)</label>
                       <input
                         type="text"
                         value={skill.title.en}
@@ -1652,11 +1754,11 @@ function doPost(e) {
                             skills: prev.skills.map((s, i) => i === skIdx ? { ...s, title: { ...s.title, en: val } } : s)
                           }));
                         }}
-                        className="w-full px-3 py-1.5 rounded-lg bg-[#0F1419] border border-[#232B33] text-xs text-white"
+                        className="w-full px-3 py-1.5 rounded-lg bg-[#0B0C0F] border border-white/[0.08] text-xs text-[#F4F0E8] focus:border-[#E4583B] focus:outline-none"
                       />
                     </div>
                     <div>
-                      <label className="block text-[11px] font-mono text-neutral-400 mb-1">Title (বাংলা)</label>
+                      <label className="block text-[11px] font-medium text-[#8E8A82] mb-1">Title (বাংলা)</label>
                       <input
                         type="text"
                         value={skill.title.bn}
@@ -1667,11 +1769,11 @@ function doPost(e) {
                             skills: prev.skills.map((s, i) => i === skIdx ? { ...s, title: { ...s.title, bn: val } } : s)
                           }));
                         }}
-                        className="w-full px-3 py-1.5 rounded-lg bg-[#0F1419] border border-[#232B33] text-xs text-white"
+                        className="w-full px-3 py-1.5 rounded-lg bg-[#0B0C0F] border border-white/[0.08] text-xs text-[#F4F0E8] focus:border-[#E4583B] focus:outline-none"
                       />
                     </div>
                     <div>
-                      <label className="block text-[11px] font-mono text-neutral-400 mb-1">Title (العربية)</label>
+                      <label className="block text-[11px] font-medium text-[#8E8A82] mb-1">Title (العربية)</label>
                       <input
                         type="text"
                         dir="rtl"
@@ -1683,13 +1785,13 @@ function doPost(e) {
                             skills: prev.skills.map((s, i) => i === skIdx ? { ...s, title: { ...s.title, ar: val } } : s)
                           }));
                         }}
-                        className="w-full px-3 py-1.5 rounded-lg bg-[#0F1419] border border-[#232B33] text-xs text-white"
+                        className="w-full px-3 py-1.5 rounded-lg bg-[#0B0C0F] border border-white/[0.08] text-xs text-[#F4F0E8] focus:border-[#E4583B] focus:outline-none"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-mono text-neutral-400 mb-1">
+                    <label className="block text-[11px] font-medium text-[#8E8A82] mb-1">
                       Software / Tools (comma separated)
                     </label>
                     <input
@@ -1703,112 +1805,15 @@ function doPost(e) {
                         }));
                       }}
                       placeholder="e.g. Adobe Premiere Pro, After Effects, DaVinci Resolve"
-                      className="w-full px-3 py-1.5 rounded-lg bg-[#0F1419] border border-[#232B33] text-xs text-white font-mono"
+                      className="w-full px-3 py-1.5 rounded-lg bg-[#0B0C0F] border border-white/[0.08] text-xs text-[#F4F0E8] focus:border-[#E4583B] focus:outline-none"
                     />
                   </div>
                 </div>
               ))}
 
               {/* Creative Workflow Steps Management */}
-              <div className="pt-8 border-t border-[#1D232A]">
+              <div className="pt-8 border-t border-white/[0.08]">
                 <WorkflowEditor />
-              </div>
-            </div>
-          )}
-
-          {/* TAB: CONTACT */}
-          {activeTab === 'contact' && (
-            <div className="space-y-6 max-w-3xl">
-              <div className="pb-4 border-b border-[#1D232A]">
-                <h2 className="text-xl font-bold text-white mb-1">Contact & Social Links</h2>
-                <p className="text-xs text-neutral-400 font-mono">Edit direct contact email and social profile links</p>
-              </div>
-
-              <div>
-                <label className="block text-xs font-mono text-neutral-400 mb-1">Direct Contact Email</label>
-                <input
-                  type="email"
-                  value={draftPortfolio.contact?.email || ''}
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    updateDraft(prev => ({
-                      ...prev,
-                      contact: { ...(prev.contact || { email: '' }), email: val }
-                    }));
-                  }}
-                  placeholder="mdjaber.contact@gmail.com"
-                  className="w-full px-3 py-2 rounded-xl bg-[#141A20] border border-[#232B33] text-sm text-white font-mono"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-mono text-neutral-400 mb-1">Facebook Profile URL</label>
-                  <input
-                    type="text"
-                    value={draftPortfolio.contact?.facebookUrl || ''}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      updateDraft(prev => ({
-                        ...prev,
-                        contact: { ...(prev.contact || { email: '' }), facebookUrl: val }
-                      }));
-                    }}
-                    placeholder="https://www.facebook.com/..."
-                    className="w-full px-3 py-2 rounded-xl bg-[#141A20] border border-[#232B33] text-xs text-white font-mono"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-mono text-neutral-400 mb-1">Telegram Profile URL</label>
-                  <input
-                    type="text"
-                    value={draftPortfolio.contact?.telegramUrl || ''}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      updateDraft(prev => ({
-                        ...prev,
-                        contact: { ...(prev.contact || { email: '' }), telegramUrl: val }
-                      }));
-                    }}
-                    placeholder="https://t.me/..."
-                    className="w-full px-3 py-2 rounded-xl bg-[#141A20] border border-[#232B33] text-xs text-white font-mono"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-mono text-neutral-400 mb-1">Behance Portfolio URL</label>
-                  <input
-                    type="text"
-                    value={draftPortfolio.contact?.behanceUrl || ''}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      updateDraft(prev => ({
-                        ...prev,
-                        contact: { ...(prev.contact || { email: '' }), behanceUrl: val }
-                      }));
-                    }}
-                    placeholder="https://www.behance.net/..."
-                    className="w-full px-3 py-2 rounded-xl bg-[#141A20] border border-[#232B33] text-xs text-white font-mono"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-mono text-neutral-400 mb-1">YouTube Channel URL</label>
-                  <input
-                    type="text"
-                    value={draftPortfolio.contact?.youtubeUrl || ''}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      updateDraft(prev => ({
-                        ...prev,
-                        contact: { ...(prev.contact || { email: '' }), youtubeUrl: val }
-                      }));
-                    }}
-                    placeholder="https://www.youtube.com/@..."
-                    className="w-full px-3 py-2 rounded-xl bg-[#141A20] border border-[#232B33] text-xs text-white font-mono"
-                  />
-                </div>
               </div>
             </div>
           )}
@@ -1819,16 +1824,18 @@ function doPost(e) {
           {/* TAB 4: PROJECTS (Creative Works & Graphic Design) */}
           {activeTab === 'projects' && (
             <div className="space-y-6 max-w-4xl">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#232B33]">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/[0.08]">
                 <div>
-                  <h2 className="text-xl font-bold text-white flex items-center space-x-2 rtl:space-x-reverse">
-                    <span>Projects & Graphics Showcase</span>
-                    <span className="text-xs font-mono px-2 py-0.5 rounded bg-[#FF5722]/15 text-[#FF5722] border border-[#FF5722]/30">
-                      {draftPortfolio.projects?.length || 0} Total Items
+                  <div className="flex items-center space-x-2.5 rtl:space-x-reverse">
+                    <h2 className="text-lg font-semibold text-[#F4F0E8]">
+                      Projects &amp; Graphics Showcase
+                    </h2>
+                    <span className="text-xs text-[#8E8A82] tabular-nums">
+                      &middot; {draftPortfolio.projects?.length || 0} items
                     </span>
-                  </h2>
-                  <p className="text-xs text-neutral-400 mt-1">
-                    Manage Graphic Design and Video Editing projects, display order, Behance URLs, external links, and artwork.
+                  </div>
+                  <p className="text-xs text-[#8E8A82] mt-0.5">
+                    Manage multi-poster graphic project groups, display order, Behance gallery links, and high-res artwork.
                   </p>
                 </div>
 
@@ -1841,44 +1848,110 @@ function doPost(e) {
                       id: newId,
                       title: { en: 'New Graphic Project', bn: 'নতুন গ্রাফিক্স প্রজেক্ট', ar: 'مشروع جرافيك جديد' },
                       category: 'graphic',
-                      description: { 
-                        en: 'High-resolution graphic design concept, brand identity and visual styling.', 
-                        bn: 'হাই-রেজোলিউশন গ্রাফিক্স ডিজাইন কনসেপ্ট, ব্র্যান্ড আইডেন্টিটি ও ভিজ্যুয়াল স্টাইলিং।', 
-                        ar: 'مفهوم تصميم جرافيكي عالي الدقة وهوية بصرية بأسلوب مميز.' 
+                      description: {
+                        en: 'High-resolution graphic design concept, brand identity and visual styling.',
+                        bn: 'হাই-রেজোলিউশন গ্রাফিক্স ডিজাইন কনসেপ্ট, ব্র্যান্ড আইডেন্টিটি ও ভিজ্যুয়াল স্টাইলিং।',
+                        ar: 'مفهوم تصميم جرافيكي عالي الدقة وهوية بصرية بأسلوب مميز.'
                       },
                       behanceUrl: 'https://www.behance.net/jaberhosain',
                       externalUrl: '',
                       coverImage: '',
+                      galleryImages: [],
+                      galleryCaptions: [],
                       order: nextOrder
                     };
                     updateDraft(prev => ({
                       ...prev,
                       projects: [...(prev.projects || []), newProject]
                     }));
-                    showToast('New graphic project created! Enter details, upload artwork, and Publish.', 'success');
+                    showToast('New graphic project created! Paste a Behance URL or upload posters below.');
                   }}
-                  className="inline-flex items-center space-x-1.5 rtl:space-x-reverse px-4 py-2 rounded-xl text-xs font-bold text-white bg-[#FF5722] hover:bg-[#F4511E] glow-orange-sm transition-all shrink-0 self-start sm:self-auto"
+                  className="inline-flex items-center space-x-1.5 rtl:space-x-reverse px-4 py-2 rounded-lg text-xs font-semibold text-white bg-[#E4583B] hover:bg-[#D0492D] transition-colors shrink-0 self-start sm:self-auto cursor-pointer"
                 >
                   <Plus className="w-4 h-4" />
-                  <span>Add Project</span>
+                  <span>Add Blank Project</span>
                 </button>
               </div>
 
+              {/* 1-Click Import Entire Behance Project Group Card */}
+              <div className="p-4 sm:p-5 rounded-xl bg-[#171A21] border border-white/[0.08] space-y-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                  <div className="flex items-center space-x-2">
+                    <Wand2 className="w-4 h-4 text-[#E4583B]" />
+                    <h3 className="text-xs font-semibold text-[#F4F0E8]">
+                      Import Entire Behance Project Group
+                    </h3>
+                  </div>
+                  <span className="text-[11px] text-[#8E8A82]">
+                    ১টি প্রজেক্টে ২–৩টি বা তার বেশি পোস্টার অটোমেটিক গ্রুপ আকারে যোগ হবে
+                  </span>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <input
+                    type="url"
+                    value={behanceImportUrl}
+                    onChange={(e) => setBehanceImportUrl(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleImportNewBehanceProject();
+                      }
+                    }}
+                    placeholder="https://www.behance.net/gallery/..."
+                    className="flex-1 px-3.5 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] text-xs font-mono text-[#F4F0E8] placeholder-[#6F6B64] focus:border-[#E4583B] focus:outline-none"
+                  />
+                  <button
+                    type="button"
+                    disabled={importingBehanceProject}
+                    onClick={handleImportNewBehanceProject}
+                    className="inline-flex items-center justify-center space-x-1.5 px-4 py-2 rounded-lg bg-[#E4583B] hover:bg-[#D0492D] text-xs font-semibold text-white disabled:opacity-50 shrink-0 cursor-pointer transition-colors"
+                  >
+                    {importingBehanceProject ? (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    ) : (
+                      <Sparkles className="w-3.5 h-3.5" />
+                    )}
+                    <span>{importingBehanceProject ? 'Importing Posters...' : 'Import Behance Group'}</span>
+                  </button>
+                </div>
+
+                {behanceImportHint && (
+                  <div
+                    className={`p-3 rounded-lg text-xs border flex items-start space-x-2 ${
+                      behanceImportHint.type === 'ok'
+                        ? 'bg-emerald-950/35 border-emerald-500/30 text-emerald-300'
+                        : 'bg-amber-950/35 border-amber-500/30 text-amber-200'
+                    }`}
+                  >
+                    {behanceImportHint.type === 'ok' ? (
+                      <CheckCircle className="w-4 h-4 shrink-0 mt-0.5 text-emerald-400" />
+                    ) : (
+                      <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-amber-400" />
+                    )}
+                    <span>{behanceImportHint.text}</span>
+                  </div>
+                )}
+              </div>
+
               {/* Projects List */}
-              <div className="space-y-6">
+              <div className="space-y-5">
                 {(draftPortfolio.projects || []).map((proj, pIdx) => (
-                  <div key={proj.id || pIdx} className="p-5 sm:p-6 rounded-3xl bg-[#141A20] border border-[#232B33] space-y-5 relative shadow-xl hover:border-neutral-700 transition-all">
-                    
+                  <div
+                    id={`project-card-${proj.id}`}
+                    key={proj.id || pIdx}
+                    className="p-5 sm:p-6 rounded-2xl bg-[#171A21] border border-white/[0.08] space-y-5 relative hover:border-white/[0.14] transition-colors"
+                  >
                     {/* Header: Order, Category & Actions */}
-                    <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-[#232B33]">
+                    <div className="flex flex-wrap items-center justify-between gap-3 pb-3.5 border-b border-white/[0.06]">
                       <div className="flex items-center space-x-3 rtl:space-x-reverse">
-                        <span className="w-7 h-7 rounded-full bg-[#181E24] border border-[#232B33] flex items-center justify-center text-xs font-mono font-bold text-[#FF5722]">
+                        <span className="px-2 py-0.5 rounded-md bg-[#0B0C0F] border border-white/[0.08] text-xs font-semibold text-[#E4583B] tabular-nums">
                           #{pIdx + 1}
                         </span>
 
                         {/* Category Selector */}
                         <div className="flex items-center space-x-1.5 rtl:space-x-reverse">
-                          <label className="text-[11px] font-mono text-neutral-400">Category:</label>
+                          <label className="text-xs text-[#8E8A82]">Category:</label>
                           <select
                             value={proj.category}
                             onChange={(e) => {
@@ -1888,7 +1961,7 @@ function doPost(e) {
                                 projects: prev.projects.map(p => p.id === proj.id ? { ...p, category: val } : p)
                               }));
                             }}
-                            className="px-2.5 py-1 rounded-lg bg-[#0F1419] border border-[#232B33] text-xs font-mono text-[#FF5722] uppercase focus:outline-none"
+                            className="px-2.5 py-1 rounded-lg bg-[#0B0C0F] border border-white/[0.08] text-xs font-medium text-[#F4F0E8] focus:border-[#E4583B] focus:outline-none"
                           >
                             <option value="graphic">Graphic Design</option>
                             <option value="video">Video Editing</option>
@@ -1896,8 +1969,8 @@ function doPost(e) {
                         </div>
 
                         {/* Order Input */}
-                        <div className="flex items-center space-x-1 rtl:space-x-reverse">
-                          <label className="text-[11px] font-mono text-neutral-400">Order:</label>
+                        <div className="flex items-center space-x-1.5 rtl:space-x-reverse">
+                          <label className="text-xs text-[#8E8A82]">Order:</label>
                           <input
                             type="number"
                             min={1}
@@ -1909,7 +1982,7 @@ function doPost(e) {
                                 projects: prev.projects.map(p => p.id === proj.id ? { ...p, order: val } : p)
                               }));
                             }}
-                            className="w-14 px-2 py-0.5 rounded-lg bg-[#0F1419] border border-[#232B33] text-xs font-mono text-center text-white"
+                            className="w-14 px-2 py-0.5 rounded-lg bg-[#0B0C0F] border border-white/[0.08] text-xs tabular-nums text-center text-[#F4F0E8] focus:border-[#E4583B] focus:outline-none"
                           />
                         </div>
                       </div>
@@ -1920,7 +1993,7 @@ function doPost(e) {
                           type="button"
                           onClick={() => handleMoveProject(pIdx, pIdx - 1)}
                           disabled={pIdx === 0}
-                          className="p-1.5 rounded-lg text-neutral-400 hover:text-white hover:bg-neutral-800 disabled:opacity-30 disabled:pointer-events-none transition-colors"
+                          className="p-1.5 rounded-lg text-[#8E8A82] hover:text-white hover:bg-white/[0.06] disabled:opacity-30 disabled:pointer-events-none transition-colors cursor-pointer"
                           title="Move Up"
                         >
                           <ArrowUp className="w-4 h-4" />
@@ -1929,7 +2002,7 @@ function doPost(e) {
                           type="button"
                           onClick={() => handleMoveProject(pIdx, pIdx + 1)}
                           disabled={pIdx === (draftPortfolio.projects?.length || 0) - 1}
-                          className="p-1.5 rounded-lg text-neutral-400 hover:text-white hover:bg-neutral-800 disabled:opacity-30 disabled:pointer-events-none transition-colors"
+                          className="p-1.5 rounded-lg text-[#8E8A82] hover:text-white hover:bg-white/[0.06] disabled:opacity-30 disabled:pointer-events-none transition-colors cursor-pointer"
                           title="Move Down"
                         >
                           <ArrowDown className="w-4 h-4" />
@@ -1951,7 +2024,7 @@ function doPost(e) {
                               'Are you sure you want to delete this project? It will be removed from your draft portfolio. Changes take effect on the live website when you click Publish.'
                             );
                           }}
-                          className="p-1.5 text-rose-400 hover:text-rose-300 hover:bg-rose-950/40 rounded-lg transition-colors ml-1"
+                          className="p-1.5 text-rose-400 hover:text-rose-300 hover:bg-rose-950/40 rounded-lg transition-colors ml-1 cursor-pointer"
                           title="Delete Project"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -1960,8 +2033,8 @@ function doPost(e) {
                     </div>
 
                     {/* Group / Series Name (Behance Project Group) */}
-                    <div className="p-3 rounded-2xl bg-[#0F1419] border border-[#232B33] space-y-2">
-                      <label className="block text-[11px] font-mono text-neutral-300 font-semibold">
+                    <div className="p-3.5 rounded-xl bg-[#121419] border border-white/[0.07] space-y-2">
+                      <label className="block text-xs font-medium text-[#D7D2C8]">
                         Behance Group / Poster Series Name (Optional — e.g. Eid Poster Series, Brand Identity)
                       </label>
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
@@ -1976,7 +2049,7 @@ function doPost(e) {
                               projects: prev.projects.map(p => p.id === proj.id ? { ...p, groupName: { ...(p.groupName || { en: '', bn: '', ar: '' }), en: val } } : p)
                             }));
                           }}
-                          className="w-full px-3 py-1.5 rounded-lg bg-[#141A20] border border-[#232B33] text-xs text-white"
+                          className="w-full px-3 py-1.5 rounded-lg bg-[#0B0C0F] border border-white/[0.08] text-xs text-[#F4F0E8] focus:border-[#E4583B] focus:outline-none"
                         />
                         <input
                           type="text"
@@ -1989,7 +2062,7 @@ function doPost(e) {
                               projects: prev.projects.map(p => p.id === proj.id ? { ...p, groupName: { ...(p.groupName || { en: '', bn: '', ar: '' }), bn: val } } : p)
                             }));
                           }}
-                          className="w-full px-3 py-1.5 rounded-lg bg-[#141A20] border border-[#232B33] text-xs text-white"
+                          className="w-full px-3 py-1.5 rounded-lg bg-[#0B0C0F] border border-white/[0.08] text-xs text-[#F4F0E8] focus:border-[#E4583B] focus:outline-none"
                         />
                         <input
                           type="text"
@@ -2003,7 +2076,7 @@ function doPost(e) {
                               projects: prev.projects.map(p => p.id === proj.id ? { ...p, groupName: { ...(p.groupName || { en: '', bn: '', ar: '' }), ar: val } } : p)
                             }));
                           }}
-                          className="w-full px-3 py-1.5 rounded-lg bg-[#141A20] border border-[#232B33] text-xs text-white"
+                          className="w-full px-3 py-1.5 rounded-lg bg-[#0B0C0F] border border-white/[0.08] text-xs text-[#F4F0E8] focus:border-[#E4583B] focus:outline-none"
                         />
                       </div>
                     </div>
@@ -2011,7 +2084,7 @@ function doPost(e) {
                     {/* Titles across 3 languages */}
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                       <div>
-                        <label className="block text-[11px] font-mono text-neutral-400 mb-1">Title (English)</label>
+                        <label className="block text-[11px] font-medium text-[#8E8A82] mb-1">Title (English)</label>
                         <input
                           type="text"
                           value={proj.title?.en || ''}
@@ -2022,11 +2095,11 @@ function doPost(e) {
                               projects: prev.projects.map(p => p.id === proj.id ? { ...p, title: { ...(p.title || { en: '', bn: '', ar: '' }), en: val } } : p)
                             }));
                           }}
-                          className="w-full px-3 py-1.5 rounded-lg bg-[#0F1419] border border-[#232B33] text-xs text-white"
+                          className="w-full px-3 py-1.5 rounded-lg bg-[#0B0C0F] border border-white/[0.08] text-xs text-[#F4F0E8] focus:border-[#E4583B] focus:outline-none"
                         />
                       </div>
                       <div>
-                        <label className="block text-[11px] font-mono text-neutral-400 mb-1">Title (বাংলা)</label>
+                        <label className="block text-[11px] font-medium text-[#8E8A82] mb-1">Title (বাংলা)</label>
                         <input
                           type="text"
                           value={proj.title?.bn || ''}
@@ -2037,11 +2110,11 @@ function doPost(e) {
                               projects: prev.projects.map(p => p.id === proj.id ? { ...p, title: { ...(p.title || { en: '', bn: '', ar: '' }), bn: val } } : p)
                             }));
                           }}
-                          className="w-full px-3 py-1.5 rounded-lg bg-[#0F1419] border border-[#232B33] text-xs text-white"
+                          className="w-full px-3 py-1.5 rounded-lg bg-[#0B0C0F] border border-white/[0.08] text-xs text-[#F4F0E8] focus:border-[#E4583B] focus:outline-none"
                         />
                       </div>
                       <div>
-                        <label className="block text-[11px] font-mono text-neutral-400 mb-1">Title (العربية)</label>
+                        <label className="block text-[11px] font-medium text-[#8E8A82] mb-1">Title (العربية)</label>
                         <input
                           type="text"
                           dir="rtl"
@@ -2053,7 +2126,7 @@ function doPost(e) {
                               projects: prev.projects.map(p => p.id === proj.id ? { ...p, title: { ...(p.title || { en: '', bn: '', ar: '' }), ar: val } } : p)
                             }));
                           }}
-                          className="w-full px-3 py-1.5 rounded-lg bg-[#0F1419] border border-[#232B33] text-xs text-white"
+                          className="w-full px-3 py-1.5 rounded-lg bg-[#0B0C0F] border border-white/[0.08] text-xs text-[#F4F0E8] focus:border-[#E4583B] focus:outline-none"
                         />
                       </div>
                     </div>
@@ -2061,7 +2134,7 @@ function doPost(e) {
                     {/* Descriptions across 3 languages */}
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                       <div>
-                        <label className="block text-[11px] font-mono text-neutral-400 mb-1">Description (English)</label>
+                        <label className="block text-[11px] font-medium text-[#8E8A82] mb-1">Description (English)</label>
                         <textarea
                           rows={2}
                           value={proj.description?.en || ''}
@@ -2072,11 +2145,11 @@ function doPost(e) {
                               projects: prev.projects.map(p => p.id === proj.id ? { ...p, description: { ...(p.description || { en: '', bn: '', ar: '' }), en: val } } : p)
                             }));
                           }}
-                          className="w-full px-3 py-1.5 rounded-lg bg-[#0F1419] border border-[#232B33] text-xs text-white resize-none"
+                          className="w-full px-3 py-1.5 rounded-lg bg-[#0B0C0F] border border-white/[0.08] text-xs text-[#F4F0E8] focus:border-[#E4583B] focus:outline-none resize-none"
                         />
                       </div>
                       <div>
-                        <label className="block text-[11px] font-mono text-neutral-400 mb-1">Description (বাংলা)</label>
+                        <label className="block text-[11px] font-medium text-[#8E8A82] mb-1">Description (বাংলা)</label>
                         <textarea
                           rows={2}
                           value={proj.description?.bn || ''}
@@ -2087,11 +2160,11 @@ function doPost(e) {
                               projects: prev.projects.map(p => p.id === proj.id ? { ...p, description: { ...(p.description || { en: '', bn: '', ar: '' }), bn: val } } : p)
                             }));
                           }}
-                          className="w-full px-3 py-1.5 rounded-lg bg-[#0F1419] border border-[#232B33] text-xs text-white resize-none"
+                          className="w-full px-3 py-1.5 rounded-lg bg-[#0B0C0F] border border-white/[0.08] text-xs text-[#F4F0E8] focus:border-[#E4583B] focus:outline-none resize-none"
                         />
                       </div>
                       <div>
-                        <label className="block text-[11px] font-mono text-neutral-400 mb-1">Description (العربية)</label>
+                        <label className="block text-[11px] font-medium text-[#8E8A82] mb-1">Description (العربية)</label>
                         <textarea
                           rows={2}
                           dir="rtl"
@@ -2103,37 +2176,53 @@ function doPost(e) {
                               projects: prev.projects.map(p => p.id === proj.id ? { ...p, description: { ...(p.description || { en: '', bn: '', ar: '' }), ar: val } } : p)
                             }));
                           }}
-                          className="w-full px-3 py-1.5 rounded-lg bg-[#0F1419] border border-[#232B33] text-xs text-white resize-none"
+                          className="w-full px-3 py-1.5 rounded-lg bg-[#0B0C0F] border border-white/[0.08] text-xs text-[#F4F0E8] focus:border-[#E4583B] focus:outline-none resize-none"
                         />
                       </div>
                     </div>
 
-                    {/* Links: Behance & Optional External Link */}
+                    {/* Links: Behance (with 1-click Extract Posters) & Optional External Link */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-[11px] font-mono text-neutral-400 mb-1">
-                          Behance Project / Profile URL
+                        <label className="block text-xs font-medium text-[#A7A298] mb-1.5">
+                          Behance Project / Gallery URL
                         </label>
-                        <input
-                          type="url"
-                          placeholder="https://www.behance.net/gallery/..."
-                          value={proj.behanceUrl || ''}
-                          onChange={(e) => {
-                            const val = e.target.value;
-                            updateDraft(prev => ({
-                              ...prev,
-                              projects: prev.projects.map(p => p.id === proj.id ? { ...p, behanceUrl: val } : p)
-                            }));
-                          }}
-                          className="w-full px-3 py-2 rounded-xl bg-[#0F1419] border border-[#232B33] text-xs text-white font-mono"
-                        />
-                        <span className="text-[10px] text-neutral-500 font-mono mt-0.5 block">
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="url"
+                            placeholder="https://www.behance.net/gallery/..."
+                            value={proj.behanceUrl || ''}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              updateDraft(prev => ({
+                                ...prev,
+                                projects: prev.projects.map(p => p.id === proj.id ? { ...p, behanceUrl: val } : p)
+                              }));
+                            }}
+                            className="flex-1 min-w-0 px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] text-xs text-[#F4F0E8] font-mono focus:border-[#E4583B] focus:outline-none"
+                          />
+                          <button
+                            type="button"
+                            disabled={extractingProjectId === proj.id || !proj.behanceUrl}
+                            onClick={() => handleExtractProjectBehance(proj)}
+                            className="inline-flex items-center space-x-1.5 px-3 py-2 rounded-lg bg-[#121419] hover:bg-[#1E222B] border border-white/[0.1] text-xs font-medium text-[#F4F0E8] disabled:opacity-45 shrink-0 cursor-pointer transition-colors"
+                            title="Pull cover and all posters from this Behance project URL"
+                          >
+                            {extractingProjectId === proj.id ? (
+                              <Loader2 className="w-3.5 h-3.5 animate-spin text-[#E4583B]" />
+                            ) : (
+                              <Wand2 className="w-3.5 h-3.5 text-[#E4583B]" />
+                            )}
+                            <span>{extractingProjectId === proj.id ? 'Extracting...' : 'Extract Posters'}</span>
+                          </button>
+                        </div>
+                        <span className="text-[11px] text-[#6F6B64] mt-1 block">
                           Displays "View on Behance" button inside the high-resolution lightbox
                         </span>
                       </div>
 
                       <div>
-                        <label className="block text-[11px] font-mono text-neutral-400 mb-1">
+                        <label className="block text-xs font-medium text-[#A7A298] mb-1.5">
                           External Project Link (Optional)
                         </label>
                         <input
@@ -2147,9 +2236,9 @@ function doPost(e) {
                               projects: prev.projects.map(p => p.id === proj.id ? { ...p, externalUrl: val } : p)
                             }));
                           }}
-                          className="w-full px-3 py-2 rounded-xl bg-[#0F1419] border border-[#232B33] text-xs text-white font-mono"
+                          className="w-full px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] text-xs text-[#F4F0E8] font-mono focus:border-[#E4583B] focus:outline-none"
                         />
-                        <span className="text-[10px] text-neutral-500 font-mono mt-0.5 block">
+                        <span className="text-[11px] text-[#6F6B64] mt-1 block">
                           Optional live demo or client case study link
                         </span>
                       </div>
@@ -2164,7 +2253,7 @@ function doPost(e) {
                         projects: prev.projects.map(p => p.id === proj.id ? { ...p, coverImage: val } : p)
                       }))}
                       defaultFallback=""
-                      helperText="Upload image file or paste direct poster URL (mir-s3-cdn-cf.behance.net/..., i.postimg.cc/...)."
+                      helperText="Upload image file or paste Behance/Postimages URL (mir-s3-cdn-cf.behance.net/..., i.postimg.cc/...)."
                     />
 
                     {/* Multi-Poster Project Group Gallery */}
@@ -2172,6 +2261,7 @@ function doPost(e) {
                       galleryImages={proj.galleryImages || []}
                       galleryCaptions={proj.galleryCaptions || []}
                       coverImage={proj.coverImage || ''}
+                      behanceUrl={proj.behanceUrl || ''}
                       onChange={(nextImages, nextCaptions, newCover) => {
                         updateDraft(prev => ({
                           ...prev,
@@ -2187,13 +2277,37 @@ function doPost(e) {
                           )
                         }));
                       }}
+                      onBehanceImported={({ title, description }) => {
+                        updateDraft(prev => ({
+                          ...prev,
+                          projects: prev.projects.map(p => {
+                            if (p.id !== proj.id) return p;
+                            const isDefaultTitle =
+                              !p.title?.en ||
+                              p.title.en === 'New Graphic Project' ||
+                              p.title.en === 'Untitled';
+                            const isDefaultDesc =
+                              !p.description?.en ||
+                              p.description.en.startsWith('High-resolution graphic design concept');
+                            return {
+                              ...p,
+                              title: isDefaultTitle && title ? { ...(p.title || { en: '', bn: '', ar: '' }), en: title } : p.title,
+                              groupName: !p.groupName?.en && title ? { ...(p.groupName || { en: '', bn: '', ar: '' }), en: title } : p.groupName,
+                              description:
+                                isDefaultDesc && description
+                                  ? { ...(p.description || { en: '', bn: '', ar: '' }), en: description }
+                                  : p.description
+                            };
+                          })
+                        }));
+                      }}
                     />
                   </div>
                 ))}
 
                 {(draftPortfolio.projects?.length || 0) === 0 && (
-                  <div className="p-8 text-center rounded-2xl bg-[#141A20] border border-[#232B33] text-neutral-400 text-xs">
-                    No projects found. Click "Add Project" above to create one.
+                  <div className="p-8 text-center rounded-xl bg-[#171A21] border border-white/[0.08] text-[#8E8A82] text-xs">
+                    No projects found. Import a Behance link above or click "Add Blank Project" to create one.
                   </div>
                 )}
               </div>
@@ -2208,25 +2322,27 @@ function doPost(e) {
           {/* TAB 5: VIDEOS (Video Editing Showcase & Embeds) */}
           {activeTab === 'videos' && (
             <div className="max-w-4xl space-y-6">
-              
+
               {/* Header */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#232B33]">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/[0.08]">
                 <div>
-                  <h2 className="text-xl font-bold text-white flex items-center space-x-2 rtl:space-x-reverse">
-                    <span>Video Editing Portfolio / Showcase</span>
-                    <span className="text-xs font-mono px-2 py-0.5 rounded bg-[#FF5722]/15 text-[#FF5722] border border-[#FF5722]/30">
-                      {draftPortfolio.videos?.length || 0} Videos
+                  <div className="flex items-center space-x-2.5 rtl:space-x-reverse">
+                    <h2 className="text-lg font-semibold text-[#F4F0E8]">
+                      Video Editing Portfolio / Showcase
+                    </h2>
+                    <span className="text-xs text-[#8E8A82] tabular-nums">
+                      &middot; {draftPortfolio.videos?.length || 0} videos
                     </span>
-                  </h2>
-                  <p className="text-xs text-neutral-400 mt-1">
-                    Manage YouTube and Facebook video embeds, automatic thumbnails, custom uploads, titles, and display order.
+                  </div>
+                  <p className="text-xs text-[#8E8A82] mt-0.5">
+                    Manage Vimeo, YouTube, and Facebook video embeds, automatic thumbnails, custom uploads, titles, and display order.
                   </p>
                 </div>
 
                 <button
                   type="button"
                   onClick={handleAddVideo}
-                  className="inline-flex items-center space-x-1.5 rtl:space-x-reverse px-4 py-2 rounded-xl text-xs font-bold text-white bg-[#FF5722] hover:bg-[#F4511E] glow-orange-sm transition-all shrink-0 self-start sm:self-auto"
+                  className="inline-flex items-center space-x-1.5 rtl:space-x-reverse px-4 py-2 rounded-lg text-xs font-semibold text-white bg-[#E4583B] hover:bg-[#D0492D] transition-colors shrink-0 self-start sm:self-auto cursor-pointer"
                 >
                   <Plus className="w-4 h-4" />
                   <span>Add Video</span>
@@ -2234,10 +2350,10 @@ function doPost(e) {
               </div>
 
               {/* YouTube Channel Link Global Editor */}
-              <div className="p-5 rounded-3xl bg-[#141A20] border border-[#232B33] space-y-2.5 shadow-lg">
+              <div className="p-5 rounded-xl bg-[#171A21] border border-white/[0.08] space-y-2.5">
                 <div className="flex items-center space-x-2 rtl:space-x-reverse">
                   <Youtube className="w-4 h-4 text-[#FF0000]" />
-                  <label className="text-xs font-mono font-bold text-white uppercase tracking-wider">
+                  <label className="text-xs font-semibold text-[#F4F0E8]">
                     My YouTube Channel URL
                   </label>
                 </div>
@@ -2253,21 +2369,20 @@ function doPost(e) {
                     }));
                   }}
                   placeholder="https://www.youtube.com/@jaberhosain"
-                  className="w-full px-4 py-2.5 rounded-xl bg-[#0B0F12] border border-[#232B33] text-sm text-white font-mono focus:border-[#FF5722] focus:outline-none"
+                  className="w-full px-3.5 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] text-sm text-[#F4F0E8] font-mono focus:border-[#E4583B] focus:outline-none"
                 />
-                <p className="text-[11px] text-neutral-400 font-mono">
+                <p className="text-xs text-[#8E8A82]">
                   Controls the primary "Watch My Work On YouTube" button and public channel proof links across the website.
                 </p>
               </div>
 
               {/* Videos List */}
-              <div className="space-y-6">
+              <div className="space-y-5">
                 {draftPortfolio.videos?.map((vid, idx) => {
                   const ytId = extractYouTubeId(vid.videoUrl);
                   const vimeoInfo = extractVimeoInfo(vid.videoUrl);
                   const isVimeo = vid.videoType === 'vimeo' || Boolean(vimeoInfo.id);
                   const isYouTube = !isVimeo && (vid.videoType === 'youtube' || Boolean(ytId));
-                  const isFacebook = !isVimeo && !isYouTube && (vid.videoType === 'facebook' || (vid.videoUrl && (vid.videoUrl.includes('facebook.com') || vid.videoUrl.includes('fb.watch'))));
                   const isFetchingOg = fetchingOgId === vid.id;
                   const ogNote = ogFetchNotes[vid.id];
 
@@ -2278,18 +2393,18 @@ function doPost(e) {
                   return (
                     <div
                       key={vid.id || idx}
-                      className="p-6 rounded-3xl bg-[#141A20] border border-[#232B33] space-y-5 relative shadow-xl hover:border-neutral-700 transition-all"
+                      className="p-5 sm:p-6 rounded-2xl bg-[#171A21] border border-white/[0.08] space-y-5 relative hover:border-white/[0.14] transition-colors"
                     >
                       {/* Top Video Header: Platform, Order & Actions */}
-                      <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-[#232B33]">
+                      <div className="flex flex-wrap items-center justify-between gap-3 pb-3.5 border-b border-white/[0.06]">
                         <div className="flex items-center space-x-3 rtl:space-x-reverse">
-                          <span className="w-7 h-7 rounded-full bg-[#181E24] border border-[#232B33] flex items-center justify-center text-xs font-mono font-bold text-[#FF5722]">
+                          <span className="px-2 py-0.5 rounded-md bg-[#0B0C0F] border border-white/[0.08] text-xs font-semibold text-[#E4583B] tabular-nums">
                             #{idx + 1}
                           </span>
 
                           {/* Platform Selector with Vimeo */}
                           <div className="flex items-center space-x-1.5 rtl:space-x-reverse">
-                            <label className="text-[11px] font-mono text-neutral-400">Platform:</label>
+                            <label className="text-xs text-[#8E8A82]">Platform:</label>
                             <select
                               value={vid.videoType}
                               onChange={(e) => {
@@ -2299,7 +2414,7 @@ function doPost(e) {
                                   videos: prev.videos.map((v, i) => i === idx ? { ...v, videoType: val } : v)
                                 }));
                               }}
-                              className="px-2.5 py-1 rounded-lg bg-[#0F1419] border border-[#232B33] text-xs font-mono text-[#FF5722] uppercase focus:outline-none"
+                              className="px-2.5 py-1 rounded-lg bg-[#0B0C0F] border border-white/[0.08] text-xs font-medium text-[#F4F0E8] focus:border-[#E4583B] focus:outline-none"
                             >
                               <option value="vimeo">Vimeo</option>
                               <option value="youtube">YouTube</option>
@@ -2309,8 +2424,8 @@ function doPost(e) {
                           </div>
 
                           {/* Order Input */}
-                          <div className="flex items-center space-x-1 rtl:space-x-reverse">
-                            <label className="text-[11px] font-mono text-neutral-400">Order:</label>
+                          <div className="flex items-center space-x-1.5 rtl:space-x-reverse">
+                            <label className="text-xs text-[#8E8A82]">Order:</label>
                             <input
                               type="number"
                               min={1}
@@ -2322,23 +2437,23 @@ function doPost(e) {
                                   videos: prev.videos.map((v, i) => i === idx ? { ...v, order: val } : v)
                                 }));
                               }}
-                              className="w-14 px-2 py-0.5 rounded-lg bg-[#0F1419] border border-[#232B33] text-xs font-mono text-center text-white"
+                              className="w-14 px-2 py-0.5 rounded-lg bg-[#0B0C0F] border border-white/[0.08] text-xs tabular-nums text-center text-[#F4F0E8] focus:border-[#E4583B] focus:outline-none"
                             />
                           </div>
 
                           {vid.customThumbnailUrl && (
-                            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-950/60 text-emerald-400 border border-emerald-500/30">
+                            <span className="text-xs text-emerald-400">
                               Custom Thumbnail Active
                             </span>
                           )}
                           {!vid.customThumbnailUrl && isVimeo && (
-                            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#1AB7EA]/20 text-[#1AB7EA] border border-[#1AB7EA]/30">
-                              Vimeo Video
+                            <span className="text-xs text-[#1AB7EA]">
+                              Vimeo Auto
                             </span>
                           )}
                           {!vid.customThumbnailUrl && isYouTube && ytId && (
-                            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-red-950/60 text-red-400 border border-red-500/30">
-                              Auto YouTube Thumbnail
+                            <span className="text-xs text-[#D7D2C8]">
+                              YouTube Auto
                             </span>
                           )}
                         </div>
@@ -2349,7 +2464,7 @@ function doPost(e) {
                             type="button"
                             onClick={() => handleMoveVideo(idx, idx - 1)}
                             disabled={idx === 0}
-                            className="p-1.5 rounded-lg text-neutral-400 hover:text-white hover:bg-neutral-800 disabled:opacity-30 disabled:pointer-events-none transition-colors"
+                            className="p-1.5 rounded-lg text-[#8E8A82] hover:text-white hover:bg-white/[0.06] disabled:opacity-30 disabled:pointer-events-none transition-colors cursor-pointer"
                             title="Move Up"
                           >
                             <ArrowUp className="w-4 h-4" />
@@ -2358,7 +2473,7 @@ function doPost(e) {
                             type="button"
                             onClick={() => handleMoveVideo(idx, idx + 1)}
                             disabled={idx === (draftPortfolio.videos?.length || 0) - 1}
-                            className="p-1.5 rounded-lg text-neutral-400 hover:text-white hover:bg-neutral-800 disabled:opacity-30 disabled:pointer-events-none transition-colors"
+                            className="p-1.5 rounded-lg text-[#8E8A82] hover:text-white hover:bg-white/[0.06] disabled:opacity-30 disabled:pointer-events-none transition-colors cursor-pointer"
                             title="Move Down"
                           >
                             <ArrowDown className="w-4 h-4" />
@@ -2380,7 +2495,7 @@ function doPost(e) {
                                 'Are you sure you want to delete this video item? It will be removed from your draft portfolio. Changes take effect on the live website when you click Publish.'
                               );
                             }}
-                            className="p-1.5 rounded-lg text-rose-400 hover:text-rose-300 hover:bg-rose-950/40 ml-2 transition-colors"
+                            className="p-1.5 rounded-lg text-rose-400 hover:text-rose-300 hover:bg-rose-950/40 ml-2 transition-colors cursor-pointer"
                             title="Delete Video"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -2390,10 +2505,10 @@ function doPost(e) {
 
                       {/* Video URL Input */}
                       <div>
-                        <label className="block text-xs font-mono uppercase text-neutral-400 mb-1.5 flex items-center justify-between">
+                        <label className="block text-xs font-medium text-[#A7A298] mb-1.5 flex items-center justify-between">
                           <span>Video URL (Vimeo, YouTube, or Facebook Link)</span>
                           {isVimeo && (
-                            <span className="text-[10px] text-[#1AB7EA] font-bold font-mono">
+                            <span className="text-[11px] text-[#1AB7EA] font-medium">
                               Vimeo Link Detected
                             </span>
                           )}
@@ -2411,9 +2526,9 @@ function doPost(e) {
 
                             updateDraft(prev => ({
                               ...prev,
-                              videos: prev.videos.map((v, i) => i === idx ? { 
-                                ...v, 
-                                videoUrl: val, 
+                              videos: prev.videos.map((v, i) => i === idx ? {
+                                ...v,
+                                videoUrl: val,
                                 videoType: detected !== 'direct' ? detected : v.videoType,
                                 videoId: vInfo.id || (ytId || v.videoId),
                                 videoHash: vInfo.hash || v.videoHash,
@@ -2428,20 +2543,19 @@ function doPost(e) {
                             }
                           }}
                           placeholder="https://vimeo.com/... or https://www.youtube.com/watch?v=... or https://www.facebook.com/..."
-                          className="w-full px-4 py-2.5 rounded-xl bg-[#0B0F12] border border-[#232B33] text-sm text-white font-mono focus:border-[#FF5722] focus:outline-none"
+                          className="w-full px-3.5 py-2.5 rounded-lg bg-[#0B0C0F] border border-white/[0.08] text-sm text-[#F4F0E8] font-mono focus:border-[#E4583B] focus:outline-none"
                         />
                       </div>
 
                       {/* Thumbnail Management Stage */}
-                      <div className="p-4 rounded-2xl bg-[#0E1217] border border-[#232B33] space-y-4">
+                      <div className="p-4 rounded-xl bg-[#121419] border border-white/[0.07] space-y-4">
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                          <span className="text-xs font-mono uppercase font-bold text-neutral-300 flex items-center space-x-1.5 rtl:space-x-reverse">
-                            <ImageIcon className="w-3.5 h-3.5 text-[#FF5722]" />
+                          <span className="text-xs font-semibold text-[#D7D2C8] flex items-center space-x-1.5 rtl:space-x-reverse">
+                            <ImageIcon className="w-3.5 h-3.5 text-[#E4583B]" />
                             <span>Thumbnail Configuration</span>
                           </span>
 
                           <div className="flex items-center space-x-2 rtl:space-x-reverse">
-                            {/* Reset to Automatic Thumbnail Button */}
                             {vid.customThumbnailUrl && (
                               <button
                                 type="button"
@@ -2455,42 +2569,39 @@ function doPost(e) {
                                   }
                                   showToast('Reset to automatic thumbnail');
                                 }}
-                                className="inline-flex items-center space-x-1.5 rtl:space-x-reverse px-3 py-1.5 rounded-lg text-xs font-mono text-amber-300 bg-amber-950/40 hover:bg-amber-950/60 border border-amber-500/30 transition-colors"
+                                className="inline-flex items-center space-x-1.5 rtl:space-x-reverse px-3 py-1.5 rounded-lg text-xs font-medium text-amber-300 bg-amber-950/35 hover:bg-amber-950/55 border border-amber-500/30 transition-colors cursor-pointer"
                                 title="Remove custom thumbnail and restore automatic thumbnail"
                               >
                                 <RotateCcw className="w-3.5 h-3.5 text-amber-400" />
-                                <span>Reset to automatic thumbnail</span>
+                                <span>Reset to Auto</span>
                               </button>
                             )}
 
-                            {/* Automatic Open Graph & oEmbed Fetch Button */}
                             <button
                               type="button"
                               onClick={() => handleFetchOg(vid, idx)}
                               disabled={isFetchingOg || !vid.videoUrl}
-                              className="inline-flex items-center space-x-1.5 rtl:space-x-reverse px-3 py-1.5 rounded-lg text-xs font-mono text-neutral-200 bg-[#181E24] hover:bg-[#202830] border border-[#232B33] hover:border-[#FF5722]/50 transition-colors disabled:opacity-50"
+                              className="inline-flex items-center space-x-1.5 rtl:space-x-reverse px-3 py-1.5 rounded-lg text-xs font-medium text-[#EAE5DC] bg-[#171A21] hover:bg-[#1E222B] border border-white/[0.08] hover:border-[#E4583B]/50 transition-colors disabled:opacity-50 cursor-pointer"
                             >
-                              <RefreshCw className={`w-3.5 h-3.5 text-[#FF5722] ${isFetchingOg ? 'animate-spin' : ''}`} />
-                              <span>{isFetchingOg ? 'Fetching...' : 'Re-fetch Automatic Thumbnail'}</span>
+                              <RefreshCw className={`w-3.5 h-3.5 text-[#E4583B] ${isFetchingOg ? 'animate-spin' : ''}`} />
+                              <span>{isFetchingOg ? 'Fetching...' : 'Re-fetch Auto Thumbnail'}</span>
                             </button>
                           </div>
                         </div>
 
-                        {/* Notice if auto-fetch failed */}
                         {ogNote && (
-                          <div className="p-3 rounded-xl bg-amber-950/40 border border-amber-500/30 text-amber-300 text-xs flex items-start space-x-2 rtl:space-x-reverse">
+                          <div className="p-3 rounded-lg bg-amber-950/35 border border-amber-500/30 text-amber-300 text-xs flex items-start space-x-2 rtl:space-x-reverse">
                             <AlertCircle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
                             <span>{ogNote}</span>
                           </div>
                         )}
 
                         <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-start">
-                          {/* Thumbnail Preview Stage - object-contain */}
                           <div className="md:col-span-5">
-                            <label className="block text-[11px] font-mono text-neutral-400 mb-1">
+                            <label className="block text-[11px] font-medium text-[#8E8A82] mb-1">
                               Current Display Preview
                             </label>
-                            <div className="relative aspect-[16/10] rounded-xl overflow-hidden border border-[#232B33] bg-[#080B0D] flex items-center justify-center">
+                            <div className="relative aspect-[16/10] rounded-lg overflow-hidden border border-white/[0.08] bg-[#0B0C0F] flex items-center justify-center">
                               {activeThumbnail ? (
                                 <img
                                   src={activeThumbnail}
@@ -2499,21 +2610,21 @@ function doPost(e) {
                                 />
                               ) : (
                                 <div className="text-center p-4">
-                                  <div className="w-10 h-10 mx-auto rounded-xl bg-[#181E24] border border-[#232B33] flex items-center justify-center text-[#FF5722] mb-2">
+                                  <div className="w-10 h-10 mx-auto rounded-lg bg-[#171A21] border border-white/[0.08] flex items-center justify-center text-[#E4583B] mb-2">
                                     {isVimeo ? (
                                       <VimeoIcon className="w-5 h-5 text-[#1AB7EA]" />
                                     ) : (
                                       <Play className="w-5 h-5 fill-current" />
                                     )}
                                   </div>
-                                  <span className="text-[10px] font-mono text-neutral-400 uppercase">
+                                  <span className="text-[11px] text-[#8E8A82]">
                                     {isVimeo ? 'Vimeo Placeholder' : 'Branded Placeholder'}
                                   </span>
                                 </div>
                               )}
 
                               {isVimeo && (
-                                <div className="absolute top-2 left-2 px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-black/85 text-[#1AB7EA] border border-[#1AB7EA]/40 flex items-center space-x-1">
+                                <div className="absolute top-2 left-2 px-2 py-0.5 rounded text-[10px] font-medium bg-black/85 text-[#1AB7EA] border border-[#1AB7EA]/35 flex items-center space-x-1">
                                   <VimeoIcon className="w-3 h-3 fill-current" />
                                   <span>Vimeo</span>
                                 </div>
@@ -2521,15 +2632,14 @@ function doPost(e) {
                             </div>
                           </div>
 
-                          {/* Upload / URL Inputs */}
                           <div className="md:col-span-7 space-y-3">
                             <div>
-                              <label className="block text-[11px] font-mono text-neutral-400 mb-1">
+                              <label className="block text-[11px] font-medium text-[#8E8A82] mb-1">
                                 Upload Custom Thumbnail (Overrides Auto)
                               </label>
                               <div className="flex items-center space-x-2 rtl:space-x-reverse">
-                                <label className="flex-1 cursor-pointer inline-flex items-center justify-center space-x-2 px-3 py-2 rounded-xl text-xs font-mono text-white bg-[#181E24] hover:bg-[#202830] border border-[#232B33] hover:border-[#FF5722] transition-colors">
-                                  <Upload className="w-3.5 h-3.5 text-[#FF5722]" />
+                                <label className="flex-1 cursor-pointer inline-flex items-center justify-center space-x-2 px-3 py-2 rounded-lg text-xs font-medium text-[#F4F0E8] bg-[#171A21] hover:bg-[#1E222B] border border-white/[0.08] hover:border-[#E4583B]/60 transition-colors">
+                                  <Upload className="w-3.5 h-3.5 text-[#E4583B]" />
                                   <span>{videoUploadProgress[idx] ? `Uploading to Storage (${videoUploadProgress[idx]}%)...` : 'Upload Thumbnail File...'}</span>
                                   <input
                                     type="file"
@@ -2541,9 +2651,9 @@ function doPost(e) {
                                 </label>
                               </div>
                               {videoUploadProgress[idx] && (
-                                <div className="w-full bg-[#0B0F12] rounded-full h-1 mt-1">
+                                <div className="w-full bg-[#0B0C0F] rounded-full h-1 mt-1">
                                   <div
-                                    className="bg-[#FF5722] h-1 rounded-full transition-all"
+                                    className="bg-[#E4583B] h-1 rounded-full transition-all"
                                     style={{ width: `${videoUploadProgress[idx]}%` }}
                                   />
                                 </div>
@@ -2551,7 +2661,7 @@ function doPost(e) {
                             </div>
 
                             <div>
-                              <label className="block text-[11px] font-mono text-neutral-400 mb-1">
+                              <label className="block text-[11px] font-medium text-[#8E8A82] mb-1">
                                 Or Paste Image URL
                               </label>
                               <input
@@ -2565,7 +2675,7 @@ function doPost(e) {
                                   }));
                                 }}
                                 placeholder="https://example.com/thumbnail.jpg"
-                                className="w-full px-3 py-2 rounded-lg bg-[#0B0F12] border border-[#232B33] text-xs text-white font-mono"
+                                className="w-full px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] text-xs text-[#F4F0E8] font-mono focus:border-[#E4583B] focus:outline-none"
                               />
                             </div>
                           </div>
@@ -2574,7 +2684,7 @@ function doPost(e) {
 
                       {/* Video Title in 3 languages (Optional) */}
                       <div>
-                        <label className="block text-xs font-mono uppercase text-neutral-400 mb-1.5">
+                        <label className="block text-xs font-medium text-[#A7A298] mb-1.5">
                           Video Title (Optional)
                         </label>
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -2586,13 +2696,13 @@ function doPost(e) {
                               const val = e.target.value;
                               updateDraft(prev => ({
                                 ...prev,
-                                videos: prev.videos.map((v, i) => i === idx ? { 
-                                  ...v, 
-                                  title: { ...(v.title || { en: '', bn: '', ar: '' }), en: val } 
+                                videos: prev.videos.map((v, i) => i === idx ? {
+                                  ...v,
+                                  title: { ...(v.title || { en: '', bn: '', ar: '' }), en: val }
                                 } : v)
                               }));
                             }}
-                            className="px-3 py-2 rounded-xl bg-[#0B0F12] border border-[#232B33] text-xs text-white font-mono"
+                            className="px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] text-xs text-[#F4F0E8] focus:border-[#E4583B] focus:outline-none"
                           />
 
                           <input
@@ -2603,13 +2713,13 @@ function doPost(e) {
                               const val = e.target.value;
                               updateDraft(prev => ({
                                 ...prev,
-                                videos: prev.videos.map((v, i) => i === idx ? { 
-                                  ...v, 
-                                  title: { ...(v.title || { en: '', bn: '', ar: '' }), bn: val } 
+                                videos: prev.videos.map((v, i) => i === idx ? {
+                                  ...v,
+                                  title: { ...(v.title || { en: '', bn: '', ar: '' }), bn: val }
                                 } : v)
                               }));
                             }}
-                            className="px-3 py-2 rounded-xl bg-[#0B0F12] border border-[#232B33] text-xs text-white font-mono"
+                            className="px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] text-xs text-[#F4F0E8] focus:border-[#E4583B] focus:outline-none"
                           />
 
                           <input
@@ -2621,17 +2731,16 @@ function doPost(e) {
                               const val = e.target.value;
                               updateDraft(prev => ({
                                 ...prev,
-                                videos: prev.videos.map((v, i) => i === idx ? { 
-                                  ...v, 
-                                  title: { ...(v.title || { en: '', bn: '', ar: '' }), ar: val } 
+                                videos: prev.videos.map((v, i) => i === idx ? {
+                                  ...v,
+                                  title: { ...(v.title || { en: '', bn: '', ar: '' }), ar: val }
                                 } : v)
                               }));
                             }}
-                            className="px-3 py-2 rounded-xl bg-[#0B0F12] border border-[#232B33] text-xs text-white font-mono"
+                            className="px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] text-xs text-[#F4F0E8] focus:border-[#E4583B] focus:outline-none"
                           />
                         </div>
                       </div>
-
                     </div>
                   );
                 })}
@@ -2647,12 +2756,15 @@ function doPost(e) {
           {/* TAB 6: CHANNELS */}
           {activeTab === 'channels' && (
             <div className="max-w-3xl space-y-6">
-              <h2 className="text-xl font-bold text-white mb-2">Channel Links</h2>
+              <div className="pb-4 border-b border-white/[0.08]">
+                <h2 className="text-lg font-semibold text-[#F4F0E8] mb-0.5">Channel Links</h2>
+                <p className="text-xs text-[#8E8A82]">Connect your active YouTube, Facebook, Behance, or external portfolio channels</p>
+              </div>
               <div className="space-y-4">
                 {(draftPortfolio.channelLinks || []).map((item) => (
-                  <div key={item.id} className="p-4 rounded-xl bg-[#141A20] border border-[#232B33] space-y-2">
+                  <div key={item.id} className="p-4 rounded-xl bg-[#171A21] border border-white/[0.08] space-y-2.5">
                     <div className="flex items-center justify-between">
-                      <span className="font-bold text-sm text-white">{item.platform}</span>
+                      <span className="font-semibold text-sm text-[#F4F0E8]">{item.platform}</span>
                       <select
                         value={item.status}
                         onChange={(e) => {
@@ -2662,7 +2774,7 @@ function doPost(e) {
                             channelLinks: prev.channelLinks.map(c => c.id === item.id ? { ...c, status: val } : c)
                           }));
                         }}
-                        className="px-2 py-1 rounded bg-[#0B0F12] border border-[#232B33] text-xs text-white"
+                        className="px-2.5 py-1 rounded-lg bg-[#0B0C0F] border border-white/[0.08] text-xs text-[#F4F0E8] focus:border-[#E4583B] focus:outline-none"
                       >
                         <option value="LINKED">LINKED</option>
                         <option value="UNLINKED">UNLINKED</option>
@@ -2680,7 +2792,7 @@ function doPost(e) {
                           channelLinks: prev.channelLinks.map(c => c.id === item.id ? { ...c, url: val } : c)
                         }));
                       }}
-                      className="w-full px-3 py-2 rounded-lg bg-[#0B0F12] border border-[#232B33] text-xs text-white"
+                      className="w-full px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] text-xs font-mono text-[#F4F0E8] focus:border-[#E4583B] focus:outline-none"
                     />
                   </div>
                 ))}
@@ -2694,20 +2806,20 @@ function doPost(e) {
               <SocialLinksEditor />
 
               {/* Primary Email & Direct Contact Info */}
-              <div className="p-6 rounded-3xl bg-[#12161A] border border-[#232B33] space-y-4 max-w-4xl">
-                <div className="flex items-center space-x-3 rtl:space-x-reverse pb-3 border-b border-[#1D232A]">
-                  <div className="w-10 h-10 rounded-xl bg-[#181E24] border border-[#232B33] flex items-center justify-center text-[#FF5722]">
-                    <Mail className="w-5 h-5" />
+              <div className="p-6 rounded-2xl bg-[#171A21] border border-white/[0.08] space-y-4 max-w-4xl">
+                <div className="flex items-center space-x-3 rtl:space-x-reverse pb-3 border-b border-white/[0.06]">
+                  <div className="w-9 h-9 rounded-lg bg-[#121419] border border-white/[0.08] flex items-center justify-center text-[#E4583B]">
+                    <Mail className="w-4 h-4" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold text-white tracking-wide">Direct Contact Information</h3>
-                    <p className="text-xs text-neutral-400 font-mono">Email address used for inquiries and advice form</p>
+                    <h3 className="text-base font-semibold text-[#F4F0E8]">Direct Contact Information</h3>
+                    <p className="text-xs text-[#8E8A82]">Email address and social links used for inquiries</p>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-mono text-neutral-400 mb-1">Primary Email Address</label>
+                    <label className="block text-xs font-medium text-[#A7A298] mb-1">Primary Email Address</label>
                     <input
                       type="email"
                       value={draftPortfolio.contact?.email || ''}
@@ -2719,14 +2831,14 @@ function doPost(e) {
                         }));
                       }}
                       placeholder="yourname@gmail.com"
-                      className="w-full px-3 py-2 rounded-xl bg-[#0F1419] border border-[#232B33] text-xs text-white font-mono"
+                      className="w-full px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] text-xs text-[#F4F0E8] font-mono focus:border-[#E4583B] focus:outline-none"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-mono text-neutral-400 mb-1 flex items-center justify-between">
+                    <label className="block text-xs font-medium text-[#A7A298] mb-1 flex items-center justify-between">
                       <span>Telegram (Direct Contact Link)</span>
-                      <span className="text-[10px] text-[#229ED9]">Get In Touch</span>
+                      <span className="text-[11px] text-[#38BDF8]">Get In Touch</span>
                     </label>
                     <input
                       type="url"
@@ -2739,14 +2851,14 @@ function doPost(e) {
                         }));
                       }}
                       placeholder="https://t.me/sbmc3925"
-                      className="w-full px-3 py-2 rounded-xl bg-[#0F1419] border border-[#232B33] text-xs text-white font-mono"
+                      className="w-full px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] text-xs text-[#F4F0E8] font-mono focus:border-[#E4583B] focus:outline-none"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-mono text-neutral-400 mb-1 flex items-center justify-between">
+                    <label className="block text-xs font-medium text-[#A7A298] mb-1 flex items-center justify-between">
                       <span>Facebook Profile URL</span>
-                      <span className="text-[10px] text-neutral-500">Leave empty to hide</span>
+                      <span className="text-[11px] text-[#6F6B64]">Leave empty to hide</span>
                     </label>
                     <input
                       type="url"
@@ -2759,14 +2871,14 @@ function doPost(e) {
                         }));
                       }}
                       placeholder="https://www.facebook.com/..."
-                      className="w-full px-3 py-2 rounded-xl bg-[#0F1419] border border-[#232B33] text-xs text-white font-mono"
+                      className="w-full px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] text-xs text-[#F4F0E8] font-mono focus:border-[#E4583B] focus:outline-none"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-mono text-neutral-400 mb-1 flex items-center justify-between">
+                    <label className="block text-xs font-medium text-[#A7A298] mb-1 flex items-center justify-between">
                       <span>YouTube Channel URL</span>
-                      <span className="text-[10px] text-neutral-500">Leave empty to hide</span>
+                      <span className="text-[11px] text-[#6F6B64]">Leave empty to hide</span>
                     </label>
                     <input
                       type="url"
@@ -2779,14 +2891,14 @@ function doPost(e) {
                         }));
                       }}
                       placeholder="https://www.youtube.com/@..."
-                      className="w-full px-3 py-2 rounded-xl bg-[#0F1419] border border-[#232B33] text-xs text-white font-mono"
+                      className="w-full px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] text-xs text-[#F4F0E8] font-mono focus:border-[#E4583B] focus:outline-none"
                     />
                   </div>
 
                   <div className="sm:col-span-2">
-                    <label className="block text-xs font-mono text-neutral-400 mb-1 flex items-center justify-between">
+                    <label className="block text-xs font-medium text-[#A7A298] mb-1 flex items-center justify-between">
                       <span>Behance Profile URL</span>
-                      <span className="text-[10px] text-[#0057FF]">Direct Profile</span>
+                      <span className="text-[11px] text-[#60A5FA]">Direct Profile</span>
                     </label>
                     <input
                       type="url"
@@ -2799,7 +2911,7 @@ function doPost(e) {
                         }));
                       }}
                       placeholder="https://www.behance.net/jaberhosain"
-                      className="w-full px-3 py-2 rounded-xl bg-[#0F1419] border border-[#232B33] text-xs text-white font-mono"
+                      className="w-full px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] text-xs text-[#F4F0E8] font-mono focus:border-[#E4583B] focus:outline-none"
                     />
                   </div>
                 </div>
@@ -2813,36 +2925,36 @@ function doPost(e) {
           {/* TAB 7: LEADS */}
           {activeTab === 'leads' && (
             <div className="space-y-6">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between pb-4 border-b border-white/[0.08]">
                 <div>
-                  <h2 className="text-xl font-bold text-white">Received Advice & Messages</h2>
-                  <p className="text-xs text-neutral-400">Private submissions from the Give Me Your Advice form.</p>
+                  <h2 className="text-lg font-semibold text-[#F4F0E8]">Received Advice &amp; Messages</h2>
+                  <p className="text-xs text-[#8E8A82]">Private submissions from the Give Me Your Advice form.</p>
                 </div>
                 <button
                   onClick={loadLeadsData}
                   disabled={loadingLeads}
-                  className="px-3 py-1.5 rounded-lg text-xs font-medium text-neutral-300 bg-[#141A20] border border-[#232B33] hover:text-white"
+                  className="px-3.5 py-2 rounded-lg text-xs font-medium text-[#D7D2C8] bg-[#171A21] hover:bg-[#1E222B] border border-white/[0.08] hover:text-white cursor-pointer transition-colors"
                 >
                   {loadingLeads ? 'Refreshing...' : 'Refresh List'}
                 </button>
               </div>
 
               {leads.length === 0 ? (
-                <div className="p-12 text-center text-neutral-400 text-sm rounded-2xl bg-[#141A20] border border-[#232B33]">
+                <div className="p-12 text-center text-[#8E8A82] text-sm rounded-xl bg-[#171A21] border border-white/[0.08]">
                   No messages received yet.
                 </div>
               ) : (
                 <div className="space-y-4">
                   {leads.map((l) => (
-                    <div key={l.id} className="p-5 rounded-2xl bg-[#141A20] border border-[#232B33] space-y-2">
-                      <div className="flex items-center justify-between">
-                        <h3 className="font-bold text-sm text-white">{l.name}</h3>
-                        <span className="text-xs font-mono text-[#FF5722]">{l.email}</span>
+                    <div key={l.id} className="p-5 rounded-xl bg-[#171A21] border border-white/[0.08] space-y-2.5">
+                      <div className="flex items-center justify-between gap-2">
+                        <h3 className="font-semibold text-sm text-[#F4F0E8]">{l.name}</h3>
+                        <span className="text-xs font-mono text-[#E4583B]">{l.email}</span>
                       </div>
-                      <p className="text-xs text-neutral-300 bg-[#0B0F12] p-3 rounded-lg border border-[#232B33]">
+                      <p className="text-xs text-[#D7D2C8] bg-[#0B0C0F] p-3.5 rounded-lg border border-white/[0.06]">
                         {l.message}
                       </p>
-                      <span className="text-[10px] text-neutral-500 font-mono">
+                      <span className="text-[11px] text-[#6F6B64] font-mono block">
                         {new Date(l.createdAt).toLocaleString()}
                       </span>
                     </div>
@@ -2855,13 +2967,13 @@ function doPost(e) {
           {/* TAB 8: GOOGLE SHEETS */}
           {activeTab === 'sheets' && (
             <div className="max-w-3xl space-y-6">
-              <div>
-                <h2 className="text-xl font-bold text-white mb-2">Google Sheets Webhook</h2>
-                <p className="text-xs text-neutral-400">Optionally connect your Google Sheet to receive automatic rows.</p>
+              <div className="pb-4 border-b border-white/[0.08]">
+                <h2 className="text-lg font-semibold text-[#F4F0E8] mb-0.5">Google Sheets Webhook</h2>
+                <p className="text-xs text-[#8E8A82]">Optionally connect your Google Sheet to receive automatic rows.</p>
               </div>
 
               <div>
-                <label className="block text-xs font-mono text-neutral-400 mb-1">Web App URL</label>
+                <label className="block text-xs font-medium text-[#A7A298] mb-1.5">Web App URL</label>
                 <input
                   type="url"
                   placeholder="https://script.google.com/macros/s/.../exec"
@@ -2873,27 +2985,27 @@ function doPost(e) {
                       googleSheetWebhookUrl: val
                     }));
                   }}
-                  className="w-full px-3 py-2 rounded-xl bg-[#141A20] border border-[#232B33] text-xs text-white"
+                  className="w-full px-3.5 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] text-xs font-mono text-[#F4F0E8] focus:border-[#E4583B] focus:outline-none"
                 />
               </div>
 
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-mono text-neutral-300">Google Apps Script Code:</span>
+                  <span className="text-xs font-medium text-[#D7D2C8]">Google Apps Script Code</span>
                   <button
                     onClick={() => {
                       navigator.clipboard.writeText(appsScriptCode);
                       setCopiedScript(true);
                       setTimeout(() => setCopiedScript(false), 3000);
                     }}
-                    className="inline-flex items-center space-x-1.5 rtl:space-x-reverse px-3 py-1 rounded-lg text-xs font-semibold text-white bg-[#141A20] hover:bg-[#1E2630] border border-[#232B33]"
+                    className="inline-flex items-center space-x-1.5 rtl:space-x-reverse px-3 py-1.5 rounded-lg text-xs font-medium text-[#F4F0E8] bg-[#171A21] hover:bg-[#1E222B] border border-white/[0.08] cursor-pointer"
                   >
                     <Copy className="w-3.5 h-3.5" />
                     <span>{copiedScript ? 'Copied to Clipboard!' : 'Copy Code'}</span>
                   </button>
                 </div>
 
-                <pre className="p-4 rounded-xl bg-[#080B0D] border border-[#232B33] text-xs text-neutral-300 font-mono overflow-x-auto max-h-56">
+                <pre className="p-4 rounded-xl bg-[#0B0C0F] border border-white/[0.08] text-xs text-[#D7D2C8] font-mono overflow-x-auto max-h-56">
                   {appsScriptCode}
                 </pre>
               </div>

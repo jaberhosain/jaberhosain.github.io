@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { 
-  Share2, 
-  Plus, 
-  Trash2, 
-  ArrowUp, 
-  ArrowDown, 
+import {
+  Share2,
+  Plus,
+  Trash2,
+  ArrowUp,
+  ArrowDown,
   ExternalLink,
   Facebook,
   Send,
@@ -37,8 +37,7 @@ const PLATFORM_PRESETS: { platform: string; name: string; icon: string; defaultU
 
 export const SocialLinksEditor: React.FC = () => {
   const { draftPortfolio, updateDraft } = usePortfolio();
-  
-  // Resolve socialLinks safely with fallback
+
   const socialLinks: SocialLinkItem[] = Array.isArray(draftPortfolio.socialLinks) && draftPortfolio.socialLinks.length > 0
     ? draftPortfolio.socialLinks
     : (defaultSocialLinks || []);
@@ -66,7 +65,7 @@ export const SocialLinksEditor: React.FC = () => {
       case 'github':
         return <Github className="w-4 h-4 text-white" />;
       default:
-        return <Globe className="w-4 h-4 text-[#FF5722]" />;
+        return <Globe className="w-4 h-4 text-[#E4583B]" />;
     }
   };
 
@@ -110,7 +109,6 @@ export const SocialLinksEditor: React.FC = () => {
     nextList[idx] = nextList[targetIdx];
     nextList[targetIdx] = temp;
 
-    // re-assign order property
     const reordered = nextList.map((item, i) => ({ ...item, order: i + 1 }));
 
     updateDraft(prev => ({
@@ -121,30 +119,28 @@ export const SocialLinksEditor: React.FC = () => {
 
   return (
     <div className="space-y-6 max-w-4xl">
-      <div className="p-6 rounded-3xl bg-[#12161A] border border-[#232B33] space-y-6">
-        
+      <div className="p-5 sm:p-6 rounded-2xl bg-[#121419] border border-white/[0.08] space-y-6">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[#1D232A]">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-white/[0.06]">
           <div className="flex items-center space-x-3 rtl:space-x-reverse">
-            <div className="w-10 h-10 rounded-xl bg-[#181E24] border border-[#232B33] flex items-center justify-center text-[#FF5722]">
-              <Share2 className="w-5 h-5" />
+            <div className="w-9 h-9 rounded-lg bg-[#171A21] border border-white/[0.08] flex items-center justify-center text-[#E4583B]">
+              <Share2 className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-white tracking-wide">
+              <h3 className="text-base font-semibold text-white tracking-tight">
                 Connect With Me — Footer Social Links
               </h3>
-              <p className="text-xs text-neutral-400 font-mono">
-                Manage icons, links, and visibility in the footer &quot;Connect With Me&quot; section
+              <p className="text-xs text-neutral-400">
+                Manage icons, links, and visibility in the footer social bar
               </p>
             </div>
           </div>
 
-          {/* Quick Add Presets */}
           <div className="flex items-center space-x-2">
             <button
               type="button"
-              onClick={() => handleAddSocialLink(PLATFORM_PRESETS[3])} // YouTube
-              className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-[#FF5722] hover:bg-[#F4511E] text-xs font-bold text-white transition-all shadow-md"
+              onClick={() => handleAddSocialLink(PLATFORM_PRESETS[3])}
+              className="inline-flex items-center space-x-1.5 px-3.5 py-2 rounded-lg bg-[#E4583B] hover:bg-[#D0492D] text-xs font-medium text-white transition-colors"
             >
               <Plus className="w-4 h-4" />
               <span>Add Platform</span>
@@ -154,8 +150,8 @@ export const SocialLinksEditor: React.FC = () => {
 
         {/* Presets Bar */}
         <div className="space-y-2">
-          <span className="text-[11px] font-mono uppercase text-neutral-400 block tracking-wider">
-            Quick Add Platform:
+          <span className="text-[11px] font-medium uppercase text-neutral-400 block tracking-wider">
+            Quick Add Platform
           </span>
           <div className="flex flex-wrap gap-2">
             {PLATFORM_PRESETS.map((p) => {
@@ -165,10 +161,10 @@ export const SocialLinksEditor: React.FC = () => {
                   key={p.platform}
                   type="button"
                   onClick={() => handleAddSocialLink(p)}
-                  className={`inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-lg text-xs font-mono border transition-all ${
+                  className={`inline-flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg text-xs border transition-colors ${
                     alreadyExists
-                      ? 'bg-[#181E24] text-neutral-400 border-[#232B33] hover:border-neutral-500'
-                      : 'bg-[#181E24] text-white border-[#232B33] hover:border-[#FF5722] hover:text-[#FF5722]'
+                      ? 'bg-[#171A21] text-neutral-400 border-white/[0.06] hover:border-white/20'
+                      : 'bg-[#171A21] text-white border-white/[0.08] hover:border-[#E4583B] hover:text-[#E4583B]'
                   }`}
                   title={`Add ${p.name}`}
                 >
@@ -186,31 +182,29 @@ export const SocialLinksEditor: React.FC = () => {
           {socialLinks.map((item, idx) => (
             <div
               key={item.id || idx}
-              className={`p-4 rounded-2xl border transition-all space-y-3 ${
+              className={`p-4 rounded-xl border transition-colors space-y-3 ${
                 item.enabled
-                  ? 'bg-[#181E24] border-[#232B33]'
-                  : 'bg-[#12161A]/60 border-[#1D232A] opacity-75'
+                  ? 'bg-[#171A21] border-white/[0.08]'
+                  : 'bg-[#0B0C0F]/60 border-white/[0.05] opacity-70'
               }`}
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3 rtl:space-x-reverse">
-                  <div className="w-8 h-8 rounded-lg bg-[#0F1419] border border-[#232B33] flex items-center justify-center">
+                  <div className="w-8 h-8 rounded-lg bg-[#0B0C0F] border border-white/[0.08] flex items-center justify-center">
                     {renderPlatformIcon(item.icon || item.platform)}
                   </div>
                   <div>
-                    <span className="text-xs font-bold text-white block">
+                    <span className="text-xs font-semibold text-white block">
                       {item.name || item.platform}
                     </span>
-                    <span className="text-[10px] font-mono text-neutral-400 uppercase tracking-widest">
+                    <span className="text-[11px] text-neutral-400 tabular-nums">
                       Slot #{idx + 1}
                     </span>
                   </div>
                 </div>
 
-                {/* Controls: Enable toggle, Reorder, Delete */}
                 <div className="flex items-center space-x-2">
-                  {/* Enable / Disable toggle */}
-                  <label className="flex items-center space-x-1.5 cursor-pointer text-xs font-mono text-neutral-300 mr-2">
+                  <label className="flex items-center space-x-2 cursor-pointer text-xs text-neutral-300 mr-2">
                     <input
                       type="checkbox"
                       checked={item.enabled !== false}
@@ -218,9 +212,9 @@ export const SocialLinksEditor: React.FC = () => {
                         const checked = e.target.checked;
                         handleUpdateItem(item.id, current => ({ ...current, enabled: checked }));
                       }}
-                      className="rounded border-[#232B33] bg-[#0F1419] text-[#FF5722] focus:ring-0 focus:ring-offset-0"
+                      className="rounded border-white/15 bg-[#0B0C0F] text-[#E4583B] focus:ring-0 focus:ring-offset-0"
                     />
-                    <span className={item.enabled !== false ? 'text-emerald-400' : 'text-neutral-500'}>
+                    <span className={item.enabled !== false ? 'text-emerald-400 font-medium' : 'text-neutral-500'}>
                       {item.enabled !== false ? 'Visible' : 'Hidden'}
                     </span>
                   </label>
@@ -229,7 +223,7 @@ export const SocialLinksEditor: React.FC = () => {
                     type="button"
                     disabled={idx === 0}
                     onClick={() => handleMove(idx, 'up')}
-                    className="p-1.5 text-neutral-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed rounded-lg hover:bg-[#232B33] transition-colors"
+                    className="p-1.5 text-neutral-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed rounded-lg hover:bg-[#1E222B] transition-colors"
                     title="Move Up"
                   >
                     <ArrowUp className="w-4 h-4" />
@@ -238,7 +232,7 @@ export const SocialLinksEditor: React.FC = () => {
                     type="button"
                     disabled={idx === socialLinks.length - 1}
                     onClick={() => handleMove(idx, 'down')}
-                    className="p-1.5 text-neutral-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed rounded-lg hover:bg-[#232B33] transition-colors"
+                    className="p-1.5 text-neutral-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed rounded-lg hover:bg-[#1E222B] transition-colors"
                     title="Move Down"
                   >
                     <ArrowDown className="w-4 h-4" />
@@ -257,7 +251,7 @@ export const SocialLinksEditor: React.FC = () => {
               {/* Inputs */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
                 <div>
-                  <label className="block text-[10px] font-mono text-neutral-400 mb-1">
+                  <label className="block text-[11px] font-medium text-neutral-400 mb-1">
                     Platform / Display Name
                   </label>
                   <input
@@ -268,12 +262,12 @@ export const SocialLinksEditor: React.FC = () => {
                       handleUpdateItem(item.id, current => ({ ...current, name: val }));
                     }}
                     placeholder="e.g. Facebook"
-                    className="w-full px-3 py-1.5 rounded-lg bg-[#0F1419] border border-[#232B33] text-xs text-white"
+                    className="w-full px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] focus:border-[#E4583B] outline-none text-xs text-white"
                   />
                 </div>
 
                 <div className="sm:col-span-2">
-                  <label className="block text-[10px] font-mono text-neutral-400 mb-1">
+                  <label className="block text-[11px] font-medium text-neutral-400 mb-1">
                     Profile / Direct URL
                   </label>
                   <div className="flex items-center space-x-1.5">
@@ -285,14 +279,14 @@ export const SocialLinksEditor: React.FC = () => {
                         handleUpdateItem(item.id, current => ({ ...current, url: val }));
                       }}
                       placeholder="https://..."
-                      className="w-full px-3 py-1.5 rounded-lg bg-[#0F1419] border border-[#232B33] text-xs text-white font-mono"
+                      className="w-full px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] focus:border-[#E4583B] outline-none text-xs text-white font-mono"
                     />
                     {item.url && (
                       <a
                         href={item.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="p-2 text-neutral-400 hover:text-[#FF5722] hover:bg-[#0F1419] rounded-lg transition-colors"
+                        className="p-2 text-neutral-400 hover:text-[#E4583B] hover:bg-[#0B0C0F] rounded-lg transition-colors"
                         title="Open Link"
                       >
                         <ExternalLink className="w-4 h-4" />

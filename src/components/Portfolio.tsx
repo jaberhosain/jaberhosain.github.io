@@ -325,67 +325,119 @@ export const Portfolio: React.FC<PortfolioProps> = ({
                       className="h-full group relative rounded-[22px] glass-showcase-card overflow-hidden flex flex-col justify-between cursor-pointer transition-all duration-300 hover:-translate-y-1"
                     >
                       <div className="p-2.5 border-b border-white/[0.08]">
-                        <Tilt3DImageStage className="aspect-[16/10] w-full" maxTilt={13} scaleOnHover={1.03}>
-                          <div className="relative w-full h-full rounded-2xl glass-showcase-inner flex items-center justify-center overflow-hidden">
-                            {coverPoster && !coverBroken ? (
-                              <img
-                                src={resolveAssetUrl(coverPoster)}
-                                alt={loc(project.title)}
-                                referrerPolicy="no-referrer"
-                                onError={() => setBrokenImages((prev) => ({ ...prev, [coverKey]: true }))}
-                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                              />
-                            ) : (
-                              <div className="w-full h-full flex flex-col items-center justify-center text-center p-6 space-y-2.5">
-                                <StudioGlassIcon size="lg">
-                                  <Palette className="w-5 h-5 text-[#F4F0E8]" strokeWidth={1.35} />
-                                </StudioGlassIcon>
-                                <span className="text-xs text-[#DDD1BE] font-semibold line-clamp-1">
-                                  {loc(project.title)}
-                                </span>
-                                <span className="text-[11px] text-[#A7A298]">
-                                  {project.behanceUrl ? 'Behance Design Series' : 'Graphic Design'}
+                        {posters.length >= 2 ? (
+                          <Tilt3DImageStage className="aspect-[16/10] w-full" maxTilt={11} scaleOnHover={1.02}>
+                            <div
+                              className={`relative w-full h-full rounded-2xl glass-showcase-inner overflow-hidden grid gap-1.5 p-1.5 ${
+                                posters.length === 2 ? 'grid-cols-2' : 'grid-cols-3'
+                              }`}
+                            >
+                              {posters.slice(0, 3).map((poster, pIdx) => {
+                                const tileKey = `${project.id}-tile-${pIdx}`;
+                                const tileBroken = brokenImages[tileKey];
+                                const showMoreBadge = pIdx === 2 && posters.length > 3;
+                                return (
+                                  <button
+                                    key={tileKey}
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      onOpenLightbox?.(project, pIdx);
+                                    }}
+                                    className="relative w-full h-full rounded-xl overflow-hidden bg-black/40 group/tile cursor-pointer focus:outline-none"
+                                    title={poster.caption || `Poster ${pIdx + 1}`}
+                                  >
+                                    {!tileBroken ? (
+                                      <img
+                                        src={resolveAssetUrl(poster.url)}
+                                        alt={poster.caption || `${loc(project.title)} - Poster ${pIdx + 1}`}
+                                        referrerPolicy="no-referrer"
+                                        onError={() =>
+                                          setBrokenImages((prev) => ({ ...prev, [tileKey]: true }))
+                                        }
+                                        className="w-full h-full object-cover group-hover/tile:scale-105 transition-transform duration-500"
+                                        loading="lazy"
+                                      />
+                                    ) : (
+                                      <div className="w-full h-full flex items-center justify-center text-[#A7A298]">
+                                        <Palette className="w-5 h-5" strokeWidth={1.35} />
+                                      </div>
+                                    )}
+
+                                    <div className="absolute inset-0 bg-black/35 opacity-0 group-hover/tile:opacity-100 transition-opacity flex items-center justify-center">
+                                      <span className="w-8 h-8 rounded-full glass-pill-cta flex items-center justify-center">
+                                        <Eye className="w-3.5 h-3.5" strokeWidth={1.5} />
+                                      </span>
+                                    </div>
+
+                                    {showMoreBadge && (
+                                      <div className="absolute inset-0 bg-black/60 flex items-center justify-center text-sm font-semibold text-[#F4F0E8] tracking-wide pointer-events-none">
+                                        +{posters.length - 3}
+                                      </div>
+                                    )}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </Tilt3DImageStage>
+                        ) : (
+                          <Tilt3DImageStage className="aspect-[16/10] w-full" maxTilt={13} scaleOnHover={1.03}>
+                            <div className="relative w-full h-full rounded-2xl glass-showcase-inner flex items-center justify-center overflow-hidden">
+                              {coverPoster && !coverBroken ? (
+                                <img
+                                  src={resolveAssetUrl(coverPoster)}
+                                  alt={loc(project.title)}
+                                  referrerPolicy="no-referrer"
+                                  onError={() => setBrokenImages((prev) => ({ ...prev, [coverKey]: true }))}
+                                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                />
+                              ) : (
+                                <div className="w-full h-full flex flex-col items-center justify-center text-center p-6 space-y-2.5">
+                                  <StudioGlassIcon size="lg">
+                                    <Palette className="w-5 h-5 text-[#F4F0E8]" strokeWidth={1.35} />
+                                  </StudioGlassIcon>
+                                  <span className="text-xs text-[#DDD1BE] font-semibold line-clamp-1">
+                                    {loc(project.title)}
+                                  </span>
+                                  <span className="text-[11px] text-[#A7A298]">
+                                    {project.behanceUrl ? 'Behance Design Series' : 'Graphic Design'}
+                                  </span>
+                                </div>
+                              )}
+
+                              <div className="absolute inset-0 bg-black/45 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center z-10 pointer-events-none">
+                                <span className="inline-flex items-center space-x-1.5 rtl:space-x-reverse px-4 py-2 rounded-full glass-pill-cta text-xs font-semibold">
+                                  <Eye className="w-3.5 h-3.5" strokeWidth={1.5} />
+                                  <span>
+                                    {language === 'bn' ? 'বড় করে দেখুন' : 'Preview in Lightbox'}
+                                  </span>
                                 </span>
                               </div>
-                            )}
-
-                            <div className="absolute inset-0 bg-black/45 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center z-10 pointer-events-none">
-                              <span className="inline-flex items-center space-x-1.5 rtl:space-x-reverse px-4 py-2 rounded-full glass-pill-cta text-xs font-semibold">
-                                <Eye className="w-3.5 h-3.5" strokeWidth={1.5} />
-                                <span>
-                                  {posters.length > 1
-                                    ? language === 'bn'
-                                      ? `সব ${posters.length}টি পোস্টার দেখুন`
-                                      : `Browse ${posters.length} Posters`
-                                    : language === 'bn'
-                                    ? 'বড় করে দেখুন'
-                                    : 'Preview in Lightbox'}
-                                </span>
-                              </span>
                             </div>
-                          </div>
-                        </Tilt3DImageStage>
+                          </Tilt3DImageStage>
+                        )}
 
-                        {posters.length > 1 && (
+                        {posters.length > 3 && (
                           <div className="mt-2.5 px-1 flex items-center gap-2 overflow-x-auto pb-0.5">
-                            {posters.slice(0, 6).map((p, idx) => {
-                              const thumbKey = `${project.id}-t-${idx}`;
-                              const isOverflowBadge = idx === 5 && posters.length > 6;
+                            {posters.slice(3, 9).map((p, sliceIdx) => {
+                              const realIdx = sliceIdx + 3;
+                              const thumbKey = `${project.id}-t-${realIdx}`;
+                              const isOverflowBadge = sliceIdx === 5 && posters.length > 9;
                               return (
                                 <button
                                   key={thumbKey}
                                   type="button"
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    onOpenLightbox?.(project, idx);
+                                    onOpenLightbox?.(project, realIdx);
                                   }}
-                                  className="relative w-14 h-14 rounded-xl overflow-hidden glass-showcase-inner hover:border-white/30 shrink-0 transition-all cursor-pointer group/thumb"
-                                  title={p.caption || `Poster ${idx + 1}`}
+                                  className="relative w-12 h-12 rounded-xl overflow-hidden glass-showcase-inner hover:border-white/30 shrink-0 transition-all cursor-pointer group/thumb"
+                                  title={p.caption || `Poster ${realIdx + 1}`}
                                 >
                                   {!brokenImages[thumbKey] ? (
                                     <img
                                       src={resolveAssetUrl(p.url)}
-                                      alt={p.caption || `Poster ${idx + 1}`}
+                                      alt={p.caption || `Poster ${realIdx + 1}`}
                                       referrerPolicy="no-referrer"
                                       onError={() =>
                                         setBrokenImages((prev) => ({ ...prev, [thumbKey]: true }))
@@ -399,7 +451,7 @@ export const Portfolio: React.FC<PortfolioProps> = ({
                                   )}
                                   {isOverflowBadge && (
                                     <div className="absolute inset-0 bg-black/75 flex items-center justify-center text-[11px] font-semibold text-white">
-                                      +{posters.length - 5}
+                                      +{posters.length - 8}
                                     </div>
                                   )}
                                 </button>

@@ -12,7 +12,7 @@ import { usePortfolio } from '../context/PortfolioContext';
 import { useNavigation } from '../context/NavigationContext';
 import { ProjectItem, VideoShowcaseItem } from '../types/portfolio';
 import { resolveAssetUrl } from '../utils/assetUrl';
-import { normalizeDirectImageUrl } from '../lib/imageUrlResolver';
+import { normalizeDirectImageUrl, getProjectPosters } from '../lib/imageUrlResolver';
 import { Tilt3DImageStage } from './common/Tilt3DImageStage';
 import { Reveal3D } from './common/Reveal3D';
 import { VideoParallaxCarousel } from './VideoParallaxCarousel';
@@ -201,13 +201,10 @@ export const HomeHighlights: React.FC<HomeHighlightsProps> = ({
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {spotlightGraphics.map((proj, idx) => {
                 const imgKey = proj.id || `sg-${idx}`;
-                const cleanCover = normalizeDirectImageUrl(proj.coverImage);
+                const posters = getProjectPosters(proj);
+                const cleanCover = posters[0]?.url || normalizeDirectImageUrl(proj.coverImage);
                 const hasBroken = brokenGraphicIds[imgKey];
-                const posterCount = Array.from(
-                  new Set(
-                    [cleanCover, ...(proj.galleryImages || []).map(normalizeDirectImageUrl)].filter(Boolean)
-                  )
-                ).length;
+                const posterCount = posters.length;
 
                 const dir = idx === 0 ? 'left' : idx === 2 ? 'right' : 'up';
 
@@ -219,37 +216,82 @@ export const HomeHighlights: React.FC<HomeHighlightsProps> = ({
                       className="h-full group rounded-[22px] glass-showcase-card overflow-hidden cursor-pointer flex flex-col justify-between hover:-translate-y-1 transition-transform duration-300"
                     >
                       <div className="p-2.5 bg-[#0D0E12]/70 border-b border-white/[0.07]">
-                        <Tilt3DImageStage className="aspect-[16/10] w-full" maxTilt={13} scaleOnHover={1.03}>
-                          <div className="relative w-full h-full rounded-[14px] bg-[#14171E] overflow-hidden flex items-center justify-center">
-                            {cleanCover && !hasBroken ? (
-                              <img
-                                src={resolveAssetUrl(cleanCover)}
-                                alt={loc(proj.title)}
-                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                                referrerPolicy="no-referrer"
-                                onError={() => setBrokenGraphicIds((prev) => ({ ...prev, [imgKey]: true }))}
-                              />
-                            ) : (
-                              <div className="w-full h-full flex flex-col items-center justify-center text-center p-5 bg-[#14171E]">
-                                <StudioGlassIcon size="md" className="mb-2">
-                                  <Palette className="w-4 h-4" strokeWidth={1.35} />
-                                </StudioGlassIcon>
-                                <span className="text-xs text-[#DDD1BE] font-medium line-clamp-1">
-                                  {loc(proj.title)}
-                                </span>
-                                <span className="text-[10px] text-[#8E8A82] mt-0.5">
-                                  {proj.behanceUrl ? 'Behance Visual Project' : 'Graphic Design'}
+                        {posterCount >= 2 ? (
+                          <Tilt3DImageStage className="aspect-[16/10] w-full" maxTilt={11} scaleOnHover={1.02}>
+                            <div
+                              className={`relative w-full h-full rounded-[14px] bg-[#14171E] overflow-hidden grid gap-1 p-1 ${
+                                posterCount === 2 ? 'grid-cols-2' : 'grid-cols-3'
+                              }`}
+                            >
+                              {posters.slice(0, 3).map((poster, pIdx) => {
+                                const tileKey = `${imgKey}-t-${pIdx}`;
+                                return (
+                                  <button
+                                    key={tileKey}
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      onOpenLightbox?.(proj, pIdx);
+                                    }}
+                                    className="relative w-full h-full rounded-lg overflow-hidden bg-black/40 group/tile cursor-pointer"
+                                    title={poster.caption || `Poster ${pIdx + 1}`}
+                                  >
+                                    {!brokenGraphicIds[tileKey] ? (
+                                      <img
+                                        src={resolveAssetUrl(poster.url)}
+                                        alt={poster.caption || loc(proj.title)}
+                                        className="w-full h-full object-cover group-hover/tile:scale-105 transition-transform duration-500"
+                                        referrerPolicy="no-referrer"
+                                        onError={() => setBrokenGraphicIds((prev) => ({ ...prev, [tileKey]: true }))}
+                                      />
+                                    ) : (
+                                      <div className="w-full h-full flex items-center justify-center text-[#8E8A82]">
+                                        <Palette className="w-4 h-4" strokeWidth={1.35} />
+                                      </div>
+                                    )}
+                                    {pIdx === 2 && posterCount > 3 && (
+                                      <div className="absolute inset-0 bg-black/60 flex items-center justify-center text-xs font-semibold text-[#F4F0E8]">
+                                        +{posterCount - 3}
+                                      </div>
+                                    )}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </Tilt3DImageStage>
+                        ) : (
+                          <Tilt3DImageStage className="aspect-[16/10] w-full" maxTilt={13} scaleOnHover={1.03}>
+                            <div className="relative w-full h-full rounded-[14px] bg-[#14171E] overflow-hidden flex items-center justify-center">
+                              {cleanCover && !hasBroken ? (
+                                <img
+                                  src={resolveAssetUrl(cleanCover)}
+                                  alt={loc(proj.title)}
+                                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                  referrerPolicy="no-referrer"
+                                  onError={() => setBrokenGraphicIds((prev) => ({ ...prev, [imgKey]: true }))}
+                                />
+                              ) : (
+                                <div className="w-full h-full flex flex-col items-center justify-center text-center p-5 bg-[#14171E]">
+                                  <StudioGlassIcon size="md" className="mb-2">
+                                    <Palette className="w-4 h-4" strokeWidth={1.35} />
+                                  </StudioGlassIcon>
+                                  <span className="text-xs text-[#DDD1BE] font-medium line-clamp-1">
+                                    {loc(proj.title)}
+                                  </span>
+                                  <span className="text-[10px] text-[#8E8A82] mt-0.5">
+                                    {proj.behanceUrl ? 'Behance Visual Project' : 'Graphic Design'}
+                                  </span>
+                                </div>
+                              )}
+                              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                <span className="inline-flex items-center space-x-1.5 rtl:space-x-reverse px-4 py-1.5 rounded-full glass-pill-ghost text-xs font-medium">
+                                  <Eye className="w-3.5 h-3.5" strokeWidth={1.4} />
+                                  <span>{language === 'bn' ? 'দেখুন' : 'Preview'}</span>
                                 </span>
                               </div>
-                            )}
-                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                              <span className="inline-flex items-center space-x-1.5 rtl:space-x-reverse px-4 py-1.5 rounded-full glass-pill-ghost text-xs font-medium">
-                                <Eye className="w-3.5 h-3.5" strokeWidth={1.4} />
-                                <span>{language === 'bn' ? 'দেখুন' : 'Preview'}</span>
-                              </span>
                             </div>
-                          </div>
-                        </Tilt3DImageStage>
+                          </Tilt3DImageStage>
+                        )}
                       </div>
 
                       <div className="p-5 flex items-center justify-between gap-4">

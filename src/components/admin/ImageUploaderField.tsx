@@ -115,9 +115,9 @@ export const ImageUploaderField: React.FC<ImageUploaderFieldProps> = ({
   const previewSrc = value ? resolveAssetUrl(normalizeDirectImageUrl(value)) : '';
 
   return (
-    <div className="p-4 rounded-2xl bg-[#141A20] border border-[#232B33] space-y-3">
+    <div className="p-3.5 rounded-xl bg-[#121419] border border-white/[0.08] space-y-3">
       <div className="flex items-center justify-between gap-2">
-        <label className="text-xs font-mono text-neutral-300 font-semibold tracking-wide">
+        <label className="text-xs font-medium text-[#EAE5DC]">
           {label}
         </label>
         {value && value !== defaultFallback && (
@@ -128,7 +128,7 @@ export const ImageUploaderField: React.FC<ImageUploaderFieldProps> = ({
               setPreviewError(false);
               onChange(defaultFallback);
             }}
-            className="inline-flex items-center space-x-1 text-[11px] font-mono text-[#FF5722] hover:text-[#FF7043] transition-colors cursor-pointer"
+            className="inline-flex items-center space-x-1 text-xs text-[#E4583B] hover:text-[#F07C63] transition-colors cursor-pointer"
           >
             {defaultFallback ? (
               <>
@@ -145,9 +145,9 @@ export const ImageUploaderField: React.FC<ImageUploaderFieldProps> = ({
         )}
       </div>
 
-      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3.5">
         {/* Preview Thumbnail — NEVER silently hijacked to profile pic */}
-        <div className="w-20 h-20 rounded-xl overflow-hidden bg-[#0B0F12] border border-[#232B33] shrink-0 flex items-center justify-center relative">
+        <div className="w-20 h-20 rounded-xl overflow-hidden bg-[#0B0C0F] border border-white/[0.08] shrink-0 flex items-center justify-center relative">
           {previewSrc && !previewError ? (
             <img
               src={previewSrc}
@@ -159,9 +159,9 @@ export const ImageUploaderField: React.FC<ImageUploaderFieldProps> = ({
             />
           ) : (
             <div className="flex flex-col items-center justify-center text-center p-1">
-              <ImageIcon className={`w-6 h-6 ${previewError ? 'text-amber-400' : 'text-neutral-600'}`} />
+              <ImageIcon className={`w-6 h-6 ${previewError ? 'text-amber-400' : 'text-[#5A5750]'}`} />
               {previewError && (
-                <span className="text-[9px] font-mono text-amber-400 mt-1 leading-tight">Invalid URL</span>
+                <span className="text-[10px] text-amber-400 mt-1 leading-tight">Check URL</span>
               )}
             </div>
           )}
@@ -174,27 +174,27 @@ export const ImageUploaderField: React.FC<ImageUploaderFieldProps> = ({
               type="text"
               value={value}
               onChange={(e) => handleUrlInputChange(e.target.value)}
-              placeholder="Paste direct image URL (i.postimg.cc / mir-s3-cdn-cf.behance.net / Firebase)..."
-              className="flex-1 px-3 py-2 rounded-xl bg-[#0B0F12] border border-[#232B33] text-xs text-white font-mono focus:border-[#FF5722] focus:outline-none transition-colors"
+              placeholder="Paste direct image URL, Google Drive link, or Behance URL..."
+              className="flex-1 px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] text-xs text-[#F4F0E8] font-mono placeholder-[#6F6B64] focus:border-[#E4583B] focus:outline-none transition-colors"
             />
             {value && (isWrapperPage || previewError) && (
               <button
                 type="button"
                 disabled={resolving}
                 onClick={handleResolveUrl}
-                className="inline-flex items-center justify-center space-x-1.5 px-3 py-2 rounded-xl bg-[#0057FF]/20 hover:bg-[#0057FF]/30 border border-[#0057FF]/40 text-xs font-mono font-semibold text-[#60A5FA] transition-colors shrink-0 cursor-pointer disabled:opacity-50"
+                className="inline-flex items-center justify-center space-x-1.5 px-3 py-2 rounded-lg bg-[#1C2029] hover:bg-[#252A36] border border-white/[0.1] text-xs font-medium text-[#F4F0E8] transition-colors shrink-0 cursor-pointer disabled:opacity-50"
               >
                 {resolving ? (
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  <Loader2 className="w-3.5 h-3.5 animate-spin text-[#E4583B]" />
                 ) : (
-                  <Link2 className="w-3.5 h-3.5" />
+                  <Link2 className="w-3.5 h-3.5 text-[#E4583B]" />
                 )}
-                <span>{resolving ? 'Checking...' : 'Extract Image'}</span>
+                <span>{resolving ? 'Extracting...' : 'Extract Image'}</span>
               </button>
             )}
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2.5">
             <input
               type="file"
               ref={fileInputRef}
@@ -206,53 +206,53 @@ export const ImageUploaderField: React.FC<ImageUploaderFieldProps> = ({
               type="button"
               disabled={uploading}
               onClick={() => fileInputRef.current?.click()}
-              className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-[#232B33] hover:bg-[#2F3A45] text-xs font-semibold text-white transition-all hover:border-[#FF5722] disabled:opacity-50 cursor-pointer"
+              className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-[#171A21] hover:bg-[#1E222B] border border-white/[0.09] text-xs font-medium text-[#F4F0E8] transition-colors disabled:opacity-50 cursor-pointer"
             >
-              <Upload className="w-3.5 h-3.5 text-[#FF5722]" />
-              <span>{uploading ? 'Processing & Uploading...' : 'Upload Image File'}</span>
+              <Upload className="w-3.5 h-3.5 text-[#E4583B]" />
+              <span>{uploading ? 'Uploading...' : 'Upload Image'}</span>
             </button>
-            <span className="text-[11px] text-neutral-500 font-mono">
-              Or paste Direct Image URL (Postimages, Behance CDN, ImgBB, Drive)
+            <span className="text-[11px] text-[#8E8A82]">
+              Supports direct image links, Google Drive, Postimages, ImgBB, or Behance
             </span>
           </div>
 
           {/* Progress bar */}
           {uploading && (
             <div className="space-y-1 pt-1">
-              <div className="w-full bg-[#0B0F12] rounded-full h-1.5 overflow-hidden border border-[#232B33]">
+              <div className="w-full bg-[#0B0C0F] rounded-full h-1.5 overflow-hidden border border-white/[0.08]">
                 <div
-                  className="bg-[#FF5722] h-full transition-all duration-200"
+                  className="bg-[#E4583B] h-full transition-all duration-200"
                   style={{ width: `${progress}%` }}
                 />
               </div>
               {statusMessage && (
-                <p className="text-[10px] font-mono text-[#FF5722]">{statusMessage}</p>
+                <p className="text-[11px] text-[#F07C63]">{statusMessage}</p>
               )}
             </div>
           )}
 
           {/* Success status message */}
           {!uploading && statusMessage && (
-            <p className="text-[11px] font-mono text-emerald-400 flex items-center space-x-1 pt-1">
+            <p className="text-xs text-emerald-400 flex items-center space-x-1.5 pt-0.5">
               <CheckCircle className="w-3.5 h-3.5 shrink-0" />
               <span>{statusMessage}</span>
             </p>
           )}
 
-          {/* Wrapper URL / Broken Image Warning (Only when user hasn't already hit Extract Error) */}
+          {/* Wrapper URL hint */}
           {!uploading && !uploadError && (previewError || isWrapperPage) && (
-            <div className="p-2.5 rounded-xl bg-amber-950/50 border border-amber-500/40 text-amber-200 text-[11px] font-mono space-y-1">
+            <div className="p-2.5 rounded-lg bg-amber-950/35 border border-amber-500/30 text-amber-200 text-xs space-y-1">
               {urlKind === 'behance_page' ? (
                 <p>
-                  Note: <span className="text-white font-semibold">behance.net/gallery/...</span> is a project webpage, not a direct image file. Open the poster on Behance, right-click the image &rarr; <span className="text-white font-semibold">&ldquo;Copy image address&rdquo;</span> (<code className="text-amber-300">mir-s3-cdn-cf.behance.net/...</code>), or click <span className="text-white font-semibold">Extract Image</span>.
+                  Behance পেজ লিংক দেওয়া হয়েছে—ডানদিকের <span className="text-white font-semibold">Extract Image</span> বাটনে ক্লিক করলে অটোমেটিক কভার ছবি চলে আসবে।
                 </p>
               ) : urlKind === 'postimg_page' ? (
                 <p>
-                  Note: On Postimages, copy the <span className="text-white font-semibold">&ldquo;Direct link&rdquo;</span> (<code className="text-amber-300">https://i.postimg.cc/...</code>) instead of the page share URL, or click <span className="text-white font-semibold">Extract Image</span>.
+                  Postimages-এর Direct link ব্যবহার করুন (<code className="font-mono text-amber-300">https://i.postimg.cc/...</code>) অথবা <span className="text-white font-semibold">Extract Image</span> চাপুন।
                 </p>
               ) : (
                 <p>
-                  This link could not render as an image preview. Click <span className="text-white font-semibold">Extract Image</span>, paste the direct image address (<code className="text-amber-300">.jpg / .png / .webp</code>), or upload the image file.
+                  প্রিভিউ লোড হয়নি—<span className="text-white font-semibold">Extract Image</span> ক্লিক করুন অথবা ছবি ফাইল আপলোড করুন।
                 </p>
               )}
             </div>
@@ -260,11 +260,11 @@ export const ImageUploaderField: React.FC<ImageUploaderFieldProps> = ({
 
           {/* Clear Error notice */}
           {!uploading && uploadError && (
-            <div className="p-2.5 rounded-xl bg-rose-950/60 border border-rose-500/40 text-rose-300 text-xs flex items-start space-x-2 mt-1">
+            <div className="p-2.5 rounded-lg bg-rose-950/45 border border-rose-500/35 text-rose-200 text-xs flex items-start space-x-2 mt-1">
               <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
               <div className="flex-1 min-w-0">
-                <p className="font-bold font-mono">Notice</p>
-                <p className="text-[11px] text-rose-200/90 font-mono break-words">{uploadError}</p>
+                <p className="font-medium text-rose-100">Notice</p>
+                <p className="text-xs text-rose-200/90 break-words mt-0.5">{uploadError}</p>
               </div>
             </div>
           )}
@@ -272,7 +272,7 @@ export const ImageUploaderField: React.FC<ImageUploaderFieldProps> = ({
       </div>
 
       {helperText && !uploading && (
-        <p className="text-[11px] text-neutral-400 font-mono">{helperText}</p>
+        <p className="text-xs text-[#8E8A82]">{helperText}</p>
       )}
     </div>
   );

@@ -1,14 +1,11 @@
 import React, { useState } from 'react';
-import { 
-  Sliders, 
-  Sparkles, 
-  ArrowUpRight, 
-  Eye, 
-  EyeOff, 
-  Plus, 
-  Trash2, 
-  ArrowUp, 
-  ArrowDown, 
+import {
+  Sliders,
+  ArrowUpRight,
+  Plus,
+  Trash2,
+  ArrowUp,
+  ArrowDown,
   CheckCircle,
   Hash,
   Link as LinkIcon
@@ -89,31 +86,29 @@ export const HeroEditor: React.FC = () => {
   };
 
   return (
-    <div className="space-y-8 max-w-4xl">
+    <div className="space-y-6 max-w-4xl">
       {/* 1. Header & Identity */}
-      <div className="p-6 rounded-3xl bg-[#12161A] border border-[#232B33] space-y-6">
-        <div className="flex items-center space-x-3 rtl:space-x-reverse pb-4 border-b border-[#1D232A]">
-          <div className="w-10 h-10 rounded-xl bg-[#181E24] border border-[#232B33] flex items-center justify-center text-[#FF5722]">
-            <Sliders className="w-5 h-5" />
+      <div className="p-5 sm:p-6 rounded-2xl bg-[#121419] border border-white/[0.08] space-y-6">
+        <div className="flex items-center space-x-3 rtl:space-x-reverse pb-4 border-b border-white/[0.06]">
+          <div className="w-9 h-9 rounded-lg bg-[#171A21] border border-white/[0.08] flex items-center justify-center text-[#E4583B]">
+            <Sliders className="w-4 h-4" />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-white tracking-wide">Hero & Identity</h3>
-            <p className="text-xs text-neutral-400 font-mono">
-              Manage availability badge, main name, tagline, and authentic portrait
+            <h3 className="text-base font-semibold text-white tracking-tight">Hero & Identity</h3>
+            <p className="text-xs text-neutral-400">
+              Manage availability badge, main name, tagline, and portrait
             </p>
           </div>
         </div>
 
         {/* Availability Badge */}
-        <div className="p-4 rounded-2xl bg-[#181E24] border border-[#232B33] space-y-3">
+        <div className="p-4 rounded-xl bg-[#171A21] border border-white/[0.08] space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-mono font-bold text-neutral-200 uppercase tracking-wider flex items-center space-x-2">
-              <span className="w-2 h-2 rounded-full bg-[#FF5722]" />
-              <span>Availability Badge</span>
+            <span className="text-xs font-medium text-neutral-200 uppercase tracking-wider">
+              Availability Badge
             </span>
 
-            {/* Toggle show/hide */}
-            <label className="flex items-center space-x-1.5 cursor-pointer text-xs font-mono">
+            <label className="flex items-center space-x-2 cursor-pointer text-xs">
               <input
                 type="checkbox"
                 checked={hero.showBadge !== false}
@@ -124,9 +119,9 @@ export const HeroEditor: React.FC = () => {
                     hero: { ...prev.hero, showBadge: val }
                   }));
                 }}
-                className="rounded border-[#232B33] bg-[#0F1419] text-[#FF5722] focus:ring-0"
+                className="rounded border-white/15 bg-[#0B0C0F] text-[#E4583B] focus:ring-0"
               />
-              <span className={hero.showBadge !== false ? 'text-emerald-400' : 'text-neutral-500'}>
+              <span className={hero.showBadge !== false ? 'text-emerald-400 font-medium' : 'text-neutral-500'}>
                 {hero.showBadge !== false ? 'Visible' : 'Hidden'}
               </span>
             </label>
@@ -134,7 +129,7 @@ export const HeroEditor: React.FC = () => {
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
-              <label className="block text-[10px] font-mono text-neutral-400 mb-1">Badge Text (English)</label>
+              <label className="block text-[11px] font-medium text-neutral-400 mb-1">Badge Text (English)</label>
               <input
                 type="text"
                 value={hero.badge?.en || ''}
@@ -145,11 +140,11 @@ export const HeroEditor: React.FC = () => {
                     hero: { ...prev.hero, badge: { ...(prev.hero.badge || { en: '', bn: '', ar: '' }), en: val } }
                   }));
                 }}
-                className="w-full px-3 py-1.5 rounded-lg bg-[#0F1419] border border-[#232B33] text-xs text-white"
+                className="w-full px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] focus:border-[#E4583B] outline-none text-xs text-white"
               />
             </div>
             <div>
-              <label className="block text-[10px] font-mono text-neutral-400 mb-1">Badge Text (বাংলা)</label>
+              <label className="block text-[11px] font-medium text-neutral-400 mb-1">Badge Text (বাংলা)</label>
               <input
                 type="text"
                 value={hero.badge?.bn || ''}
@@ -160,11 +155,11 @@ export const HeroEditor: React.FC = () => {
                     hero: { ...prev.hero, badge: { ...(prev.hero.badge || { en: '', bn: '', ar: '' }), bn: val } }
                   }));
                 }}
-                className="w-full px-3 py-1.5 rounded-lg bg-[#0F1419] border border-[#232B33] text-xs text-white"
+                className="w-full px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] focus:border-[#E4583B] outline-none text-xs text-white"
               />
             </div>
             <div>
-              <label className="block text-[10px] font-mono text-neutral-400 mb-1">Badge Text (العربية)</label>
+              <label className="block text-[11px] font-medium text-neutral-400 mb-1">Badge Text (العربية)</label>
               <input
                 type="text"
                 dir="rtl"
@@ -176,7 +171,7 @@ export const HeroEditor: React.FC = () => {
                     hero: { ...prev.hero, badge: { ...(prev.hero.badge || { en: '', bn: '', ar: '' }), ar: val } }
                   }));
                 }}
-                className="w-full px-3 py-1.5 rounded-lg bg-[#0F1419] border border-[#232B33] text-xs text-white"
+                className="w-full px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] focus:border-[#E4583B] outline-none text-xs text-white"
               />
             </div>
           </div>
@@ -184,7 +179,7 @@ export const HeroEditor: React.FC = () => {
 
         {/* Hero Name (3 Languages) */}
         <div>
-          <label className="block text-xs font-mono text-neutral-300 mb-1.5 font-bold uppercase tracking-wider">
+          <label className="block text-xs font-medium text-neutral-300 mb-1.5 uppercase tracking-wider">
             Hero Main Name (English, বাংলা, العربية)
           </label>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -199,7 +194,7 @@ export const HeroEditor: React.FC = () => {
                   hero: { ...prev.hero, name: { ...(prev.hero.name || { en: '', bn: '', ar: '' }), en: val } }
                 }));
               }}
-              className="w-full px-3 py-2 rounded-xl bg-[#181E24] border border-[#232B33] text-sm text-white font-mono"
+              className="w-full px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] focus:border-[#E4583B] outline-none text-sm text-white"
             />
             <input
               type="text"
@@ -212,7 +207,7 @@ export const HeroEditor: React.FC = () => {
                   hero: { ...prev.hero, name: { ...(prev.hero.name || { en: '', bn: '', ar: '' }), bn: val } }
                 }));
               }}
-              className="w-full px-3 py-2 rounded-xl bg-[#181E24] border border-[#232B33] text-sm text-white font-mono"
+              className="w-full px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] focus:border-[#E4583B] outline-none text-sm text-white"
             />
             <input
               type="text"
@@ -226,14 +221,14 @@ export const HeroEditor: React.FC = () => {
                   hero: { ...prev.hero, name: { ...(prev.hero.name || { en: '', bn: '', ar: '' }), ar: val } }
                 }));
               }}
-              className="w-full px-3 py-2 rounded-xl bg-[#181E24] border border-[#232B33] text-sm text-white font-mono"
+              className="w-full px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] focus:border-[#E4583B] outline-none text-sm text-white"
             />
           </div>
         </div>
 
         {/* Tagline (3 Languages) */}
         <div>
-          <label className="block text-xs font-mono text-neutral-300 mb-1.5 font-bold uppercase tracking-wider">
+          <label className="block text-xs font-medium text-neutral-300 mb-1.5 uppercase tracking-wider">
             Tagline Subheading (English, বাংলা, العربية)
           </label>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -248,7 +243,7 @@ export const HeroEditor: React.FC = () => {
                   hero: { ...prev.hero, tagline: { ...(prev.hero.tagline || { en: '', bn: '', ar: '' }), en: val } }
                 }));
               }}
-              className="w-full px-3 py-2 rounded-xl bg-[#181E24] border border-[#232B33] text-xs text-white font-mono"
+              className="w-full px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] focus:border-[#E4583B] outline-none text-xs text-white"
             />
             <input
               type="text"
@@ -261,7 +256,7 @@ export const HeroEditor: React.FC = () => {
                   hero: { ...prev.hero, tagline: { ...(prev.hero.tagline || { en: '', bn: '', ar: '' }), bn: val } }
                 }));
               }}
-              className="w-full px-3 py-2 rounded-xl bg-[#181E24] border border-[#232B33] text-xs text-white font-mono"
+              className="w-full px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] focus:border-[#E4583B] outline-none text-xs text-white"
             />
             <input
               type="text"
@@ -275,13 +270,13 @@ export const HeroEditor: React.FC = () => {
                   hero: { ...prev.hero, tagline: { ...(prev.hero.tagline || { en: '', bn: '', ar: '' }), ar: val } }
                 }));
               }}
-              className="w-full px-3 py-2 rounded-xl bg-[#181E24] border border-[#232B33] text-xs text-white font-mono"
+              className="w-full px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] focus:border-[#E4583B] outline-none text-xs text-white"
             />
           </div>
         </div>
 
         {/* Portrait Upload & Floating Verified Label */}
-        <div className="space-y-4 pt-2 border-t border-[#1D232A]">
+        <div className="space-y-4 pt-4 border-t border-white/[0.06]">
           <ImageUploaderField
             label="Hero Portrait Photo (Verified Authentic Image)"
             value={hero.avatarUrl}
@@ -299,22 +294,22 @@ export const HeroEditor: React.FC = () => {
                 ...prev,
                 about: { ...prev.about, avatarUrl: prev.hero.avatarUrl }
               }))}
-              className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-[#181E24] hover:bg-[#232B33] border border-[#232B33] text-[11px] font-mono text-neutral-300 hover:text-white transition-colors cursor-pointer"
+              className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-[#171A21] hover:bg-[#1E222B] border border-white/[0.08] text-xs text-neutral-300 hover:text-white transition-colors cursor-pointer"
             >
-              <CheckCircle className="w-3.5 h-3.5 text-[#FF5722]" />
+              <CheckCircle className="w-3.5 h-3.5 text-[#E4583B]" />
               <span>Also use this photo for About section</span>
             </button>
           </div>
 
           {/* Floating Badge on Portrait */}
-          <div className="p-4 rounded-2xl bg-[#181E24] border border-[#232B33] space-y-3">
+          <div className="p-4 rounded-xl bg-[#171A21] border border-white/[0.08] space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-mono font-bold text-neutral-300 uppercase tracking-wider flex items-center space-x-2">
-                <CheckCircle className="w-3.5 h-3.5 text-[#FF5722]" />
+              <span className="text-xs font-medium text-neutral-300 uppercase tracking-wider flex items-center space-x-2">
+                <CheckCircle className="w-3.5 h-3.5 text-[#E4583B]" />
                 <span>Verified Floating Badge (on Portrait)</span>
               </span>
 
-              <label className="flex items-center space-x-1.5 cursor-pointer text-xs font-mono">
+              <label className="flex items-center space-x-2 cursor-pointer text-xs">
                 <input
                   type="checkbox"
                   checked={hero.showFloatingBadge !== false}
@@ -325,9 +320,9 @@ export const HeroEditor: React.FC = () => {
                       hero: { ...prev.hero, showFloatingBadge: val }
                     }));
                   }}
-                  className="rounded border-[#232B33] bg-[#0F1419] text-[#FF5722] focus:ring-0"
+                  className="rounded border-white/15 bg-[#0B0C0F] text-[#E4583B] focus:ring-0"
                 />
-                <span className={hero.showFloatingBadge !== false ? 'text-emerald-400' : 'text-neutral-500'}>
+                <span className={hero.showFloatingBadge !== false ? 'text-emerald-400 font-medium' : 'text-neutral-500'}>
                   {hero.showFloatingBadge !== false ? 'Visible' : 'Hidden'}
                 </span>
               </label>
@@ -345,7 +340,7 @@ export const HeroEditor: React.FC = () => {
                     hero: { ...prev.hero, floatingBadgeText: { ...(prev.hero.floatingBadgeText || { en: '', bn: '', ar: '' }), en: val } }
                   }));
                 }}
-                className="w-full px-3 py-1.5 rounded-lg bg-[#0F1419] border border-[#232B33] text-xs text-white"
+                className="w-full px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] focus:border-[#E4583B] outline-none text-xs text-white"
               />
               <input
                 type="text"
@@ -358,7 +353,7 @@ export const HeroEditor: React.FC = () => {
                     hero: { ...prev.hero, floatingBadgeText: { ...(prev.hero.floatingBadgeText || { en: '', bn: '', ar: '' }), bn: val } }
                   }));
                 }}
-                className="w-full px-3 py-1.5 rounded-lg bg-[#0F1419] border border-[#232B33] text-xs text-white"
+                className="w-full px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] focus:border-[#E4583B] outline-none text-xs text-white"
               />
               <input
                 type="text"
@@ -372,7 +367,7 @@ export const HeroEditor: React.FC = () => {
                     hero: { ...prev.hero, floatingBadgeText: { ...(prev.hero.floatingBadgeText || { en: '', bn: '', ar: '' }), ar: val } }
                   }));
                 }}
-                className="w-full px-3 py-1.5 rounded-lg bg-[#0F1419] border border-[#232B33] text-xs text-white"
+                className="w-full px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] focus:border-[#E4583B] outline-none text-xs text-white"
               />
             </div>
           </div>
@@ -380,27 +375,27 @@ export const HeroEditor: React.FC = () => {
       </div>
 
       {/* 2. Hero Action Buttons */}
-      <div className="p-6 rounded-3xl bg-[#12161A] border border-[#232B33] space-y-6">
-        <div className="flex items-center space-x-3 rtl:space-x-reverse pb-4 border-b border-[#1D232A]">
-          <div className="w-10 h-10 rounded-xl bg-[#181E24] border border-[#232B33] flex items-center justify-center text-[#FF5722]">
-            <ArrowUpRight className="w-5 h-5" />
+      <div className="p-5 sm:p-6 rounded-2xl bg-[#121419] border border-white/[0.08] space-y-6">
+        <div className="flex items-center space-x-3 rtl:space-x-reverse pb-4 border-b border-white/[0.06]">
+          <div className="w-9 h-9 rounded-lg bg-[#171A21] border border-white/[0.08] flex items-center justify-center text-[#E4583B]">
+            <ArrowUpRight className="w-4 h-4" />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-white tracking-wide">Hero Action Buttons</h3>
-            <p className="text-xs text-neutral-400 font-mono">
+            <h3 className="text-base font-semibold text-white tracking-tight">Hero Action Buttons</h3>
+            <p className="text-xs text-neutral-400">
               Configure button labels in 3 languages, destination links, and visibility
             </p>
           </div>
         </div>
 
         {/* Primary CTA (View My Work) */}
-        <div className="p-4 rounded-2xl bg-[#181E24] border border-[#232B33] space-y-4">
+        <div className="p-4 rounded-xl bg-[#171A21] border border-white/[0.08] space-y-4">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-mono font-bold text-[#FF5722] uppercase tracking-wider">
-              Primary Button (Orange Accent)
+            <span className="text-xs font-medium text-[#E4583B] uppercase tracking-wider">
+              Primary Button (Brand Accent)
             </span>
 
-            <label className="flex items-center space-x-1.5 cursor-pointer text-xs font-mono">
+            <label className="flex items-center space-x-2 cursor-pointer text-xs">
               <input
                 type="checkbox"
                 checked={hero.showCtaWork !== false}
@@ -411,9 +406,9 @@ export const HeroEditor: React.FC = () => {
                     hero: { ...prev.hero, showCtaWork: val }
                   }));
                 }}
-                className="rounded border-[#232B33] bg-[#0F1419] text-[#FF5722] focus:ring-0"
+                className="rounded border-white/15 bg-[#0B0C0F] text-[#E4583B] focus:ring-0"
               />
-              <span className={hero.showCtaWork !== false ? 'text-emerald-400' : 'text-neutral-500'}>
+              <span className={hero.showCtaWork !== false ? 'text-emerald-400 font-medium' : 'text-neutral-500'}>
                 {hero.showCtaWork !== false ? 'Visible' : 'Hidden'}
               </span>
             </label>
@@ -421,7 +416,7 @@ export const HeroEditor: React.FC = () => {
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
-              <label className="block text-[10px] font-mono text-neutral-400 mb-1">Button Label (English)</label>
+              <label className="block text-[11px] font-medium text-neutral-400 mb-1">Button Label (English)</label>
               <input
                 type="text"
                 value={hero.ctaWork?.en || ''}
@@ -432,11 +427,11 @@ export const HeroEditor: React.FC = () => {
                     hero: { ...prev.hero, ctaWork: { ...(prev.hero.ctaWork || { en: '', bn: '', ar: '' }), en: val } }
                   }));
                 }}
-                className="w-full px-3 py-1.5 rounded-lg bg-[#0F1419] border border-[#232B33] text-xs text-white"
+                className="w-full px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] focus:border-[#E4583B] outline-none text-xs text-white"
               />
             </div>
             <div>
-              <label className="block text-[10px] font-mono text-neutral-400 mb-1">বাটন লেবেল (বাংলা)</label>
+              <label className="block text-[11px] font-medium text-neutral-400 mb-1">বাটন লেবেল (বাংলা)</label>
               <input
                 type="text"
                 value={hero.ctaWork?.bn || ''}
@@ -447,11 +442,11 @@ export const HeroEditor: React.FC = () => {
                     hero: { ...prev.hero, ctaWork: { ...(prev.hero.ctaWork || { en: '', bn: '', ar: '' }), bn: val } }
                   }));
                 }}
-                className="w-full px-3 py-1.5 rounded-lg bg-[#0F1419] border border-[#232B33] text-xs text-white"
+                className="w-full px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] focus:border-[#E4583B] outline-none text-xs text-white"
               />
             </div>
             <div>
-              <label className="block text-[10px] font-mono text-neutral-400 mb-1">عنوان الزر (العربية)</label>
+              <label className="block text-[11px] font-medium text-neutral-400 mb-1">عنوان الزر (العربية)</label>
               <input
                 type="text"
                 dir="rtl"
@@ -463,14 +458,14 @@ export const HeroEditor: React.FC = () => {
                     hero: { ...prev.hero, ctaWork: { ...(prev.hero.ctaWork || { en: '', bn: '', ar: '' }), ar: val } }
                   }));
                 }}
-                className="w-full px-3 py-1.5 rounded-lg bg-[#0F1419] border border-[#232B33] text-xs text-white"
+                className="w-full px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] focus:border-[#E4583B] outline-none text-xs text-white"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-[10px] font-mono text-neutral-400 mb-1 flex items-center space-x-1">
-              <LinkIcon className="w-3 h-3 text-[#FF5722]" />
+            <label className="block text-[11px] font-medium text-neutral-400 mb-1 flex items-center space-x-1.5">
+              <LinkIcon className="w-3 h-3 text-[#E4583B]" />
               <span>Target Link / Section Anchor</span>
             </label>
             <input
@@ -484,19 +479,19 @@ export const HeroEditor: React.FC = () => {
                   hero: { ...prev.hero, ctaWorkUrl: val }
                 }));
               }}
-              className="w-full px-3 py-1.5 rounded-lg bg-[#0F1419] border border-[#232B33] text-xs text-white font-mono"
+              className="w-full px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] focus:border-[#E4583B] outline-none text-xs text-white font-mono"
             />
           </div>
         </div>
 
         {/* Secondary CTA (Let's Work Together) */}
-        <div className="p-4 rounded-2xl bg-[#181E24] border border-[#232B33] space-y-4">
+        <div className="p-4 rounded-xl bg-[#171A21] border border-white/[0.08] space-y-4">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-mono font-bold text-neutral-300 uppercase tracking-wider">
+            <span className="text-xs font-medium text-neutral-300 uppercase tracking-wider">
               Secondary Button (Bordered Surface)
             </span>
 
-            <label className="flex items-center space-x-1.5 cursor-pointer text-xs font-mono">
+            <label className="flex items-center space-x-2 cursor-pointer text-xs">
               <input
                 type="checkbox"
                 checked={hero.showCtaContact !== false}
@@ -507,9 +502,9 @@ export const HeroEditor: React.FC = () => {
                     hero: { ...prev.hero, showCtaContact: val }
                   }));
                 }}
-                className="rounded border-[#232B33] bg-[#0F1419] text-[#FF5722] focus:ring-0"
+                className="rounded border-white/15 bg-[#0B0C0F] text-[#E4583B] focus:ring-0"
               />
-              <span className={hero.showCtaContact !== false ? 'text-emerald-400' : 'text-neutral-500'}>
+              <span className={hero.showCtaContact !== false ? 'text-emerald-400 font-medium' : 'text-neutral-500'}>
                 {hero.showCtaContact !== false ? 'Visible' : 'Hidden'}
               </span>
             </label>
@@ -517,7 +512,7 @@ export const HeroEditor: React.FC = () => {
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
-              <label className="block text-[10px] font-mono text-neutral-400 mb-1">Button Label (English)</label>
+              <label className="block text-[11px] font-medium text-neutral-400 mb-1">Button Label (English)</label>
               <input
                 type="text"
                 value={hero.ctaContact?.en || ''}
@@ -528,11 +523,11 @@ export const HeroEditor: React.FC = () => {
                     hero: { ...prev.hero, ctaContact: { ...(prev.hero.ctaContact || { en: '', bn: '', ar: '' }), en: val } }
                   }));
                 }}
-                className="w-full px-3 py-1.5 rounded-lg bg-[#0F1419] border border-[#232B33] text-xs text-white"
+                className="w-full px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] focus:border-[#E4583B] outline-none text-xs text-white"
               />
             </div>
             <div>
-              <label className="block text-[10px] font-mono text-neutral-400 mb-1">বাটন লেবেল (বাংলা)</label>
+              <label className="block text-[11px] font-medium text-neutral-400 mb-1">বাটন লেবেল (বাংলা)</label>
               <input
                 type="text"
                 value={hero.ctaContact?.bn || ''}
@@ -543,11 +538,11 @@ export const HeroEditor: React.FC = () => {
                     hero: { ...prev.hero, ctaContact: { ...(prev.hero.ctaContact || { en: '', bn: '', ar: '' }), bn: val } }
                   }));
                 }}
-                className="w-full px-3 py-1.5 rounded-lg bg-[#0F1419] border border-[#232B33] text-xs text-white"
+                className="w-full px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] focus:border-[#E4583B] outline-none text-xs text-white"
               />
             </div>
             <div>
-              <label className="block text-[10px] font-mono text-neutral-400 mb-1">عنوان الزر (العربية)</label>
+              <label className="block text-[11px] font-medium text-neutral-400 mb-1">عنوان الزر (العربية)</label>
               <input
                 type="text"
                 dir="rtl"
@@ -559,14 +554,14 @@ export const HeroEditor: React.FC = () => {
                     hero: { ...prev.hero, ctaContact: { ...(prev.hero.ctaContact || { en: '', bn: '', ar: '' }), ar: val } }
                   }));
                 }}
-                className="w-full px-3 py-1.5 rounded-lg bg-[#0F1419] border border-[#232B33] text-xs text-white"
+                className="w-full px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] focus:border-[#E4583B] outline-none text-xs text-white"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-[10px] font-mono text-neutral-400 mb-1 flex items-center space-x-1">
-              <LinkIcon className="w-3 h-3 text-[#FF5722]" />
+            <label className="block text-[11px] font-medium text-neutral-400 mb-1 flex items-center space-x-1.5">
+              <LinkIcon className="w-3 h-3 text-[#E4583B]" />
               <span>Target Link / Section Anchor</span>
             </label>
             <input
@@ -580,30 +575,29 @@ export const HeroEditor: React.FC = () => {
                   hero: { ...prev.hero, ctaContactUrl: val }
                 }));
               }}
-              className="w-full px-3 py-1.5 rounded-lg bg-[#0F1419] border border-[#232B33] text-xs text-white font-mono"
+              className="w-full px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] focus:border-[#E4583B] outline-none text-xs text-white font-mono"
             />
           </div>
         </div>
       </div>
 
-      {/* 3. Hero Counters & Stats (Add / Edit / Delete / Reorder with Confirmation) */}
-      <div className="p-6 rounded-3xl bg-[#12161A] border border-[#232B33] space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[#1D232A]">
+      {/* 3. Hero Counters & Stats */}
+      <div className="p-5 sm:p-6 rounded-2xl bg-[#121419] border border-white/[0.08] space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-white/[0.06]">
           <div className="flex items-center space-x-3 rtl:space-x-reverse">
-            <div className="w-10 h-10 rounded-xl bg-[#181E24] border border-[#232B33] flex items-center justify-center text-[#FF5722]">
-              <Hash className="w-5 h-5" />
+            <div className="w-9 h-9 rounded-lg bg-[#171A21] border border-white/[0.08] flex items-center justify-center text-[#E4583B]">
+              <Hash className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-white tracking-wide">Hero Counters & Stats</h3>
-              <p className="text-xs text-neutral-400 font-mono">
+              <h3 className="text-base font-semibold text-white tracking-tight">Hero Counters & Stats</h3>
+              <p className="text-xs text-neutral-400">
                 Highlight completed projects, client satisfaction, or custom creative stats
               </p>
             </div>
           </div>
 
           <div className="flex items-center space-x-3">
-            {/* Show / Hide Counters Toggle */}
-            <label className="flex items-center space-x-1.5 cursor-pointer text-xs font-mono">
+            <label className="flex items-center space-x-2 cursor-pointer text-xs">
               <input
                 type="checkbox"
                 checked={Boolean(hero.showCounters)}
@@ -614,9 +608,9 @@ export const HeroEditor: React.FC = () => {
                     hero: { ...prev.hero, showCounters: val }
                   }));
                 }}
-                className="rounded border-[#232B33] bg-[#0F1419] text-[#FF5722] focus:ring-0"
+                className="rounded border-white/15 bg-[#0B0C0F] text-[#E4583B] focus:ring-0"
               />
-              <span className={hero.showCounters ? 'text-emerald-400 font-bold' : 'text-neutral-500'}>
+              <span className={hero.showCounters ? 'text-emerald-400 font-medium' : 'text-neutral-500'}>
                 {hero.showCounters ? 'Counters Enabled' : 'Disabled'}
               </span>
             </label>
@@ -624,7 +618,7 @@ export const HeroEditor: React.FC = () => {
             <button
               type="button"
               onClick={handleAddCounter}
-              className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-[#FF5722] hover:bg-[#F4511E] text-xs font-bold text-white transition-all shadow-md"
+              className="inline-flex items-center space-x-1.5 px-3.5 py-2 rounded-lg bg-[#E4583B] hover:bg-[#D0492D] text-xs font-medium text-white transition-colors"
             >
               <Plus className="w-4 h-4" />
               <span>Add Counter</span>
@@ -633,15 +627,15 @@ export const HeroEditor: React.FC = () => {
         </div>
 
         {counters.length === 0 ? (
-          <div className="p-8 text-center rounded-2xl bg-[#181E24] border border-[#232B33] text-neutral-400 text-xs font-mono">
+          <div className="p-8 text-center rounded-xl bg-[#171A21] border border-dashed border-white/[0.09] text-neutral-400 text-xs">
             No counters configured. Click &quot;Add Counter&quot; above to create one.
           </div>
         ) : (
           <div className="space-y-4">
             {counters.map((c, idx) => (
-              <div key={c.id || idx} className="p-4 rounded-2xl bg-[#181E24] border border-[#232B33] space-y-3">
+              <div key={c.id || idx} className="p-4 rounded-xl bg-[#171A21] border border-white/[0.08] space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-mono font-bold text-[#FF5722]">
+                  <span className="text-xs font-semibold text-[#E4583B] tabular-nums">
                     Counter #{idx + 1}
                   </span>
 
@@ -650,7 +644,7 @@ export const HeroEditor: React.FC = () => {
                       type="button"
                       disabled={idx === 0}
                       onClick={() => handleMoveCounter(idx, 'up')}
-                      className="p-1.5 text-neutral-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed rounded-lg hover:bg-[#232B33] transition-colors"
+                      className="p-1.5 text-neutral-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed rounded-lg hover:bg-[#1E222B] transition-colors"
                       title="Move Up"
                     >
                       <ArrowUp className="w-4 h-4" />
@@ -659,7 +653,7 @@ export const HeroEditor: React.FC = () => {
                       type="button"
                       disabled={idx === counters.length - 1}
                       onClick={() => handleMoveCounter(idx, 'down')}
-                      className="p-1.5 text-neutral-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed rounded-lg hover:bg-[#232B33] transition-colors"
+                      className="p-1.5 text-neutral-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed rounded-lg hover:bg-[#1E222B] transition-colors"
                       title="Move Down"
                     >
                       <ArrowDown className="w-4 h-4" />
@@ -677,8 +671,8 @@ export const HeroEditor: React.FC = () => {
 
                 <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
                   <div>
-                    <label className="block text-[10px] font-mono text-neutral-400 mb-1">
-                      Display Value (e.g. 50+, 100%)
+                    <label className="block text-[11px] font-medium text-neutral-400 mb-1">
+                      Display Value (e.g. 50+)
                     </label>
                     <input
                       type="text"
@@ -687,12 +681,12 @@ export const HeroEditor: React.FC = () => {
                         const val = e.target.value;
                         handleUpdateCounter(c.id, current => ({ ...current, value: val }));
                       }}
-                      className="w-full px-3 py-1.5 rounded-lg bg-[#0F1419] border border-[#232B33] text-xs text-white font-mono font-bold text-[#FF5722]"
+                      className="w-full px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] focus:border-[#E4583B] outline-none text-xs font-semibold text-[#E4583B] tabular-nums"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-mono text-neutral-400 mb-1">
+                    <label className="block text-[11px] font-medium text-neutral-400 mb-1">
                       Label (English)
                     </label>
                     <input
@@ -705,12 +699,12 @@ export const HeroEditor: React.FC = () => {
                           label: { ...(current.label || { en: '', bn: '', ar: '' }), en: val }
                         }));
                       }}
-                      className="w-full px-3 py-1.5 rounded-lg bg-[#0F1419] border border-[#232B33] text-xs text-white"
+                      className="w-full px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] focus:border-[#E4583B] outline-none text-xs text-white"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-mono text-neutral-400 mb-1">
+                    <label className="block text-[11px] font-medium text-neutral-400 mb-1">
                       Label (বাংলা)
                     </label>
                     <input
@@ -723,12 +717,12 @@ export const HeroEditor: React.FC = () => {
                           label: { ...(current.label || { en: '', bn: '', ar: '' }), bn: val }
                         }));
                       }}
-                      className="w-full px-3 py-1.5 rounded-lg bg-[#0F1419] border border-[#232B33] text-xs text-white"
+                      className="w-full px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] focus:border-[#E4583B] outline-none text-xs text-white"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-mono text-neutral-400 mb-1">
+                    <label className="block text-[11px] font-medium text-neutral-400 mb-1">
                       Label (العربية)
                     </label>
                     <input
@@ -742,7 +736,7 @@ export const HeroEditor: React.FC = () => {
                           label: { ...(current.label || { en: '', bn: '', ar: '' }), ar: val }
                         }));
                       }}
-                      className="w-full px-3 py-1.5 rounded-lg bg-[#0F1419] border border-[#232B33] text-xs text-white"
+                      className="w-full px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] focus:border-[#E4583B] outline-none text-xs text-white"
                     />
                   </div>
                 </div>
