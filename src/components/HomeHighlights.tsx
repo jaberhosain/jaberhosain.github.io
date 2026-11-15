@@ -222,6 +222,7 @@ export const HomeHighlights: React.FC<HomeHighlightsProps> = ({
                   <Reveal3D key={imgKey} direction={dir} delay={idx * 95}>
                     <div
                       onClick={() => onOpenLightbox?.(proj, 0)}
+                      data-cursor="view"
                       className="h-full group rounded-2xl studio-card overflow-hidden cursor-pointer flex flex-col justify-between hover:-translate-y-1"
                     >
                       <div className="p-2.5 bg-[#121419]/90 border-b border-[#2B303D]">

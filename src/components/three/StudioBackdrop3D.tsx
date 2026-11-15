@@ -172,6 +172,33 @@ export const StudioBackdrop3D: React.FC<StudioBackdrop3DProps> = ({ activePage }
     ringInner.position.set(-2.8, 0.8, -6.5);
     worldGroup.add(ringInner);
 
+    const ringDeep = new THREE.Mesh(
+      new THREE.TorusGeometry(8.2, 0.014, 14, 128),
+      fineLineMat
+    );
+    ringDeep.rotation.set(0.28, -0.35, -0.2);
+    ringDeep.position.set(0.4, 0.1, -10.5);
+    worldGroup.add(ringDeep);
+
+    // Subtle Atmospheric Studio Light Shafts (calibrated low opacity, zero overexposure)
+    const lightShaftMat = new THREE.MeshBasicMaterial({
+      color: palette.accent,
+      transparent: true,
+      opacity: palette.isLight ? 0.025 : 0.042,
+      side: THREE.DoubleSide,
+      depthWrite: false
+    });
+    const shaftGeo = new THREE.CylinderGeometry(0.14, 2.35, 22, 24, 1, true);
+    const leftShaft = new THREE.Mesh(shaftGeo, lightShaftMat);
+    leftShaft.position.set(-5.8, 3.8, -8.8);
+    leftShaft.rotation.set(0.18, 0, -0.34);
+    worldGroup.add(leftShaft);
+
+    const rightShaft = new THREE.Mesh(shaftGeo, lightShaftMat);
+    rightShaft.position.set(6.4, 4.2, -10.4);
+    rightShaft.rotation.set(-0.14, 0, 0.28);
+    worldGroup.add(rightShaft);
+
     // 3. Sculptural Aspect-Ratio Display Monoliths (5 composite frames across Z depth)
     const monolithSpecs = [
       { pos: [-5.9, 2.2, -4.2], rot: [0.22, 0.48, -0.1], w: 2.2, h: 2.9, scale: 1.0 },
@@ -319,6 +346,8 @@ export const StudioBackdrop3D: React.FC<StudioBackdrop3DProps> = ({ activePage }
       fineLineMat.color.setHex(next.secondary);
       fineLineMat.opacity = next.isLight ? 0.22 : 0.14;
       floorGridMat.color.setHex(next.metal);
+      lightShaftMat.color.setHex(next.accent);
+      lightShaftMat.opacity = next.isLight ? 0.025 : 0.042;
       hemiLight.color.setHex(next.rimLight);
       hemiLight.groundColor.setHex(next.metal);
       hemiLight.intensity = next.isLight ? 1.15 : 0.78;
@@ -422,6 +451,8 @@ export const StudioBackdrop3D: React.FC<StudioBackdrop3DProps> = ({ activePage }
       ringOuter.rotation.y = 0.35 + smoothPointerX * 0.2;
       ringInner.rotation.z = 0.5 - elapsed * 0.07 - scrollNorm * 0.34;
       ringInner.rotation.x = -0.45 + smoothPointerY * 0.18;
+      ringDeep.rotation.z = -0.2 + elapsed * 0.032 + scrollNorm * 0.22;
+      ringDeep.rotation.y = -0.35 - smoothPointerX * 0.12;
 
       // Floating monolith breathing & cursor parallax
       for (let i = 0; i < monoliths.length; i++) {

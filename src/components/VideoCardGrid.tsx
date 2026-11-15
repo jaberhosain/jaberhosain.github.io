@@ -106,6 +106,7 @@ export const VideoCardGrid: React.FC<VideoCardGridProps> = ({
           >
             <div
               onClick={() => openVideoPayload(video)}
+              data-cursor="play"
               className="h-full group relative rounded-2xl studio-card overflow-hidden flex flex-col justify-between cursor-pointer hover:-translate-y-1"
             >
               {/* Visual Thumbnail Stage with 3D Cursor Tilt */}

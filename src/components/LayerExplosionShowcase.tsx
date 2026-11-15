@@ -124,6 +124,7 @@ export const LayerExplosionShowcase: React.FC = () => {
           <Reveal3D direction="left" className="lg:col-span-7">
             <div
               ref={containerRef}
+              data-cursor="drag"
               onMouseMove={handleMouseMove}
               onMouseLeave={handleMouseLeave}
               className="h-[460px] sm:h-[540px] relative flex items-center justify-center perspective-1200 cursor-grab active:cursor-grabbing select-none"

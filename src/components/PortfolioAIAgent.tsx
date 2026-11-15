@@ -1,17 +1,16 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
-  Bot,
   X,
   Send,
   RotateCcw,
   ArrowUpRight,
   ExternalLink,
-  MessageSquare,
   ChevronDown,
   Loader2
 } from 'lucide-react';
 import { usePortfolio } from '../context/PortfolioContext';
 import { useNavigation } from '../context/NavigationContext';
+import { AIAgentEmblem } from './common/AIAgentEmblem';
 import {
   AgentAction,
   buildPortfolioKnowledgeSummary,
@@ -232,8 +231,8 @@ export const PortfolioAIAgent: React.FC = () => {
           {/* Header */}
           <div className="px-4 py-3.5 bg-[#181B22] border-b border-[#2B303D] flex items-center justify-between gap-2">
             <div className="flex items-center space-x-2.5 rtl:space-x-reverse min-w-0">
-              <div className="w-9 h-9 rounded-xl bg-[#E4583B]/15 border border-[#E4583B]/40 flex items-center justify-center text-[#E4583B] shrink-0">
-                <Bot className="w-5 h-5" />
+              <div className="w-9 h-9 rounded-xl bg-[#E4583B]/15 border border-[#E4583B]/45 flex items-center justify-center text-[#E4583B] shrink-0">
+                <AIAgentEmblem className="w-5 h-5" />
               </div>
               <div className="min-w-0">
                 <div className="flex items-center space-x-1.5 rtl:space-x-reverse">
@@ -244,7 +243,6 @@ export const PortfolioAIAgent: React.FC = () => {
                       ? 'مساعد جابر الذكي'
                       : 'Jaber AI Agent'}
                   </h3>
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0" />
                 </div>
                 <p className="text-[11px] font-mono text-[#A7A298] truncate">
                   {language === 'bn'
@@ -388,30 +386,29 @@ export const PortfolioAIAgent: React.FC = () => {
         </div>
       )}
 
-      {/* Floating Toggle Button */}
+      {/* Signature Emblem Floating Launcher */}
       <button
         type="button"
         onClick={() => setIsOpen((v) => !v)}
-        aria-label={isOpen ? 'Close AI Agent' : 'Open AI Agent'}
-        className="group inline-flex items-center space-x-2.5 rtl:space-x-reverse px-4 py-3 rounded-2xl bg-[#E4583B] hover:bg-[#D1482D] text-[#F4F0E8] font-mono text-xs font-bold shadow-2xl border border-white/15 transition-all duration-200 hover:-translate-y-0.5 cursor-pointer"
+        aria-label={isOpen ? 'Close AI Agent' : 'Open Jaber AI Agent'}
+        className="group relative inline-flex items-center space-x-2.5 rtl:space-x-reverse p-1.5 pr-4 rtl:pr-1.5 rtl:pl-4 rounded-2xl bg-[#181B22]/96 hover:bg-[#20242E] text-[#F4F0E8] font-mono text-xs font-bold shadow-[0_18px_44px_-10px_rgba(0,0,0,0.8)] border border-[#2B303D] hover:border-[#E4583B]/70 transition-all duration-250 hover:-translate-y-0.5 cursor-pointer"
       >
-        {isOpen ? (
-          <>
-            <X className="w-4 h-4" />
-            <span>{language === 'bn' ? 'বন্ধ করুন' : 'Close AI'}</span>
-          </>
-        ) : (
-          <>
-            <MessageSquare className="w-4 h-4" />
-            <span>
-              {language === 'bn'
-                ? 'এআই এজেন্ট'
-                : language === 'ar'
-                ? 'المساعد الذكي'
-                : 'Ask AI Agent'}
-            </span>
-          </>
-        )}
+        <span className="w-10 h-10 rounded-xl bg-[#E4583B] group-hover:bg-[#D0492D] text-white flex items-center justify-center shadow-lg transition-transform duration-300 group-hover:rotate-6 shrink-0">
+          {isOpen ? <X className="w-4 h-4" /> : <AIAgentEmblem className="w-6 h-6" />}
+        </span>
+        <span className="tracking-wide whitespace-nowrap">
+          {isOpen
+            ? language === 'bn'
+              ? 'বন্ধ করুন'
+              : language === 'ar'
+              ? 'إغلاق'
+              : 'Close'
+            : language === 'bn'
+            ? 'জাবের AI'
+            : language === 'ar'
+            ? 'مساعد جابر'
+            : 'Jaber AI'}
+        </span>
       </button>
     </div>
   );

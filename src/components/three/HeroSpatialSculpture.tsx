@@ -206,14 +206,19 @@ export const HeroSpatialSculpture: React.FC<HeroSpatialSculptureProps> = ({ clas
     frontGlass.position.z = 0.18;
     lensGroup.add(frontGlass);
 
-    // 16:9 Cinema Storyboard Gate
+    // 16:9 Cinema Storyboard Gate + Precision Viewfinder Corner Accents
     const wideGateGroup = new THREE.Group();
     const wideFrameBorder = new THREE.LineSegments(
       new THREE.EdgesGeometry(new THREE.BoxGeometry(2.65, 1.5, 0.02)),
       new THREE.LineBasicMaterial({ color: palette.secondary, transparent: true, opacity: 0.48 })
     );
     const wideGlass = new THREE.Mesh(new THREE.PlaneGeometry(2.62, 1.47), prismGlassMat);
-    wideGateGroup.add(wideFrameBorder, wideGlass);
+    const cornerBracketGeo = new THREE.BoxGeometry(0.24, 0.035, 0.04);
+    const tlBracket = new THREE.Mesh(cornerBracketGeo, accentRingMat);
+    tlBracket.position.set(-1.18, 0.75, 0.02);
+    const brBracket = new THREE.Mesh(cornerBracketGeo, accentRingMat);
+    brBracket.position.set(1.18, -0.75, 0.02);
+    wideGateGroup.add(wideFrameBorder, wideGlass, tlBracket, brBracket);
     wideGateGroup.position.set(0.18, -0.05, -0.4);
     wideGateGroup.rotation.set(0.12, 0.25, -0.08);
     assembly.add(wideGateGroup);
@@ -419,6 +424,7 @@ export const HeroSpatialSculpture: React.FC<HeroSpatialSculptureProps> = ({ clas
     <div className={`relative ${className}`}>
       <div
         ref={mountRef}
+        data-cursor="drag"
         className="w-full h-full cursor-grab active:cursor-grabbing touch-none"
         aria-label="Interactive 3D Cinema Optics Sculpture"
       />

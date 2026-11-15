@@ -669,23 +669,45 @@ svg.lucide,
 @keyframes page-enter-3d {
   0% {
     opacity: 0;
-    transform: perspective(1400px) translate3d(0, 24px, -40px) rotateX(2.5deg);
+    transform: perspective(1400px) translate3d(0, 26px, -48px) rotateX(2.6deg) scale3d(0.985, 0.985, 1);
   }
   100% {
     opacity: 1;
-    transform: perspective(1400px) translate3d(0, 0, 0) rotateX(0deg);
+    transform: perspective(1400px) translate3d(0, 0, 0) rotateX(0deg) scale3d(1, 1, 1);
   }
 }
 
 .animate-page-enter-3d {
-  animation: page-enter-3d 620ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: page-enter-3d 680ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes route-cut-sweep {
+  0% {
+    transform: scaleX(0);
+    transform-origin: left;
+    opacity: 1;
+  }
+  55% {
+    transform: scaleX(1);
+    transform-origin: left;
+    opacity: 0.95;
+  }
+  100% {
+    transform: scaleX(0);
+    transform-origin: right;
+    opacity: 0;
+  }
+}
+
+.animate-route-cut {
+  background: linear-gradient(90deg, transparent, var(--brand-orange, #E4583B), #F4F0E8);
+  animation: route-cut-sweep 580ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .animate-marquee {
-    animation: none;
-  }
-  .animate-page-enter-3d {
+  .animate-marquee,
+  .animate-page-enter-3d,
+  .animate-route-cut {
     animation: none;
   }
 }

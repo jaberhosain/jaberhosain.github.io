@@ -180,6 +180,7 @@ export const Hero: React.FC = () => {
               {/* 3D Interactive Portrait Monolith */}
               <div
                 ref={cardRef}
+                data-cursor="drag"
                 onMouseMove={handleMouseMove}
                 onMouseLeave={handleMouseLeave}
                 className={`relative w-[275px] sm:w-[320px] aspect-[3/4] cursor-grab active:cursor-grabbing select-none transition-all duration-500 ${

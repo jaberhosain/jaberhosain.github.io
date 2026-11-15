@@ -5,6 +5,7 @@ import { PageHeader } from '../common/PageHeader';
 import { PagePagination } from '../common/PagePagination';
 import { About } from '../About';
 import { Experience } from '../Experience';
+import { WorkExperienceCVSection } from '../WorkExperienceCVSection';
 
 export const AboutPage: React.FC = () => {
   const { portfolio, language } = usePortfolio();
@@ -20,15 +21,16 @@ export const AboutPage: React.FC = () => {
 
   const summaryText =
     language === 'bn'
-      ? `${academicCount}টি প্রাতিষ্ঠানিক অর্জন · ${instituteCount}টি প্রশিক্ষণ`
+      ? `${academicCount}টি প্রাতিষ্ঠানিক অর্জন · ${instituteCount}টি প্রশিক্ষণ · ১.১ বছর অভিজ্ঞতা`
       : language === 'ar'
       ? `${academicCount} مؤهل أكاديمي · ${instituteCount} تدريب مهني`
-      : `${academicCount} Academic · ${instituteCount} Training`;
+      : `${academicCount} Academic · ${instituteCount} Training · 1.1 Yrs Experience`;
 
   return (
     <div className="animate-page-enter-3d">
       <PageHeader meta={meta} summaryText={summaryText} />
       <About />
+      <WorkExperienceCVSection />
       <Experience />
       <PagePagination currentPageId="about" />
     </div>

@@ -46,7 +46,7 @@ export const Experience: React.FC = () => {
                         {record.year}
                       </span>
                       <span className={`status-badge text-[11px] font-mono font-medium px-2 py-0.5 rounded ${
-                        record.status.en === 'Completed'
+                        !/studying|present|ongoing/i.test(record.status?.en || '')
                           ? 'status-badge-completed text-emerald-400 bg-emerald-950/40 border border-emerald-500/20'
                           : 'status-badge-studying text-amber-400 bg-amber-950/40 border border-amber-500/20'
                       }`}>

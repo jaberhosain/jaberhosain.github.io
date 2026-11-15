@@ -226,6 +226,7 @@ export const Portfolio: React.FC<PortfolioProps> = ({
                   <Reveal3D key={entry.key} direction={dir} delay={col * 80}>
                     <div
                       onClick={() => onOpenLightbox?.(entry.project, entry.indexInProject)}
+                      data-cursor="view"
                       className="h-full group rounded-2xl studio-card overflow-hidden cursor-pointer flex flex-col justify-between hover:-translate-y-1"
                     >
                       <div className="p-2.5 bg-[#121419]/90 border-b border-[#2B303D]">
@@ -317,6 +318,7 @@ export const Portfolio: React.FC<PortfolioProps> = ({
                   >
                     <div
                       onClick={() => onOpenLightbox?.(project, 0)}
+                      data-cursor="view"
                       className="h-full group relative rounded-2xl studio-card overflow-hidden flex flex-col justify-between cursor-pointer hover:-translate-y-1"
                     >
                       <div className="p-2.5 bg-[#121419]/90 border-b border-[#2B303D]">

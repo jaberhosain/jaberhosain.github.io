@@ -241,32 +241,32 @@ export const initialPortfolioData: PortfolioConfig = {
     {
       id: 'acad-2',
       title: {
-        en: 'Dakhil (SSC Equivalent)',
-        bn: 'দাখিল (এসএসসি সমমান)',
+        en: 'Dakhil (SSC Equivalent) — Arts',
+        bn: 'দাখিল (এসএসসি সমমান) — মানবিক',
         ar: 'الداخيل (معادل للثانوية العامة SSC)'
       },
-      year: '2022',
+      year: '2023',
       description: {
-        en: 'Successfully completed Dakhil (SSC Equivalent), a secondary-level Islamic education qualification under the Bangladesh Madrasah Education system.',
-        bn: 'বাংলাদেশ মাদ্রাসা শিক্ষা ব্যবস্থার অধীনে মাধ্যমিক স্তরের শিক্ষাগত যোগ্যতা দাখিল (এসএসসি সমমান) সফলভাবে সম্পন্ন।',
-        ar: 'إتمام الداخيل (المعادل لشهادة SSC) بنجاح، وهي مؤهل تعليمي إسلامي للمرحلة الثانوية تحت إشراف هيئة التعليم في بنغلاديش.'
+        en: 'Successfully completed Dakhil from Khilbaisa Rahmania Fazil Madrasah, Lakshmipur with GPA 3.94 out of 5.00.',
+        bn: 'খিলবাইছা রহমানিয়া ফাজিল মাদরাসা, লক্ষ্মীপুর থেকে GPA 3.94 (৫.০০-এর মধ্যে) অর্জন করে দাখিল সম্পন্ন।',
+        ar: 'إتمام الداخيل (المعادل لشهادة SSC) من مدرسة خيلبايسا الرحمانية بمعدل 3.94 من 5.00.'
       },
-      status: { en: 'Completed', bn: 'সম্পন্ন', ar: 'مكتمل' }
+      status: { en: 'GPA 3.94 / 5.00', bn: 'GPA 3.94 / 5.00', ar: '3.94 / 5.00' }
     },
     {
       id: 'acad-3',
       title: {
-        en: 'Alim (HSC Equivalent)',
-        bn: 'আলিম (এইচএসসি সমমান)',
+        en: 'Alim (HSC Equivalent) — Arts',
+        bn: 'আলিম (এইচএসসি সমমান) — মানবিক',
         ar: 'العالمية (معادل للثانوية العليا HSC)'
       },
       year: '2025',
       description: {
-        en: 'Successfully completed Alim (HSC Equivalent), a higher secondary-level Islamic education qualification under the Bangladesh Madrasah Education system.',
-        bn: 'বাংলাদেশ মাদ্রাসা শিক্ষা ব্যবস্থার অধীনে উচ্চ মাধ্যমিক স্তরের শিক্ষাগত যোগ্যতা আলিম (এইচএসসি সমমান) সফলভাবে সম্পন্ন।',
-        ar: 'إتمام شهادة العالمية (المعادل لشهادة HSC) بنجاح، وهي مؤهل تعليمي إسلامي للمرحلة الثانوية العليا.'
+        en: "Completed Higher Secondary (Alim) from Ta'mirul Millat Kamil Madrasah, Tongi with GPA 4.14 out of 5.00.",
+        bn: "তা'মীরুল মিল্লাত কামিল মাদরাসা, টঙ্গী থেকে GPA 4.14 (৫.০০-এর মধ্যে) অর্জন করে আলিম (এইচএসসি সমমান) সম্পন্ন।",
+        ar: 'إتمام شهادة العالمية (المعادل لشهادة HSC) من مدرسة تامير الملة بتونجي بمعدل 4.14 من 5.00.'
       },
-      status: { en: 'Completed', bn: 'সম্পন্ন', ar: 'مكتمل' }
+      status: { en: 'GPA 4.14 / 5.00', bn: 'GPA 4.14 / 5.00', ar: '4.14 / 5.00' }
     },
     {
       id: 'acad-4',
@@ -362,6 +362,35 @@ export const initialPortfolioData: PortfolioConfig = {
       footerTag1: { en: 'Hands-on Real Project Execution', bn: 'হাতে-কলমে বাস্তব প্রজেক্ট সম্পাদন', ar: 'تنفيذ عملي لمشاريع حقيقية' },
       footerTag2: { en: 'Industry Ready', bn: 'ইন্ডাস্ট্রি রেডি', ar: 'جاهزية لسوق العمل' },
       order: 1
+    },
+    {
+      id: 'inst-2',
+      institution: {
+        en: 'Bismillah Computer and Training Center',
+        bn: 'বিসমিল্লাহ কম্পিউটার অ্যান্ড ট্রেনিং সেন্টার',
+        ar: 'مركز بسم الله للحاسوب والتدريب'
+      },
+      course: {
+        en: 'Basic Computer & Microsoft Office Training',
+        bn: 'বেসিক কম্পিউটার ও মাইক্রোসফট অফিস প্রশিক্ষণ',
+        ar: 'دورة الحاسوب الأساسي ومايكروسوفت أوفيس'
+      },
+      batch: '2023 (3 Months)',
+      competencies: [
+        {
+          id: 'comp-2-1',
+          category: { en: 'Microsoft Office Suite', bn: 'মাইক্রোসফট অফিস সুইট', ar: 'مجموعة مايكروسوفت أوفيس' },
+          tools: 'MS Word, Excel, PowerPoint, Typing & Formatting'
+        },
+        {
+          id: 'comp-2-2',
+          category: { en: 'Operating Systems & Hardware', bn: 'অপারেটিং সিস্টেম ও হার্ডওয়্যার', ar: 'أنظمة التشغيل والعتاد' },
+          tools: 'Windows, macOS, Linux, File Management & Internet'
+        }
+      ],
+      footerTag1: { en: 'Uttar Station, Lakshmipur, Bangladesh', bn: 'উত্তর স্টেশন, লক্ষ্মীপুর, বাংলাদেশ', ar: 'لاكشميبور، بنغلاديش' },
+      footerTag2: { en: '25 May – 03 Aug 2023', bn: '২৫ মে – ০৩ আগস্ট ২০২৩', ar: 'مايو – أغسطس 2023' },
+      order: 2
     }
   ],
   services: [
@@ -460,6 +489,17 @@ export const initialPortfolioData: PortfolioConfig = {
       },
       tools: ['Storyboards', 'Voiceover Scripts'],
       icon: 'PenTool'
+    },
+    {
+      id: 'sk-7',
+      title: { en: 'OFFICE, DATA ENTRY & OS', bn: 'অফিস ম্যানেজমেন্ট, ডেটা এন্ট্রি ও ওএস', ar: 'إدارة المكاتب وإدخال البيانات' },
+      description: {
+        en: 'Administrative documentation, report preparation, basic accounts management, and multi-OS operation.',
+        bn: 'অফিস ডকুমেন্টেশন, রিপোর্ট তৈরি, দৈনিক আর্থিক হিসাব ও একাধিক অপারেটিং সিস্টেমে দক্ষ পরিচালনা।',
+        ar: 'التوثيق الإداري، إعداد التقارير، الحسابات الأساسية، والعمل على أنظمة التشغيل المتعددة.'
+      },
+      tools: ['Microsoft Office', 'Google Sheets', 'Data Entry', 'Windows / macOS / Linux'],
+      icon: 'Layers'
     }
   ],
   workflow: [

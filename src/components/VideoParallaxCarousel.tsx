@@ -358,6 +358,7 @@ export const VideoParallaxCarousel: React.FC<VideoParallaxCarouselProps> = ({
             return (
               <div
                 key={video.id || idx}
+                data-cursor={isCenter ? 'play' : 'view'}
                 onClick={() => {
                   if (isCenter) {
                     openVideoPayload(video);
