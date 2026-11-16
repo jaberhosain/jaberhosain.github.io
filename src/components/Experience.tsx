@@ -4,6 +4,7 @@ import { usePortfolio } from '../context/PortfolioContext';
 import { EditableElement } from './common/EditableElement';
 import { Reveal3D } from './common/Reveal3D';
 import { StudioGlassIcon } from './common/StudioIcon';
+import { AsSunnahFoundationLogo, AsSunnahSkillInstituteLogo } from './common/OrganizationLogos';
 
 export const Experience: React.FC = () => {
   const { portfolio, ui, loc } = usePortfolio();
@@ -84,11 +85,21 @@ export const Experience: React.FC = () => {
             </h3>
 
             <div className="space-y-8">
-              {institutes.map((inst, instIdx) => (
+              {institutes.map((inst, instIdx) => {
+                const instText = `${inst.institution?.en || ''} ${inst.institution?.bn || ''}`.toLowerCase();
+                const isAsSunnah = instText.includes('sunnah') || instText.includes('সুন্নাহ');
+
+                return (
                 <Reveal3D key={inst.id || instIdx} direction="depth" delay={instIdx * 100}>
                   <div className="p-8 rounded-[24px] glass-showcase-card">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-white/[0.08] gap-4 mb-6">
                     <div>
+                      {isAsSunnah && (
+                        <div className="flex flex-wrap items-center gap-3 mb-3.5">
+                          <AsSunnahSkillInstituteLogo variant="card" />
+                          <AsSunnahFoundationLogo variant="card" />
+                        </div>
+                      )}
                       <span className="text-[11px] text-[#9A958C] uppercase tracking-[0.2em] block mb-1">
                         Skill Training Institution
                       </span>
@@ -148,7 +159,8 @@ export const Experience: React.FC = () => {
                   )}
                   </div>
                 </Reveal3D>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}

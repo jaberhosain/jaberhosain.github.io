@@ -86,8 +86,11 @@ export const StudioBackdrop3D: React.FC<StudioBackdrop3DProps> = ({ activePage }
 
     const width = container.clientWidth || window.innerWidth;
     const height = container.clientHeight || window.innerHeight;
+    const isCompactViewport = width < 768;
 
-    renderer.setPixelRatio(isSoftware ? 1 : Math.min(window.devicePixelRatio || 1, 2));
+    renderer.setPixelRatio(
+      isSoftware ? 1 : Math.min(window.devicePixelRatio || 1, isCompactViewport ? 1.5 : 2)
+    );
     renderer.setSize(width, height);
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.04;
@@ -137,8 +140,8 @@ export const StudioBackdrop3D: React.FC<StudioBackdrop3DProps> = ({ activePage }
       uIntensity: { value: studioRef.current.waveIntensity ?? 1 }
     };
 
-    const waveSegmentsX = isSoftware ? 64 : 112;
-    const waveSegmentsY = isSoftware ? 44 : 74;
+    const waveSegmentsX = isSoftware ? 56 : isCompactViewport ? 52 : 112;
+    const waveSegmentsY = isSoftware ? 38 : isCompactViewport ? 34 : 74;
     const waveGeo = new THREE.PlaneGeometry(46, 30, waveSegmentsX, waveSegmentsY);
 
     const waveMat = new THREE.MeshPhysicalMaterial({
@@ -297,7 +300,7 @@ export const StudioBackdrop3D: React.FC<StudioBackdrop3DProps> = ({ activePage }
     // =========================================================================
     // 5. LENS BOKEH & STARFIELD MOTES
     // =========================================================================
-    const bokehCount = isSoftware ? 20 : 48;
+    const bokehCount = isSoftware ? 20 : isCompactViewport ? 24 : 48;
     const bokehGeo = new THREE.BufferGeometry();
     const bokehPositions = new Float32Array(bokehCount * 3);
     const bokehBasePositions: { x: number; y: number; z: number; phase: number; speed: number }[] = [];
@@ -422,7 +425,7 @@ export const StudioBackdrop3D: React.FC<StudioBackdrop3DProps> = ({ activePage }
       const h = container.clientHeight || window.innerHeight;
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
-      renderer.setPixelRatio(isSoftware ? 1 : Math.min(window.devicePixelRatio || 1, 2));
+      renderer.setPixelRatio(isSoftware ? 1 : Math.min(window.devicePixelRatio || 1, w < 768 ? 1.5 : 2));
       renderer.setSize(w, h);
     };
 

@@ -20,6 +20,7 @@ import { EditableElement } from './common/EditableElement';
 import { StudioSectionShell } from './common/StudioSectionShell';
 import { HeroSpatialSculpture } from './three/HeroSpatialSculpture';
 import { HeroBackdropName } from './common/HeroBackdropName';
+import { StudioSkillMarquee3D } from './common/StudioSkillMarquee3D';
 
 interface HeroProps {
   onOpenLightbox?: (project: ProjectItem, initialIndex?: number) => void;
@@ -140,125 +141,127 @@ export const Hero: React.FC<HeroProps> = ({ onOpenLightbox, onOpenVideo }) => {
   };
 
   return (
+    <>
     <StudioSectionShell
       id="home"
       sectionBgKey="hero"
       customLayerTarget="hero"
-      className="relative min-h-[100svh] flex flex-col justify-center pt-24 pb-10 bg-transparent overflow-x-clip"
+      className="relative pt-20 sm:pt-26 pb-5 sm:pb-6 px-3 sm:px-6 lg:px-8 bg-transparent overflow-x-clip"
     >
-      {/* Calibrated Studio Scrim between WebGL canvas and foreground typography */}
-      <div
-        className="hero-contrast-scrim absolute inset-0 z-[1] pointer-events-none"
-        aria-hidden="true"
-      />
+      <div className="obsidian-island relative max-w-[1320px] mx-auto rounded-[24px] sm:rounded-[34px] overflow-hidden border border-white/[0.1] shadow-[0_30px_70px_-24px_rgba(13,15,20,0.45)] px-4 sm:px-9 lg:px-12 py-7 sm:py-14">
+        {/* Calibrated Studio Scrim between WebGL canvas and foreground typography */}
+        <div
+          className="hero-contrast-scrim absolute inset-0 z-[1] pointer-events-none"
+          aria-hidden="true"
+        />
 
-      {/* Subtle Cinema Viewfinder Corner Brackets (Pure geometric framing) */}
-      <div
-        aria-hidden="true"
-        className="hidden sm:block pointer-events-none absolute inset-x-5 lg:inset-x-10 top-22 bottom-8 z-[2]"
-      >
-        <span className="hero-viewfinder-corner absolute top-0 left-0 w-5 h-5 border-t border-l border-white/[0.16]" />
-        <span className="hero-viewfinder-corner absolute top-0 right-0 w-5 h-5 border-t border-r border-white/[0.16]" />
-        <span className="hero-viewfinder-corner absolute bottom-0 left-0 w-5 h-5 border-b border-l border-white/[0.16]" />
-        <span className="hero-viewfinder-corner absolute bottom-0 right-0 w-5 h-5 border-b border-r border-white/[0.16]" />
-      </div>
+        {/* Subtle Cinema Viewfinder Corner Brackets (Pure geometric framing) */}
+        <div
+          aria-hidden="true"
+          className="hidden sm:block pointer-events-none absolute inset-x-6 lg:inset-x-9 top-6 bottom-6 z-[2]"
+        >
+          <span className="hero-viewfinder-corner absolute top-0 left-0 w-5 h-5 border-t border-l border-white/[0.16]" />
+          <span className="hero-viewfinder-corner absolute top-0 right-0 w-5 h-5 border-t border-r border-white/[0.16]" />
+          <span className="hero-viewfinder-corner absolute bottom-0 left-0 w-5 h-5 border-b border-l border-white/[0.16]" />
+          <span className="hero-viewfinder-corner absolute bottom-0 right-0 w-5 h-5 border-b border-r border-white/[0.16]" />
+        </div>
 
-      {/* Interactive Cursor-Lit Architectural Outline Name Backdrop */}
-      <HeroBackdropName />
+        {/* Interactive Cursor-Lit Architectural Outline Name Backdrop */}
+        <HeroBackdropName />
 
-      <div className="max-w-[1320px] mx-auto px-4 sm:px-8 lg:px-12 w-full relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.15fr)_minmax(320px,490px)] gap-10 lg:gap-12 items-center">
-          {/* LEFT COLUMN: Cinema Director Identity & Editorial Hierarchy */}
-          <div className="relative z-25 min-w-0 flex flex-col items-center text-center lg:items-start lg:text-left rtl:lg:items-start rtl:lg:text-right">
-            {/* Unboxed Tracked Studio Discipline Kicker */}
-            <EditableElement
-              id="hero.badge"
-              label="Hero Studio Kicker"
-              as="div"
-              className="mb-4"
-            >
-              <div className="text-[11px] font-mono uppercase tracking-[0.26em] text-[#9A958C]">
-                {loc(hero.badge) ||
-                  (language === 'bn'
-                    ? 'ভিডিও এডিটিং · মোশন গ্রাফিক্স · ভিজ্যুয়াল ডিজাইন'
-                    : language === 'ar'
-                    ? 'مونتاج الفيديو · موشن جرافيك · تصميم بصري'
-                    : 'VIDEO EDITING · MOTION DESIGN · VISUAL CRAFT')}
-              </div>
-            </EditableElement>
-
-            {/* Primary Two-Line Sculptural 3D Metallic Serif Name + Playhead Reveal */}
-            <EditableElement id="hero.name" label="Hero Headline Name" as="div" className="w-full">
-              <div className="relative inline-block max-w-full">
-                {/* Back 3D Extruded Relief Depth Layer */}
-                <div
-                  aria-hidden="true"
-                  className="hero-display-name hero-metallic-depth select-none pointer-events-none absolute inset-0 translate-y-[3px] translate-x-[1px] opacity-90"
-                >
-                  <span className="block">{line1Name}</span>
-                  {line2Name && <span className="block">{line2Name}</span>}
+        <div className="w-full relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.15fr)_minmax(320px,470px)] gap-10 lg:gap-12 items-center">
+            {/* LEFT COLUMN: Cinema Director Identity & Creative-IT Branding */}
+            <div className="relative z-25 min-w-0 flex flex-col items-center text-center lg:items-start lg:text-left rtl:lg:items-start rtl:lg:text-right">
+              {/* Tracked Creative, AI, Social Media, Computer & IT Kicker */}
+              <EditableElement
+                id="hero.badge"
+                label="Hero Studio Kicker"
+                as="div"
+                className="mb-3.5"
+              >
+                <div className="text-[11px] font-mono uppercase tracking-[0.22em] text-[#A7A298]">
+                  {loc(hero.badge) ||
+                    (language === 'bn'
+                      ? 'ক্রিয়েটিভ · ভিডিও ও গ্রাফিক · AI · সোশ্যাল মিডিয়া · আইটি ও কম্পিউটার'
+                      : language === 'ar'
+                      ? 'إبداع بصري · مونتاج · ذكاء اصطناعي · سوشيال ميديا · تقنية المعلومات'
+                      : 'CREATIVE · VIDEO & GRAPHIC · AI · SOCIAL MEDIA · COMPUTER & IT')}
                 </div>
+              </EditableElement>
 
-                {/* Front Brushed Metallic Chrome/Ivory Face with Timeline Playhead Wipe */}
-                <h1
-                  className="hero-display-name hero-metallic-text hero-clip-reveal relative z-10 select-text"
-                  aria-label={`${line1Name}${line2Name ? ` ${line2Name}` : ''}`}
-                >
-                  <span className="sr-only">
-                    {line1Name} {line2Name}
+              {/* Primary Two-Line Sculptural 3D Metallic Serif Name + Playhead Reveal */}
+              <EditableElement id="hero.name" label="Hero Headline Name" as="div" className="w-full">
+                <div className="relative inline-block max-w-full">
+                  {/* Back 3D Extruded Relief Depth Layer */}
+                  <div
+                    aria-hidden="true"
+                    className="hero-display-name hero-metallic-depth select-none pointer-events-none absolute inset-0 translate-y-[3px] translate-x-[1px] opacity-90"
+                  >
+                    <span className="block">{line1Name}</span>
+                    {line2Name && <span className="block">{line2Name}</span>}
+                  </div>
+
+                  {/* Front Brushed Metallic Chrome/Ivory Face with Timeline Playhead Wipe */}
+                  <h1
+                    className="hero-display-name hero-metallic-text hero-clip-reveal relative z-10 select-text"
+                    aria-label={`${line1Name}${line2Name ? ` ${line2Name}` : ''}`}
+                  >
+                    <span className="sr-only">
+                      {line1Name} {line2Name}
+                    </span>
+                    <span className="block">{line1Name}</span>
+                    {line2Name && <span className="block">{line2Name}</span>}
+                  </h1>
+
+                  {/* Subtle Red Vertical Playhead Beam */}
+                  <span
+                    aria-hidden="true"
+                    className="hero-playhead-beam pointer-events-none absolute -top-2 -bottom-1 w-[2px] bg-[#FF4B5C] shadow-[0_0_12px_rgba(255,75,92,0.85)] z-20"
+                  >
+                    <span className="absolute -top-1 -left-[3px] w-2 h-2 bg-[#FF4B5C]" />
                   </span>
-                  <span className="block">{line1Name}</span>
-                  {line2Name && <span className="block">{line2Name}</span>}
-                </h1>
+                </div>
+              </EditableElement>
 
-                {/* Subtle Red Vertical Playhead Beam */}
-                <span
-                  aria-hidden="true"
-                  className="hero-playhead-beam pointer-events-none absolute -top-2 -bottom-1 w-[2px] bg-[#FF4B5C] shadow-[0_0_12px_rgba(255,75,92,0.85)] z-20"
-                >
-                  <span className="absolute -top-1 -left-[3px] w-2 h-2 bg-[#FF4B5C]" />
-                </span>
-              </div>
-            </EditableElement>
+              {/* Flowing Creative-Tech Value Headline */}
+              <EditableElement
+                id="hero.tagline"
+                label="Hero Role & Branding"
+                as="div"
+                className="mt-4 max-w-xl"
+              >
+                {language === 'bn' ? (
+                  <p className="font-editorial italic font-normal text-[1.45rem] sm:text-[1.85rem] lg:text-[2.1rem] leading-[1.2] text-[#F4F0E8]">
+                    {loc(hero.tagline) || 'ক্রিয়েটিভিটি, AI ও আধুনিক ভিজ্যুয়াল প্রযুক্তির সমন্বয়।'}
+                  </p>
+                ) : language === 'ar' ? (
+                  <p className="font-editorial italic font-normal text-[1.45rem] sm:text-[1.85rem] lg:text-[2.1rem] leading-[1.2] text-[#F4F0E8]">
+                    {loc(hero.tagline) || 'حيث يلتقي الإبداع البصري بالذكاء الاصطناعي وتقنية المعلومات.'}
+                  </p>
+                ) : (
+                  <p className="font-editorial italic font-normal text-[1.5rem] sm:text-[1.9rem] lg:text-[2.15rem] leading-[1.16] text-[#F4F0E8]">
+                    {loc(hero.tagline) || 'Where Creative Direction Meets AI, Design & IT Precision.'}
+                  </p>
+                )}
+              </EditableElement>
 
-            {/* Flowing Editorial Italic Role Statement */}
-            <EditableElement
-              id="hero.tagline"
-              label="Hero Role & Branding"
-              as="div"
-              className="mt-4 max-w-xl"
-            >
-              {language === 'bn' ? (
-                <p className="font-editorial italic font-normal text-[1.45rem] sm:text-[1.85rem] lg:text-[2.15rem] leading-[1.18] text-[#F4F0E8]">
-                  {loc(hero.tagline) || 'ভিডিও এডিটর ও গ্রাফিক ডিজাইনার।'}
+              {/* Concise Multi-Disciplinary Statement */}
+              <EditableElement
+                id="hero.subtitle"
+                label="Hero Supporting Copy"
+                as="div"
+                className="mt-3 mb-7 max-w-lg"
+              >
+                <p className="hero-subtitle-font text-xs sm:text-[14px] leading-relaxed text-[#DDD1BE]/85">
+                  {loc(hero.subtitle) ||
+                    (language === 'bn'
+                      ? 'ভিডিও এডিটিং, মোশন গ্রাফিক্স, ব্র্যান্ড ডিজাইন, সোশ্যাল মিডিয়া ক্যাম্পেইন, এআই ওয়ার্কফ্লো এবং দক্ষ কম্পিউটার অপারেটর ও আইটি সাপোর্টে সম্পূর্ণ সমাধান।'
+                      : language === 'ar'
+                      ? 'مونتاج فيديو، تصميم جرافيك، حملات سوشيال ميديا، أدوات ذكاء اصطناعي وتشغيل أنظمة تقنية باحترافية عالية.'
+                      : 'Delivering high-retention Video Editing, Graphic Design, AI Workflows, Social Media Growth, and Computer & IT Operations under one organized studio workflow.')}
                 </p>
-              ) : language === 'ar' ? (
-                <p className="font-editorial italic font-normal text-[1.45rem] sm:text-[1.85rem] lg:text-[2.15rem] leading-[1.18] text-[#F4F0E8]">
-                  {loc(hero.tagline) || 'مونتير فيديو ومصمم جرافيك.'}
-                </p>
-              ) : (
-                <p className="font-editorial italic font-normal text-[1.55rem] sm:text-[1.95rem] lg:text-[2.25rem] leading-[1.15] text-[#F4F0E8]">
-                  {loc(hero.tagline) || 'Video Editor & Graphic Designer.'}
-                </p>
-              )}
-            </EditableElement>
-
-            {/* Concise Director Value Statement */}
-            <EditableElement
-              id="hero.subtitle"
-              label="Hero Supporting Copy"
-              as="div"
-              className="mt-3 mb-7 max-w-md"
-            >
-              <p className="hero-subtitle-font text-xs sm:text-[14px] leading-relaxed text-[#9A958C]">
-                {loc(hero.subtitle) ||
-                  (language === 'bn'
-                    ? 'ব্র্যান্ড ও ক্রিয়েটরদের জন্য সিনেমাটিক ভিডিও এডিটিং, মোশন গ্রাফিক্স এবং স্বতন্ত্র ভিজ্যুয়াল ডিজাইন—কোনো রেডিমেড টেমপ্লেট নয়।'
-                    : language === 'ar'
-                    ? 'مونتاج سينمائي وموشن جرافيك وهوية بصرية مخصصة للعلامات التجارية وصناع المحتوى بدون قوالب جاهزة.'
-                    : 'Editing, motion, and visual craft for brands that demand cinema-grade presence. No templates, no generic shortcuts.')}
-              </p>
-            </EditableElement>
+              </EditableElement>
 
             {/* Primary CTA Buttons + Signature Calligraphic Mark */}
             <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 w-full">
@@ -275,7 +278,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenLightbox, onOpenVideo }) => {
                       navigateTo(hero.ctaWorkUrl || 'videos');
                     }
                   }}
-                  className="glass-pill-cta inline-flex items-center justify-center space-x-2 rtl:space-x-reverse px-6 py-3 rounded-full text-xs sm:text-[13px] font-semibold shadow-[0_12px_30px_rgba(0,0,0,0.35)] transition-all duration-200 whitespace-nowrap shrink-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FF4B5C]"
+                  className="glass-pill-cta inline-flex items-center justify-center space-x-2 rtl:space-x-reverse px-6 min-h-[44px] py-3 rounded-full text-xs sm:text-[13px] font-semibold shadow-[0_12px_30px_rgba(0,0,0,0.35)] active:scale-[0.98] transition-all duration-200 whitespace-nowrap shrink-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FF4B5C]"
                 >
                   <EditableElement id="hero.ctaWork" label="Work Button Text" as="span">
                     {loc(hero.ctaWork) || 'See the work'}
@@ -297,7 +300,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenLightbox, onOpenVideo }) => {
                       navigateTo('contact');
                     }
                   }}
-                  className="glass-pill-ghost inline-flex items-center justify-center space-x-2 rtl:space-x-reverse px-6 py-3 rounded-full text-xs sm:text-[13px] font-semibold transition-all duration-200 whitespace-nowrap shrink-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FF4B5C]"
+                  className="glass-pill-ghost inline-flex items-center justify-center space-x-2 rtl:space-x-reverse px-6 min-h-[44px] py-3 rounded-full text-xs sm:text-[13px] font-semibold active:scale-[0.98] transition-all duration-200 whitespace-nowrap shrink-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FF4B5C]"
                 >
                   <EditableElement id="hero.ctaContact" label="Contact Button Text" as="span">
                     {loc(hero.ctaContact) ||
@@ -474,7 +477,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenLightbox, onOpenVideo }) => {
                 data-cursor="drag"
                 onMouseMove={handleMouseMove}
                 onMouseLeave={handleMouseLeave}
-                className="relative w-full max-w-[470px] h-[360px] sm:h-[420px] flex items-center justify-center perspective-1200 select-none"
+                className="relative w-full max-w-[470px] h-[290px] sm:h-[420px] flex items-center justify-center perspective-1200 select-none"
               >
                 {/* Ambient Three.js Interactive 3D Cinema Optics Sculpture */}
                 <div
@@ -506,10 +509,10 @@ export const Hero: React.FC<HeroProps> = ({ onOpenLightbox, onOpenVideo }) => {
                         }
                       }}
                       aria-label="Open graphic design archive"
-                      className="group/back1 absolute w-[195px] sm:w-[265px] aspect-[16/10] rounded-2xl overflow-hidden border border-white/[0.14] bg-[#161922] shadow-[0_24px_50px_-14px_rgba(0,0,0,0.85)] transition-all duration-500 cursor-pointer hover:border-[#E4583B]/60 z-10"
+                      className="group/back1 absolute w-[158px] sm:w-[265px] aspect-[16/10] rounded-2xl overflow-hidden border border-white/[0.14] bg-[#161922] shadow-[0_24px_50px_-14px_rgba(0,0,0,0.85)] transition-all duration-500 cursor-pointer hover:border-[#E4583B]/60 z-10"
                       style={{
-                        transform: `translate3d(${cardTransform.isHovered ? -68 : -44}px, ${
-                          cardTransform.isHovered ? 34 : 26
+                        transform: `translate3d(${cardTransform.isHovered ? -68 : -38}px, ${
+                          cardTransform.isHovered ? 34 : 22
                         }px, -60px) rotateZ(-9deg)`
                       }}
                     >
@@ -528,10 +531,10 @@ export const Hero: React.FC<HeroProps> = ({ onOpenLightbox, onOpenVideo }) => {
                       type="button"
                       onClick={() => navigateTo('videos')}
                       aria-label="Open video editing showcase"
-                      className="group/back2 absolute w-[195px] sm:w-[265px] aspect-[16/10] rounded-2xl overflow-hidden border border-white/[0.12] bg-[#14161D] shadow-[0_24px_50px_-14px_rgba(0,0,0,0.85)] transition-all duration-500 cursor-pointer hover:border-white/30 z-10"
+                      className="group/back2 absolute w-[158px] sm:w-[265px] aspect-[16/10] rounded-2xl overflow-hidden border border-white/[0.12] bg-[#14161D] shadow-[0_24px_50px_-14px_rgba(0,0,0,0.85)] transition-all duration-500 cursor-pointer hover:border-white/30 z-10"
                       style={{
-                        transform: `translate3d(${cardTransform.isHovered ? 68 : 44}px, ${
-                          cardTransform.isHovered ? -26 : -20
+                        transform: `translate3d(${cardTransform.isHovered ? 68 : 38}px, ${
+                          cardTransform.isHovered ? -26 : -18
                         }px, -45px) rotateZ(7deg)`
                       }}
                     >
@@ -555,7 +558,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenLightbox, onOpenVideo }) => {
                           handleFocalCardAction();
                         }
                       }}
-                      className="group relative w-[275px] sm:w-[345px] aspect-[16/10] rounded-2xl overflow-hidden glass-showcase-card p-1.5 z-20 cursor-pointer"
+                      className="group relative w-[235px] sm:w-[345px] aspect-[16/10] rounded-2xl overflow-hidden glass-showcase-card p-1.5 z-20 cursor-pointer"
                       style={{
                         transform: `translate3d(0, 0, 32px) rotateZ(${
                           cardTransform.isHovered ? -1 : -3
@@ -701,79 +704,37 @@ export const Hero: React.FC<HeroProps> = ({ onOpenLightbox, onOpenVideo }) => {
           </div>
         </div>
 
-        {/* Clean Scroll Anchor Row + Studio Craft Strip */}
-        <div className="mt-10 pt-5 border-t border-white/[0.08] flex flex-wrap items-center justify-between gap-4 text-xs text-[#9A958C]">
-          <span>
-            {language === 'bn'
-              ? 'থ্রিডি স্পেস সক্রিয় · মাউস বা স্ক্রল করে গভীরতা অনুভব করুন'
-              : 'Interactive 3D Spatial Portfolio · Frame by Frame'}
-          </span>
+          {/* Clean Scroll Anchor Row Inside Obsidian Frame */}
+          <div className="mt-8 pt-4 border-t border-white/[0.08] flex flex-wrap items-center justify-between gap-4 text-xs text-[#A7A298]">
+            <span>
+              {language === 'bn'
+                ? 'থ্রিডি স্পেস সক্রিয় · মাউস বা স্ক্রল করে গভীরতা অনুভব করুন'
+                : 'Interactive 3D Spatial Portfolio · Frame by Frame'}
+            </span>
 
-          <button
-            type="button"
-            onClick={() => {
-              const target = document.getElementById('case-studies');
-              if (target) {
-                target.scrollIntoView({ behavior: 'smooth' });
-              } else {
-                window.scrollBy({ top: window.innerHeight * 0.85, behavior: 'smooth' });
-              }
-            }}
-            className="inline-flex items-center space-x-2 rtl:space-x-reverse text-xs tracking-wide text-[#DDD1BE] hover:text-white transition-colors cursor-pointer"
-            aria-label={ui.hero.scrollDown}
-          >
-            <span>{ui.hero.scrollDown}</span>
-            <ArrowDown className="w-3.5 h-3.5" strokeWidth={1.4} />
-          </button>
-        </div>
-
-        {/* Continuous Studio Discipline Ribbon */}
-        <div className="studio-marquee-bar mt-5 overflow-hidden border-y border-[#2B303D]/70 bg-[#14171E]/85 py-2.5 select-none">
-          <div className="animate-marquee flex items-center whitespace-nowrap">
-            {[0, 1].map((dup) => (
-              <div key={dup} className="flex items-center">
-                {(language === 'bn'
-                  ? [
-                      'ভিডিও এডিটিং ও স্টোরিটেলিং',
-                      'সিনেমাটিক কালার গ্রেডিং',
-                      'কাইনেটিক মোশন গ্রাফিক্স',
-                      'গ্রাফিক ও ব্র্যান্ড পোস্টার',
-                      'বিহ্যান্স ভিজ্যুয়াল সিরিজ',
-                      'সাউন্ড ডিজাইন ও পেসিং'
-                    ]
-                  : language === 'ar'
-                  ? [
-                      'مونتاج الفيديو والسرد البصري',
-                      'تصحيح الألوان السينمائي',
-                      'موشن جرافيك وتايبوغرافي',
-                      'تصميم الهويات والبوسترات',
-                      'مشاريع بيهانس المصنفة',
-                      'هندسة الصوت والإيقاع'
-                    ]
-                  : [
-                      'Video Editing & Pacing',
-                      'Cinematic Color Grading',
-                      'Kinetic Motion Graphics',
-                      'Graphic & Poster Systems',
-                      'Behance Curated Series',
-                      'Sound Design & Foley'
-                    ]
-                ).map((label, idx) => (
-                  <span
-                    key={`${dup}-${idx}`}
-                    className="inline-flex items-center text-[11px] font-mono uppercase tracking-[0.22em] text-[#DDD1BE]"
-                  >
-                    <span className="px-6">{label}</span>
-                    <span className="text-[#E4583B]" aria-hidden="true">
-                      ·
-                    </span>
-                  </span>
-                ))}
-              </div>
-            ))}
+            <button
+              type="button"
+              onClick={() => {
+                const target = document.getElementById('featured-stage');
+                if (target) {
+                  target.scrollIntoView({ behavior: 'smooth' });
+                } else {
+                  window.scrollBy({ top: window.innerHeight * 0.85, behavior: 'smooth' });
+                }
+              }}
+              className="inline-flex items-center space-x-2 rtl:space-x-reverse text-xs tracking-wide text-[#DDD1BE] hover:text-white transition-colors cursor-pointer"
+              aria-label={ui.hero.scrollDown}
+            >
+              <span>{ui.hero.scrollDown}</span>
+              <ArrowDown className="w-3.5 h-3.5" strokeWidth={1.4} />
+            </button>
           </div>
         </div>
       </div>
     </StudioSectionShell>
+
+    {/* Floating 3D Tool, AI, Social Media & IT Discipline Marquee Directly Beneath Hero */}
+    <StudioSkillMarquee3D />
+    </>
   );
 };

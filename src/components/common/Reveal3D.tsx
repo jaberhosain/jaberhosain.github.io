@@ -20,7 +20,7 @@ const HIDDEN_TRANSFORMS: Record<RevealDirection, string> = {
   'tilt-right': 'perspective(1200px) translate3d(28px, 28px, -45px) rotateX(5deg) rotateY(-7deg) scale3d(0.96, 0.96, 1)'
 };
 
-const VISIBLE_TRANSFORM = 'perspective(1200px) translate3d(0, 0, 0) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
+const VISIBLE_TRANSFORM = 'none';
 
 /**
  * Scroll-triggered directional 3D reveal wrapper.

@@ -5,6 +5,7 @@ import { JABER_CV_DATA } from '../data/jaberCvData';
 import { resolveAssetUrl } from '../utils/assetUrl';
 import { Reveal3D } from './common/Reveal3D';
 import { StudioGlassIcon } from './common/StudioIcon';
+import { AsSunnahSkillInstituteLogo, TamirulMillatLogo } from './common/OrganizationLogos';
 
 export const WorkExperienceCVSection: React.FC = () => {
   const { language } = usePortfolio();
@@ -65,15 +66,24 @@ export const WorkExperienceCVSection: React.FC = () => {
 
         {/* 2-Column Practical Work Experience Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-14">
-          {JABER_CV_DATA.experiences.map((exp, idx) => (
+          {JABER_CV_DATA.experiences.map((exp, idx) => {
+            const isAsSunnah = exp.organization.toLowerCase().includes('sunnah');
+            const isTamirul = exp.organization.toLowerCase().includes('millat');
+            return (
             <Reveal3D key={exp.organization} direction={idx % 2 === 0 ? 'left' : 'right'} delay={idx * 90}>
               <div className="h-full p-7 rounded-[24px] glass-showcase-card flex flex-col justify-between group">
                 <div>
                   <div className="flex flex-wrap items-center justify-between gap-2 mb-4 pb-4 border-b border-white/[0.08]">
                     <div className="flex items-center space-x-3 rtl:space-x-reverse">
-                      <StudioGlassIcon size="sm">
-                        <Briefcase className="w-4 h-4" strokeWidth={1.35} />
-                      </StudioGlassIcon>
+                      {isAsSunnah ? (
+                        <AsSunnahSkillInstituteLogo variant="compact" />
+                      ) : isTamirul ? (
+                        <TamirulMillatLogo className="w-8 h-8 rounded-lg shrink-0" />
+                      ) : (
+                        <StudioGlassIcon size="sm">
+                          <Briefcase className="w-4 h-4" strokeWidth={1.35} />
+                        </StudioGlassIcon>
+                      )}
                       <span className="text-xs text-[#EAE5DC] font-medium">
                         {isBn ? exp.durationBn : exp.duration}
                       </span>
@@ -103,7 +113,8 @@ export const WorkExperienceCVSection: React.FC = () => {
                 </div>
               </div>
             </Reveal3D>
-          ))}
+            );
+          })}
         </div>
 
         {/* Career Preferences, Languages & Technical Environment Row */}

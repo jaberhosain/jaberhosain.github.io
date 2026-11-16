@@ -23,6 +23,7 @@ import { PortfolioAIAgent } from './components/PortfolioAIAgent';
 import { WelcomeSalamToast } from './components/WelcomeSalamToast';
 import { StudioBackdrop3D } from './components/three/StudioBackdrop3D';
 import { StudioCursor } from './components/common/StudioCursor';
+import { SmoothScrollEngine } from './components/common/SmoothScrollEngine';
 import { CustomLayersRenderer } from './components/common/CustomLayersRenderer';
 import { VideoShowcaseItem, ProjectItem } from './types/portfolio';
 
@@ -146,9 +147,12 @@ function MainApp() {
 
   // PUBLIC WEBSITE (3D WebGL Spatial World + Multi-page architecture)
   return (
-    <div className="relative min-h-screen bg-[#121419] text-[#F4F0E8] flex flex-col font-sans selection:bg-[#E4583B] selection:text-white overflow-x-clip">
-      {/* Context-Aware Studio Cursor (Desktop fine pointers only) */}
+    <div className="app-shell-canvas relative min-h-screen bg-[#121419] text-[#F4F0E8] flex flex-col font-sans selection:bg-[#E4583B] selection:text-white overflow-x-clip">
+      {/* Context-Aware Kinetic Studio Cursor (Desktop fine pointers only) */}
       <StudioCursor />
+
+      {/* Silky Desktop Wheel Inertia & GPU Top Scroll Progress Bar */}
+      <SmoothScrollEngine />
 
       {/* Subtle Cinema Cut Transition Indicator on route switch */}
       <div key={`cut-${currentPage}`} aria-hidden="true" className="animate-route-cut fixed top-0 left-0 right-0 h-[2px] z-[60] pointer-events-none" />

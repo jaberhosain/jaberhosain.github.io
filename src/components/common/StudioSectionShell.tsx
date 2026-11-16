@@ -42,7 +42,7 @@ export const StudioSectionShell: React.FC<StudioSectionShellProps> = ({
   return (
     <section
       id={id}
-      className={`relative overflow-hidden ${className}`.trim()}
+      className={`relative overflow-x-clip ${className}`.trim()}
       style={sectionStyle}
     >
       {/* Custom Uploaded / Linked Section Background Layer */}

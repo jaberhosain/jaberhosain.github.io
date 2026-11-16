@@ -52,17 +52,17 @@ export function getThemeThreePalette(): ThemeThreePalette {
     };
   }
 
-  const theme = document.documentElement.getAttribute('data-theme') || 'dark';
+  const theme = document.documentElement.getAttribute('data-theme') || 'light';
   switch (theme) {
     case 'light':
       return {
-        bg: 0xf5f2eb,
-        fog: 0xf5f2eb,
-        accent: 0xc94426,
-        secondary: 0x57534e,
-        metal: 0xd6cfc2,
+        bg: 0xfaf7f0,
+        fog: 0xf7f4ec,
+        accent: 0xd14a2b,
+        secondary: 0x625e57,
+        metal: 0xe3dcd0,
         glass: 0xffffff,
-        rimLight: 0xffffff,
+        rimLight: 0xfff8ee,
         isLight: true
       };
     case 'blue':

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Menu, X, Globe, ArrowUpRight, Eye, Palette } from 'lucide-react';
+import { Menu, X, Globe, ArrowUpRight, Eye, Palette, Sun, Moon } from 'lucide-react';
 import { usePortfolio } from '../context/PortfolioContext';
 import { useNavigation } from '../context/NavigationContext';
 import { Language, ThemeId } from '../types/portfolio';
@@ -63,8 +63,8 @@ export const Navbar: React.FC = () => {
   ];
 
   const availableThemeIds: ThemeId[] = portfolio.theme?.availableThemes || [
-    'dark',
     'light',
+    'dark',
     'blue',
     'green',
     'purple',
@@ -73,8 +73,8 @@ export const Navbar: React.FC = () => {
   ];
 
   const allThemes: { id: ThemeId; label: string; dot: string }[] = [
-    { id: 'dark', label: 'Studio Obsidian', dot: '#E4583B' },
-    { id: 'light', label: 'Museum Paper', dot: '#C94426' },
+    { id: 'light', label: 'Daylight Gradient', dot: '#E5955D' },
+    { id: 'dark', label: 'Dark Mode', dot: '#E4583B' },
     { id: 'blue', label: 'Nordic Slate', dot: '#38BDF8' },
     { id: 'green', label: 'Botanical Green', dot: '#34D399' },
     { id: 'purple', label: 'Aubergine', dot: '#C084FC' },
@@ -114,9 +114,9 @@ export const Navbar: React.FC = () => {
             isScrolled
               ? 'studio-nav-scrolled bg-[#13151B]/95 border-white/[0.12] shadow-[0_20px_50px_-14px_rgba(0,0,0,0.9)]'
               : 'bg-[#13151B]/82 border-white/[0.09] shadow-[0_18px_46px_-16px_rgba(0,0,0,0.82)]'
-          } backdrop-blur-xl px-4 sm:px-5 py-2`}
+          } backdrop-blur-xl px-3.5 sm:px-5 py-1.5 sm:py-2`}
         >
-          <div className="flex items-center justify-between gap-6">
+          <div className="flex items-center justify-between gap-2.5 sm:gap-6">
             {/* Zone 1: Single-line Wordmark */}
             <a
               href="#/"
@@ -170,7 +170,7 @@ export const Navbar: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setLangDropdownOpen(!langDropdownOpen)}
-                  className="inline-flex items-center space-x-1 rtl:space-x-reverse h-8 px-2.5 text-[11px] font-semibold rounded-full text-neutral-300 hover:text-white hover:bg-white/[0.06] transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                  className="inline-flex items-center space-x-1 rtl:space-x-reverse h-8 px-2.5 text-[11px] font-semibold rounded-full text-neutral-300 hover:bg-black/5 transition-colors whitespace-nowrap shrink-0 cursor-pointer"
                   aria-label="Select Language"
                 >
                   <Globe className="w-3.5 h-3.5 text-neutral-400" strokeWidth={1.5} />
@@ -187,7 +187,7 @@ export const Navbar: React.FC = () => {
                           setLanguage(item.code);
                           setLangDropdownOpen(false);
                         }}
-                        className={`w-full text-left rtl:text-right px-4 py-2 text-xs flex items-center justify-between hover:bg-white/5 transition-colors cursor-pointer ${
+                        className={`w-full text-left rtl:text-right px-4 py-2 text-xs flex items-center justify-between hover:bg-black/5 transition-colors cursor-pointer ${
                           language === item.code
                             ? 'text-[#F4F0E8] font-semibold bg-white/[0.06]'
                             : 'text-[#A7A298]'
@@ -203,12 +203,35 @@ export const Navbar: React.FC = () => {
                 )}
               </div>
 
+              {/* Instant Daylight / Dark Mode Toggle */}
+              <button
+                type="button"
+                onClick={() => setActiveThemeId(activeThemeId === 'light' ? 'dark' : 'light')}
+                className="inline-flex items-center justify-center w-8 h-8 rounded-full text-neutral-300 hover:bg-black/5 transition-colors cursor-pointer shrink-0"
+                aria-label={
+                  activeThemeId === 'light'
+                    ? language === 'bn'
+                      ? 'ডার্ক মোড চালু করুন'
+                      : 'Switch to Dark Mode'
+                    : language === 'bn'
+                    ? 'ডেইলি লাইট গ্রেডিয়েন্ট চালু করুন'
+                    : 'Switch to Daylight Gradient'
+                }
+                title={activeThemeId === 'light' ? 'Switch to Dark Mode' : 'Switch to Daylight Gradient'}
+              >
+                {activeThemeId === 'light' ? (
+                  <Moon className="w-3.5 h-3.5" strokeWidth={1.6} />
+                ) : (
+                  <Sun className="w-3.5 h-3.5 text-amber-300" strokeWidth={1.6} />
+                )}
+              </button>
+
               {/* Theme Color Grade Picker */}
               <div className="relative" ref={themeDropdownRef}>
                 <button
                   type="button"
                   onClick={() => setThemeDropdownOpen(!themeDropdownOpen)}
-                  className="inline-flex items-center justify-center w-8 h-8 rounded-full text-neutral-300 hover:text-white hover:bg-white/[0.06] transition-colors cursor-pointer shrink-0"
+                  className="inline-flex items-center justify-center w-8 h-8 rounded-full text-neutral-300 hover:bg-black/5 transition-colors cursor-pointer shrink-0"
                   aria-label="Select Color Grade Theme"
                   title="Color Grade"
                 >
@@ -277,7 +300,21 @@ export const Navbar: React.FC = () => {
             </div>
 
             {/* Mobile Controls */}
-            <div className="flex items-center space-x-2 rtl:space-x-reverse lg:hidden shrink-0">
+            <div className="flex items-center space-x-1.5 sm:space-x-2 rtl:space-x-reverse lg:hidden shrink-0">
+              <button
+                type="button"
+                onClick={() => setActiveThemeId(activeThemeId === 'light' ? 'dark' : 'light')}
+                className="glass-pill-ghost w-9 h-9 rounded-full flex items-center justify-center active:scale-95 transition-transform cursor-pointer"
+                aria-label={activeThemeId === 'light' ? 'Switch to Dark Mode' : 'Switch to Daylight Gradient'}
+                title={activeThemeId === 'light' ? 'Dark Mode' : 'Daylight Gradient'}
+              >
+                {activeThemeId === 'light' ? (
+                  <Moon className="w-4 h-4" strokeWidth={1.6} />
+                ) : (
+                  <Sun className="w-4 h-4 text-amber-300" strokeWidth={1.6} />
+                )}
+              </button>
+
               <button
                 type="button"
                 onClick={() => {
@@ -285,7 +322,7 @@ export const Navbar: React.FC = () => {
                     language === 'en' ? 'bn' : language === 'bn' ? 'ar' : 'en';
                   setLanguage(nextLang);
                 }}
-                className="glass-pill-ghost px-3 h-8 text-[11px] font-semibold rounded-full"
+                className="glass-pill-ghost px-3 h-9 text-[11px] font-semibold rounded-full active:scale-95 transition-transform cursor-pointer"
                 aria-label="Toggle language"
               >
                 {language.toUpperCase()}
@@ -294,13 +331,13 @@ export const Navbar: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="glass-pill-ghost w-8 h-8 rounded-full flex items-center justify-center"
+                className="glass-pill-ghost w-9 h-9 rounded-full flex items-center justify-center active:scale-95 transition-transform cursor-pointer"
                 aria-label="Toggle navigation menu"
               >
                 {mobileMenuOpen ? (
-                  <X className="w-4 h-4" strokeWidth={1.5} />
+                  <X className="w-4 h-4" strokeWidth={1.6} />
                 ) : (
-                  <Menu className="w-4 h-4" strokeWidth={1.5} />
+                  <Menu className="w-4 h-4" strokeWidth={1.6} />
                 )}
               </button>
             </div>

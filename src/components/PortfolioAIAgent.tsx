@@ -235,13 +235,13 @@ export const PortfolioAIAgent: React.FC = () => {
   };
 
   return (
-    <div className="fixed bottom-5 right-5 z-40 flex flex-col items-end">
+    <div className="fixed bottom-4 right-3 sm:bottom-5 sm:right-5 z-40 flex flex-col items-end">
       {/* Chat Drawer Panel */}
       {isOpen && (
         <div
           role="dialog"
           aria-label="Portfolio AI Assistant"
-          className="mb-3 w-[calc(100vw-2.5rem)] sm:w-[390px] max-h-[78vh] sm:max-h-[560px] rounded-[24px] glass-showcase-card shadow-2xl flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-200"
+          className="mb-3 w-[calc(100vw-1.5rem)] sm:w-[390px] max-h-[74vh] sm:max-h-[560px] rounded-[22px] sm:rounded-[24px] glass-showcase-card shadow-2xl flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-200"
         >
           {/* Header */}
           <div className="px-4 py-3.5 border-b border-white/[0.08] flex items-center justify-between gap-2">

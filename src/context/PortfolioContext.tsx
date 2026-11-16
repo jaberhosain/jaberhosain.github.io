@@ -95,15 +95,21 @@ export const PortfolioProvider: React.FC<{ children: ReactNode }> = ({ children 
     }
   };
 
-  // Visitor theme state initialized from localStorage (default is 'dark' = current locked design)
+  // Visitor theme state initialized from localStorage (default is 'light' Daylight Gradient; users can switch to 'dark' anytime)
   const [activeThemeId, setActiveThemeIdState] = useState<ThemeId>(() => {
     try {
+      const migrated = localStorage.getItem('jabir_theme_daylight_default_v1');
+      if (!migrated) {
+        localStorage.setItem('jabir_theme_daylight_default_v1', '1');
+        localStorage.setItem('jabir_portfolio_theme', 'light');
+        return 'light';
+      }
       const saved = localStorage.getItem('jabir_portfolio_theme') as ThemeId;
       if (saved && ['dark', 'light', 'blue', 'green', 'purple', 'warm', 'custom'].includes(saved)) {
         return saved;
       }
     } catch {}
-    return 'dark';
+    return 'light';
   });
 
   const [customAccentColor, setCustomAccentColorState] = useState<string>(() => {
@@ -117,6 +123,7 @@ export const PortfolioProvider: React.FC<{ children: ReactNode }> = ({ children 
   const setActiveThemeId = (id: ThemeId) => {
     setActiveThemeIdState(id);
     try {
+      localStorage.setItem('jabir_theme_daylight_default_v1', '1');
       localStorage.setItem('jabir_portfolio_theme', id);
     } catch {}
   };
