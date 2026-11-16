@@ -119,7 +119,13 @@ function MainApp() {
       case 'about':
         return <AboutPage key="about" />;
       case 'videos':
-        return <VideosPage key="videos" onOpenVideo={(vid) => setActiveVideo(vid)} />;
+        return (
+          <VideosPage
+            key="videos"
+            onOpenVideo={(vid) => setActiveVideo(vid)}
+            onOpenLightbox={handleOpenLightbox}
+          />
+        );
       case 'design':
         return <DesignPage key="design" onOpenLightbox={handleOpenLightbox} />;
       case 'skills':

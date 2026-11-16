@@ -44,7 +44,15 @@ import {
   reauthenticateWithCredential,
   updatePassword
 } from '../../lib/firebase';
-import { ProjectItem, Lead, VideoShowcaseItem, ServiceItem, SkillCategory } from '../../types/portfolio';
+import {
+  ProjectItem,
+  Lead,
+  VideoShowcaseItem,
+  ServiceItem,
+  SkillCategory,
+  VideoSectionFormat,
+  VideoSubSectionTier
+} from '../../types/portfolio';
 import { ImageUploaderField } from './ImageUploaderField';
 import { ThemeEditor } from './ThemeEditor';
 import { EducationEditor } from './EducationEditor';
@@ -62,6 +70,12 @@ import {
   fetchVideoAutoMetadata,
   VimeoIcon
 } from '../../lib/videoUtils';
+import {
+  VIDEO_SECTION_META,
+  VIDEO_SUBSECTION_META,
+  resolveVideoSection,
+  resolveVideoSubSection
+} from '../../lib/videoOrganization';
 import { resolveBehanceProjectFromUrl } from '../../lib/imageUrlResolver';
 import { BestWorkGraphicEditor } from './BestWorkGraphicEditor';
 import { BestWorkVideoEditor } from './BestWorkVideoEditor';
@@ -195,6 +209,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToSite }) 
   const [fetchingOgId, setFetchingOgId] = useState<string | null>(null);
   const [ogFetchNotes, setOgFetchNotes] = useState<Record<string, string>>({});
   const [videoUploadProgress, setVideoUploadProgress] = useState<Record<number, number>>({});
+  const [videoAdminFilter, setVideoAdminFilter] = useState<'all' | VideoSectionFormat>('all');
 
   // Behance project group extraction states
   const [behanceImportUrl, setBehanceImportUrl] = useState('');
@@ -500,21 +515,26 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToSite }) 
 
   // Add a new video item to the list
   const handleAddVideo = () => {
+    const targetSection: VideoSectionFormat =
+      videoAdminFilter === 'all' ? 'reels' : videoAdminFilter;
     const newVideo: VideoShowcaseItem = {
-      id: 'fb-vid-' + Date.now(),
+      id: 'vid-' + Date.now(),
       title: { en: '', bn: '', ar: '' },
       description: { en: '', bn: '', ar: '' },
       videoType: 'facebook',
       videoUrl: '',
       thumbnailUrl: '',
       customThumbnailUrl: '',
+      duration: '',
+      videoSection: targetSection,
+      subSection: 'premium',
       order: (draftPortfolio.videos?.length || 0) + 1
     };
     updateDraft(prev => ({
       ...prev,
       videos: [...(prev.videos || []), newVideo]
     }));
-    showToast('New video slot added. Enter URL and configure thumbnail.');
+    showToast('New video slot added. Choose section, enter URL and configure thumbnail.');
   };
 
   // Username + Password authentication (maps username to email-style ID internally)
@@ -2393,9 +2413,62 @@ function doPost(e) {
                 </p>
               </div>
 
+              {/* Creative Organization Section Filter Bar */}
+              <div className="p-4 rounded-xl bg-[#171A21] border border-white/[0.08] space-y-2.5">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-xs font-semibold text-[#F4F0E8]">
+                    Creative Organization Filter (Reels 9:16 vs Video Editing Sub-Sections)
+                  </span>
+                  <span className="text-[11px] text-[#8E8A82]">
+                    Assign each video below to organize Reels &amp; Video sections automatically
+                  </span>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => setVideoAdminFilter('all')}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer tabular-nums ${
+                      videoAdminFilter === 'all'
+                        ? 'bg-[#E4583B] text-white font-semibold'
+                        : 'bg-[#0B0C0F] text-[#A7A298] hover:text-white border border-white/[0.08]'
+                    }`}
+                  >
+                    All ({draftPortfolio.videos?.length || 0})
+                  </button>
+                  {VIDEO_SECTION_META.map((sec) => {
+                    const count = (draftPortfolio.videos || []).filter(
+                      (item) => resolveVideoSection(item, item.title?.en || '', item.description?.en || '') === sec.id
+                    ).length;
+                    return (
+                      <button
+                        key={sec.id}
+                        type="button"
+                        onClick={() => setVideoAdminFilter(sec.id)}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer tabular-nums ${
+                          videoAdminFilter === sec.id
+                            ? 'bg-[#E4583B] text-white font-semibold'
+                            : 'bg-[#0B0C0F] text-[#A7A298] hover:text-white border border-white/[0.08]'
+                        }`}
+                      >
+                        {sec.label.en} ({count})
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
               {/* Videos List */}
               <div className="space-y-5">
                 {draftPortfolio.videos?.map((vid, idx) => {
+                  const resolvedSection = resolveVideoSection(
+                    vid,
+                    vid.title?.en || '',
+                    vid.description?.en || ''
+                  );
+                  const resolvedSubSection = resolveVideoSubSection(vid, vid.category === 'video_best');
+                  if (videoAdminFilter !== 'all' && resolvedSection !== videoAdminFilter) {
+                    return null;
+                  }
                   const ytId = extractYouTubeId(vid.videoUrl);
                   const vimeoInfo = extractVimeoInfo(vid.videoUrl);
                   const isVimeo = vid.videoType === 'vimeo' || Boolean(vimeoInfo.id);
@@ -2517,6 +2590,74 @@ function doPost(e) {
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
+                        </div>
+                      </div>
+
+                      {/* Section Format, Sub-Section Tier & Duration Classification */}
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3.5 rounded-xl bg-[#121419] border border-white/[0.07]">
+                        <div>
+                          <label className="block text-[11px] font-medium text-[#A7A298] mb-1">
+                            Section Placement
+                          </label>
+                          <select
+                            value={vid.videoSection || resolvedSection}
+                            onChange={(e) => {
+                              const val = e.target.value as VideoSectionFormat;
+                              updateDraft(prev => ({
+                                ...prev,
+                                videos: prev.videos.map((v, i) => i === idx ? { ...v, videoSection: val } : v)
+                              }));
+                            }}
+                            className="w-full px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] text-xs font-medium text-[#F4F0E8] focus:border-[#E4583B] focus:outline-none"
+                          >
+                            {VIDEO_SECTION_META.map((sec) => (
+                              <option key={sec.id} value={sec.id}>
+                                {sec.isVerticalReel ? `${sec.label.en} (9:16)` : `${sec.label.en} (16:9)`}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="block text-[11px] font-medium text-[#A7A298] mb-1">
+                            Sub-Section Tier
+                          </label>
+                          <select
+                            value={vid.subSection || resolvedSubSection}
+                            onChange={(e) => {
+                              const val = e.target.value as VideoSubSectionTier;
+                              updateDraft(prev => ({
+                                ...prev,
+                                videos: prev.videos.map((v, i) => i === idx ? { ...v, subSection: val } : v)
+                              }));
+                            }}
+                            className="w-full px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] text-xs font-medium text-[#F4F0E8] focus:border-[#E4583B] focus:outline-none"
+                          >
+                            {VIDEO_SUBSECTION_META.map((tier) => (
+                              <option key={tier.id} value={tier.id}>
+                                {tier.label.en}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="block text-[11px] font-medium text-[#A7A298] mb-1">
+                            Duration (e.g. 0:51)
+                          </label>
+                          <input
+                            type="text"
+                            value={vid.duration || ''}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              updateDraft(prev => ({
+                                ...prev,
+                                videos: prev.videos.map((v, i) => i === idx ? { ...v, duration: val } : v)
+                              }));
+                            }}
+                            placeholder="0:51"
+                            className="w-full px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] text-xs font-mono tabular-nums text-[#F4F0E8] focus:border-[#E4583B] focus:outline-none"
+                          />
                         </div>
                       </div>
 
@@ -2757,6 +2898,42 @@ function doPost(e) {
                             className="px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] text-xs text-[#F4F0E8] focus:border-[#E4583B] focus:outline-none"
                           />
                         </div>
+                      </div>
+
+                      {/* Optional Description (EN / BN) */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <input
+                          type="text"
+                          placeholder="Short description / client note (EN)"
+                          value={vid.description?.en || ''}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            updateDraft(prev => ({
+                              ...prev,
+                              videos: prev.videos.map((v, i) => i === idx ? {
+                                ...v,
+                                description: { ...(v.description || { en: '', bn: '', ar: '' }), en: val }
+                              } : v)
+                            }));
+                          }}
+                          className="px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] text-xs text-[#F4F0E8] focus:border-[#E4583B] focus:outline-none"
+                        />
+                        <input
+                          type="text"
+                          placeholder="সংক্ষিপ্ত বিবরণ (বাংলা - ঐচ্ছিক)"
+                          value={vid.description?.bn || ''}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            updateDraft(prev => ({
+                              ...prev,
+                              videos: prev.videos.map((v, i) => i === idx ? {
+                                ...v,
+                                description: { ...(v.description || { en: '', bn: '', ar: '' }), bn: val }
+                              } : v)
+                            }));
+                          }}
+                          className="px-3 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] text-xs text-[#F4F0E8] focus:border-[#E4583B] focus:outline-none"
+                        />
                       </div>
                     </div>
                   );

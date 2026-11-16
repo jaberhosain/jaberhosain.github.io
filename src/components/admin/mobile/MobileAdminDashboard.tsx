@@ -48,8 +48,16 @@ import {
   Lead,
   ThemeId,
   ServiceItem,
-  SkillCategory
+  SkillCategory,
+  VideoSectionFormat,
+  VideoSubSectionTier
 } from '../../../types/portfolio';
+import {
+  VIDEO_SECTION_META,
+  VIDEO_SUBSECTION_META,
+  resolveVideoSection,
+  resolveVideoSubSection
+} from '../../../lib/videoOrganization';
 import { defaultThemeColors, defaultThemeFonts } from '../../../data/initialPortfolio';
 import { EducationEditor } from '../EducationEditor';
 import { HeroEditor } from '../HeroEditor';
@@ -2001,7 +2009,7 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
                           videos: prev.videos.map((v, i) => (i === idx ? { ...v, videoType: val } : v)),
                         }));
                       }}
-                      className="w-full px-2.5 py-2 rounded-xl bg-[#0B0C0F] border border-white/[0.08] text-xs text-[#F4F0E8] focus:border-[#E4583B] focus:outline-none min-h-[40px]"
+                      className="w-full px-2.5 py-2 rounded-xl bg-[#0B0C0F] border border-white/[0.08] text-xs text-[#F4F0E8] focus:border-[#E4583B] focus:outline-none min-h-[44px]"
                     >
                       <option value="vimeo">Vimeo</option>
                       <option value="youtube">YouTube</option>
@@ -2024,9 +2032,78 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
                           videos: prev.videos.map((v, i) => (i === idx ? { ...v, order: val } : v)),
                         }));
                       }}
-                      className="w-full px-2.5 py-2 rounded-xl bg-[#0B0C0F] border border-white/[0.08] text-xs text-[#F4F0E8] tabular-nums min-h-[40px]"
+                      className="w-full px-2.5 py-2 rounded-xl bg-[#0B0C0F] border border-white/[0.08] text-xs text-[#F4F0E8] tabular-nums min-h-[44px]"
                     />
                   </div>
+                </div>
+
+                {/* Section Placement, Sub-Section Tier & Duration */}
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="block text-[11px] text-[#8E8A82] mb-1">
+                      Section Placement
+                    </label>
+                    <select
+                      value={vid.videoSection || resolveVideoSection(vid, vid.title?.en || '')}
+                      onChange={(e) => {
+                        const val = e.target.value as VideoSectionFormat;
+                        updateDraft((prev) => ({
+                          ...prev,
+                          videos: prev.videos.map((v, i) => (i === idx ? { ...v, videoSection: val } : v)),
+                        }));
+                      }}
+                      className="w-full px-2.5 py-2 rounded-xl bg-[#0B0C0F] border border-white/[0.08] text-xs text-[#F4F0E8] focus:border-[#E4583B] focus:outline-none min-h-[44px]"
+                    >
+                      {VIDEO_SECTION_META.map((sec) => (
+                        <option key={sec.id} value={sec.id}>
+                          {sec.isVerticalReel ? `${sec.label.en} (9:16)` : `${sec.label.en} (16:9)`}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] text-[#8E8A82] mb-1">
+                      Sub-Section Tier
+                    </label>
+                    <select
+                      value={vid.subSection || resolveVideoSubSection(vid)}
+                      onChange={(e) => {
+                        const val = e.target.value as VideoSubSectionTier;
+                        updateDraft((prev) => ({
+                          ...prev,
+                          videos: prev.videos.map((v, i) => (i === idx ? { ...v, subSection: val } : v)),
+                        }));
+                      }}
+                      className="w-full px-2.5 py-2 rounded-xl bg-[#0B0C0F] border border-white/[0.08] text-xs text-[#F4F0E8] focus:border-[#E4583B] focus:outline-none min-h-[44px]"
+                    >
+                      {VIDEO_SUBSECTION_META.map((tier) => (
+                        <option key={tier.id} value={tier.id}>
+                          {tier.label.en}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-[11px] text-[#8E8A82] mb-1">
+                    Duration (e.g. 0:51)
+                  </label>
+                  <input
+                    type="text"
+                    value={vid.duration || ''}
+                    onChange={(e) =>
+                      updateDraft((prev) => ({
+                        ...prev,
+                        videos: prev.videos.map((v, i) =>
+                          i === idx ? { ...v, duration: e.target.value } : v
+                        ),
+                      }))
+                    }
+                    placeholder="0:51"
+                    className="w-full px-3 py-2 rounded-xl bg-[#0B0C0F] border border-white/[0.08] text-xs font-mono tabular-nums text-[#F4F0E8] focus:border-[#E4583B] focus:outline-none min-h-[44px]"
+                  />
                 </div>
 
                 <div>

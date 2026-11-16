@@ -8,7 +8,14 @@ import {
   Wrench,
   MessageSquare,
   ExternalLink,
-  Youtube
+  Youtube,
+  Star,
+  ChevronDown,
+  Film,
+  Sparkles,
+  Layers,
+  CheckCircle2,
+  ArrowUpRight
 } from 'lucide-react';
 import { usePortfolio } from '../context/PortfolioContext';
 import { useNavigation } from '../context/NavigationContext';
@@ -28,6 +35,7 @@ import { StudioArrowRight, StudioGlassIcon } from './common/StudioIcon';
 import { EditableElement } from './common/EditableElement';
 import { StudioSectionShell } from './common/StudioSectionShell';
 import { detectVideoType } from '../lib/videoUtils';
+import { resolveVideoSection } from '../lib/videoOrganization';
 import { RevealContactPill } from './common/RevealContactPill';
 
 interface HomeHighlightsProps {
@@ -57,7 +65,7 @@ export const HomeHighlights: React.FC<HomeHighlightsProps> = ({
   onOpenVideo
 }) => {
   const { portfolio, ui, loc, language } = usePortfolio();
-  const { navigateTo, focusMode } = useNavigation();
+  const { navigateTo, focusMode, setFocusMode } = useNavigation();
   const { sectionOrder: liveSectionOrder } = useDesignOverrides();
 
   const visibleVideos = [...(portfolio.videos || [])]
@@ -68,9 +76,10 @@ export const HomeHighlights: React.FC<HomeHighlightsProps> = ({
     .filter((v: any) => v.visible !== false)
     .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
 
-  const [slideSource, setSlideSource] = useState<'projects' | 'best'>(
-    visibleVideos.length > 0 ? 'projects' : 'best'
+  const [videoFormatTab, setVideoFormatTab] = useState<'all' | 'reels' | 'long' | 'motion' | 'best'>(
+    'all'
   );
+  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
   const [brokenGraphicIds, setBrokenGraphicIds] = useState<Record<string, boolean>>({});
 
   const visibleGraphicProjects = [...(portfolio.projects || [])]
@@ -112,12 +121,35 @@ export const HomeHighlights: React.FC<HomeHighlightsProps> = ({
     }
   }, [focusMode]);
 
-  const activeSlideVideos =
-    slideSource === 'best' && visibleBestVideos.length > 0
-      ? visibleBestVideos
-      : visibleVideos.length > 0
-      ? visibleVideos
-      : visibleBestVideos;
+  const combinedAllVideos =
+    visibleVideos.length > 0 ? visibleVideos : visibleBestVideos;
+
+  const activeSlideVideos = (() => {
+    if (videoFormatTab === 'best' && visibleBestVideos.length > 0) {
+      return visibleBestVideos;
+    }
+    if (videoFormatTab === 'reels') {
+      const reelFiltered = combinedAllVideos.filter(
+        (v: any) => resolveVideoSection(v, loc(v.title), loc(v.description)) === 'reels'
+      );
+      return reelFiltered.length > 0 ? reelFiltered : combinedAllVideos;
+    }
+    if (videoFormatTab === 'long') {
+      const longFiltered = combinedAllVideos.filter((v: any) => {
+        const sec = resolveVideoSection(v, loc(v.title), loc(v.description));
+        return sec === 'long_video' || sec === 'documentary' || sec === 'full_production';
+      });
+      return longFiltered.length > 0 ? longFiltered : combinedAllVideos;
+    }
+    if (videoFormatTab === 'motion') {
+      const motionFiltered = combinedAllVideos.filter((v: any) => {
+        const sec = resolveVideoSection(v, loc(v.title), loc(v.description));
+        return sec === 'motion_graphics' || sec === 'cgi' || sec === 'saas';
+      });
+      return motionFiltered.length > 0 ? motionFiltered : combinedAllVideos;
+    }
+    return combinedAllVideos;
+  })();
 
   // Dynamic Case Studies from PortfolioContext
   const rawCaseStudies: CaseStudyItem[] = [...(portfolio.caseStudies || [])]
@@ -491,32 +523,48 @@ export const HomeHighlights: React.FC<HomeHighlightsProps> = ({
                     </a>
                   )}
 
-                  {visibleVideos.length > 0 && visibleBestVideos.length > 0 && (
-                    <div className="inline-flex items-center p-1 rounded-full glass-pill-ghost">
+                  {/* Categorized Reels / Video Sub-Section Filter Bar */}
+                  <div className="inline-flex flex-wrap items-center gap-1 p-1 rounded-full glass-pill-ghost">
+                    {[
+                      {
+                        id: 'all' as const,
+                        label: language === 'bn' ? 'সব ভিডিও' : 'All Cuts'
+                      },
+                      {
+                        id: 'reels' as const,
+                        label: language === 'bn' ? 'রিলস (৯:১৬)' : 'Reels (9:16)'
+                      },
+                      {
+                        id: 'long' as const,
+                        label: language === 'bn' ? 'লং ভিডিও' : 'Long Video'
+                      },
+                      {
+                        id: 'motion' as const,
+                        label: language === 'bn' ? 'মোশন' : 'Motion'
+                      },
+                      ...(visibleBestVideos.length > 0
+                        ? [
+                            {
+                              id: 'best' as const,
+                              label: `${language === 'bn' ? 'সেরা কাজ' : 'Best Work'} (${visibleBestVideos.length})`
+                            }
+                          ]
+                        : [])
+                    ].map((tab) => (
                       <button
+                        key={tab.id}
                         type="button"
-                        onClick={() => setSlideSource('projects')}
-                        className={`px-3.5 py-1 rounded-full text-xs font-medium transition-colors whitespace-nowrap cursor-pointer ${
-                          slideSource === 'projects'
-                            ? 'bg-[#F4F0E8] text-[#111318]'
+                        onClick={() => setVideoFormatTab(tab.id)}
+                        className={`px-3.5 py-1.5 rounded-full text-xs font-medium transition-colors whitespace-nowrap cursor-pointer ${
+                          videoFormatTab === tab.id
+                            ? 'bg-[#E4583B] text-white'
                             : 'text-[#A7A298] hover:text-[#F4F0E8]'
                         }`}
                       >
-                        {ui.projects.tabVideo} ({visibleVideos.length})
+                        {tab.label}
                       </button>
-                      <button
-                        type="button"
-                        onClick={() => setSlideSource('best')}
-                        className={`px-3.5 py-1 rounded-full text-xs font-medium transition-colors whitespace-nowrap cursor-pointer ${
-                          slideSource === 'best'
-                            ? 'bg-[#F4F0E8] text-[#111318]'
-                            : 'text-[#A7A298] hover:text-[#F4F0E8]'
-                        }`}
-                      >
-                        {language === 'bn' ? 'সেরা কাজ' : 'Best Work'} ({visibleBestVideos.length})
-                      </button>
-                    </div>
-                  )}
+                    ))}
+                  </div>
 
                   <button
                     type="button"
@@ -834,10 +882,9 @@ export const HomeHighlights: React.FC<HomeHighlightsProps> = ({
       }
 
       case 'trustTestimonials': {
-        const showStats = portfolio.showHomeStats !== false && visibleStats.length > 0;
         const showTestimonials =
           portfolio.testimonialsSection?.visible !== false && visibleTestimonials.length > 0;
-        if (!showStats && !showTestimonials) return null;
+        if (!showTestimonials) return null;
 
         return (
           <StudioSectionShell
@@ -847,80 +894,55 @@ export const HomeHighlights: React.FC<HomeHighlightsProps> = ({
             customLayerTarget="trust-testimonials"
             className="py-20 bg-[#121419]/80 border-t border-white/[0.07]"
           >
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
-              {/* Editable Trust Stats Row */}
-              {showStats && (
-                <div
-                  className={`grid grid-cols-1 gap-6 ${
-                    visibleStats.length === 1
-                      ? 'sm:grid-cols-1 max-w-md mx-auto'
-                      : visibleStats.length === 2
-                      ? 'sm:grid-cols-2 max-w-3xl mx-auto'
-                      : 'sm:grid-cols-3'
-                  }`}
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <Reveal3D direction="up" className="text-center max-w-2xl mx-auto mb-12">
+                <EditableElement
+                  id="testimonials.tag"
+                  label="Testimonials Tag"
+                  as="span"
+                  className="text-[11px] font-sans uppercase tracking-[0.22em] text-[#E4583B] block mb-2"
                 >
-                  {visibleStats.map((stat, idx) => (
-                    <Reveal3D key={stat.id || idx} direction="up" delay={idx * 70}>
-                      <div className="p-6 rounded-[22px] glass-showcase-card text-center">
-                        <EditableElement
-                          id={`homeStat.${stat.id}.value`}
-                          label={`Stat Value: ${stat.value}`}
-                          as="div"
-                          className="font-display text-3xl sm:text-4xl font-extrabold text-[#F4F0E8] tabular-nums"
-                        >
-                          {stat.value}
-                        </EditableElement>
-                        <EditableElement
-                          id={`homeStat.${stat.id}.label`}
-                          label={`Stat Label: ${loc(stat.label)}`}
-                          as="div"
-                          className="text-xs uppercase tracking-[0.18em] text-[#A7A298] mt-2"
-                        >
-                          {loc(stat.label)}
-                        </EditableElement>
-                      </div>
-                    </Reveal3D>
-                  ))}
-                </div>
-              )}
+                  {loc(portfolio.testimonialsSection?.tag) ||
+                    (language === 'bn' ? 'ক্লায়েন্টদের মতামত' : 'Client Reviews & Proof')}
+                </EditableElement>
+                <EditableElement
+                  id="testimonials.title"
+                  label="Testimonials Heading"
+                  as="h2"
+                  className="font-display text-2xl sm:text-4xl font-bold text-[#F4F0E8] tracking-tight"
+                >
+                  {loc(portfolio.testimonialsSection?.title) ||
+                    (language === 'bn' ? 'ক্লায়েন্টরা যা বলেন' : 'Trusted by Creators & Brands')}
+                </EditableElement>
+              </Reveal3D>
 
-              {/* Client Testimonials */}
-              {showTestimonials && (
-                <div>
-                  <Reveal3D direction="up" className="text-center max-w-2xl mx-auto mb-10">
-                    <EditableElement
-                      id="testimonials.tag"
-                      label="Testimonials Tag"
-                      as="span"
-                      className="text-[11px] font-sans uppercase tracking-[0.22em] text-[#E4583B] block mb-2"
-                    >
-                      {loc(portfolio.testimonialsSection?.tag) ||
-                        (language === 'bn' ? 'ক্লায়েন্টদের মতামত' : 'Client Trust & Feedback')}
-                    </EditableElement>
-                    <EditableElement
-                      id="testimonials.title"
-                      label="Testimonials Heading"
-                      as="h2"
-                      className="font-display text-2xl sm:text-4xl font-bold text-[#F4F0E8] tracking-tight"
-                    >
-                      {loc(portfolio.testimonialsSection?.title) ||
-                        (language === 'bn' ? 'ক্লায়েন্টরা যা বলেন' : 'What Clients & Collaborators Say')}
-                    </EditableElement>
-                  </Reveal3D>
-
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {visibleTestimonials.map((item, idx) => (
-                      <Reveal3D key={item.id} direction="up" delay={idx * 85}>
-                        <div className="h-full p-6 rounded-[22px] glass-showcase-card flex flex-col justify-between space-y-5">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {visibleTestimonials.map((item, idx) => {
+                  const stars = Math.max(1, Math.min(5, item.rating || 5));
+                  return (
+                    <Reveal3D key={item.id} direction="up" delay={idx * 85}>
+                      <div className="h-full p-6 rounded-[22px] glass-showcase-card flex flex-col justify-between space-y-5">
+                        <div className="space-y-4">
+                          <div className="flex items-center gap-1" aria-label={`${stars} out of 5 stars`}>
+                            {Array.from({ length: stars }).map((_, sIdx) => (
+                              <Star
+                                key={sIdx}
+                                className="w-3.5 h-3.5 fill-amber-400 text-amber-400"
+                              />
+                            ))}
+                          </div>
                           <EditableElement
                             id={`testimonial.${item.id}.quote`}
                             label={`Quote by ${item.clientName}`}
                             as="p"
-                            className="text-xs sm:text-sm text-[#DDD1BE] leading-relaxed italic"
+                            className="text-xs sm:text-sm text-[#DDD1BE] leading-relaxed"
                           >
                             “{loc(item.quote)}”
                           </EditableElement>
-                          <div className="pt-4 border-t border-white/[0.08]">
+                        </div>
+
+                        <div className="pt-4 border-t border-white/[0.08] flex items-center justify-between gap-2">
+                          <div>
                             <EditableElement
                               id={`testimonial.${item.id}.name`}
                               label={`Client Name: ${item.clientName}`}
@@ -938,12 +960,13 @@ export const HomeHighlights: React.FC<HomeHighlightsProps> = ({
                               {loc(item.clientRole)}
                             </EditableElement>
                           </div>
+                          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" strokeWidth={1.5} />
                         </div>
-                      </Reveal3D>
-                    ))}
-                  </div>
-                </div>
-              )}
+                      </div>
+                    </Reveal3D>
+                  );
+                })}
+              </div>
             </div>
           </StudioSectionShell>
         );
@@ -1067,11 +1090,350 @@ export const HomeHighlights: React.FC<HomeHighlightsProps> = ({
     }
   };
 
+  const agencyServices = [
+    {
+      id: 'svc-reels',
+      icon: Film,
+      mode: 'video' as const,
+      title:
+        language === 'bn'
+          ? 'শর্ট-ফর্ম রিলস ও অ্যাডস'
+          : language === 'ar'
+          ? 'مونتاج الريلز والإعلانات القصيرة'
+          : 'Short-Form Reels & Ad Cuts',
+      desc:
+        language === 'bn'
+          ? 'প্রথম ৩ সেকেন্ডে দর্শক আটকে রাখার হুক, ডায়নামিক ক্যাপশন, সাউন্ড ডিজাইন ও হাই-রিটেনশন পেসিং।'
+          : language === 'ar'
+          ? 'توليف سريع يجذب الانتباه في أول 3 ثوانٍ مع نصوص حركية وتصميم صوتي.'
+          : 'Hook-engineered Reels, TikToks, and Meta video ads with dynamic captions, SFX, and pacing.'
+    },
+    {
+      id: 'svc-long',
+      icon: Video,
+      mode: 'video' as const,
+      title:
+        language === 'bn'
+          ? 'ইউটিউব ও ডকুমেন্টারি এডিটিং'
+          : language === 'ar'
+          ? 'مونتاج يوتيوب والأفلام الوثائقية'
+          : 'YouTube & Documentary Storytelling',
+      desc:
+        language === 'bn'
+          ? 'লং-ফর্ম স্টোরিটেলিং, বি-রোল লেয়ারিং, অডিও মাস্টারিং এবং সিনেমাটিক কালার গ্রেডিং।'
+          : language === 'ar'
+          ? 'سرد قصصي طويل وتدرج لوني سينمائي ومعالجة صوتية احترافية.'
+          : 'Narrative structuring, B-roll pacing, sound mixing, and cinema-grade color grading for creators.'
+    },
+    {
+      id: 'svc-motion',
+      icon: Sparkles,
+      mode: 'video' as const,
+      title:
+        language === 'bn'
+          ? 'মোশন গ্রাফিক্স ও ৩D প্রোমো'
+          : language === 'ar'
+          ? 'موشن جرافيك وإعلانات ثلاثية الأبعاد'
+          : 'Motion Graphics & 3D Promos',
+      desc:
+        language === 'bn'
+          ? 'After Effects-এ কাইনেটিক টাইপোগ্রাফি, এক্সপ্লেইনার এবং ব্র্যান্ড প্রোমো ভিজ্যুয়াল অ্যানিমেশন।'
+          : language === 'ar'
+          ? 'تايبوجرافي حركي وإعلانات موشن احترافية عبر After Effects.'
+          : 'Kinetic typography, 3D layered motion promos, and custom transitions built in After Effects.'
+    },
+    {
+      id: 'svc-design',
+      icon: Layers,
+      mode: 'graphic' as const,
+      title:
+        language === 'bn'
+          ? 'গ্রাফিক ডিজাইন ও হাই-CTR থাম্বনেইল'
+          : language === 'ar'
+          ? 'التصميم الجرافيكي والمصغرات'
+          : 'Brand Posters & High-CTR Thumbnails',
+      desc:
+        language === 'bn'
+          ? 'ব্র্যান্ড পোস্টার, ইউটিউব থাম্বনেইল, সোশ্যাল মিডিয়া ক্যাম্পেইন ও কাস্টম ভিজ্যুয়াল আইডেন্টিটি।'
+          : language === 'ar'
+          ? 'تصميم بوسترات الهوية التجارية وصور يوتيوب المصغرة الجذابة.'
+          : 'Scroll-stopping YouTube thumbnails, campaign posters, and unified visual systems in Photoshop & Illustrator.'
+    }
+  ];
+
+  const workflowSteps = [...(portfolio.workflow || [])].sort(
+    (a, b) => (a.order ?? 0) - (b.order ?? 0)
+  );
+
+  const faqItems =
+    language === 'bn'
+      ? [
+          {
+            q: 'কিভাবে আপনার সাথে প্রজেক্ট শুরু করবো এবং ফাইল পাঠাবো?',
+            a: 'হোয়াটসঅ্যাপ বা ইমেইলের মাধ্যমে আপনার আইডিয়া ও রেফারেন্স শেয়ার করুন। গুগল ড্রাইভ বা মেগা লিংকের মাধ্যমে র ফুটেজ পাঠালে আমি সাথে সাথে এডিটিং শুরু করি।'
+          },
+          {
+            q: 'একটি ভিডিও বা ডিজাইন ডেলিভারি পেতে সাধারণত কত সময় লাগে?',
+            a: 'শর্ট রিলস বা সোশ্যাল ডিজাইন ২৪–৪৮ ঘণ্টার মধ্যে এবং ইউটিউব লং ভিডিও বা ডকুমেন্টারি প্রজেক্টের পরিধি অনুযায়ী ৩–৫ দিনের মধ্যে ডেলিভারি দেওয়া হয়।'
+          },
+          {
+            q: 'কাজ ডেলিভারির পর রিভিশন (সংশোধন) কি অন্তর্ভুক্ত থাকে?',
+            a: 'হ্যাঁ, প্রতিটি প্রজেক্টে আপনার পূর্ণ সন্তুষ্টি নিশ্চিত করতে ফ্রি রিভিশন সুবিধা থাকে, যাতে পেসিং, টেক্সট বা কালার একদম আপনার চাহিদামতো হয়।'
+          },
+          {
+            q: 'মাসিক কন্ট্রাক্ট বা রেগুলার চ্যানেল এডিটর হিসেবে কি কাজ করেন?',
+            a: 'অবশ্যই। ইউটিউবার, ব্র্যান্ড এবং এজেন্সির জন্য মাসিক প্যাকেজ ও নিয়মিত ডেডিকেটেড এডিটিং ও ডিজাইন সাপোর্ট দেওয়া হয়।'
+          }
+        ]
+      : language === 'ar'
+      ? [
+          {
+            q: 'كيف نبدأ المشروع وكيف أرسل ملفات التصوير؟',
+            a: 'تواصل معي عبر واتساب أو البريد الإلكتروني، ثم شاركني الملفات عبر Google Drive لنبدأ التنفيذ مباشرة.'
+          },
+          {
+            q: 'كم تستغرق مدة التسليم المعتادة؟',
+            a: 'يتم تسليم مقاطع الريلز والتصاميم خلال 24-48 ساعة، بينما تستغرق فيديوهات يوتيوب الطويلة 3-5 أيام حسب التفاصيل.'
+          },
+          {
+            q: 'هل التعديلات مشمولة بعد التسليم؟',
+            a: 'نعم، تتضمن كل خدمة تعديلات مجانية لضمان رضاك التام عن النتيجة النهائية.'
+          },
+          {
+            q: 'هل تتوفر عقود شهرية للقنوات والعلامات التجارية؟',
+            a: 'بالتأكيد، أقدم باقات شهرية منتظمة للمونتاج والتصميم لصناع المحتوى والشركات.'
+          }
+        ]
+      : [
+          {
+            q: 'How do we start a project and share raw footage?',
+            a: 'Reveal my Email or WhatsApp below to share your brief and reference style. You can upload raw clips via Google Drive, and I handle organization, cutting, and visual polish.'
+          },
+          {
+            q: 'What is your typical turnaround time?',
+            a: 'Short-form Reels and static campaign posters deliver within 24–48 hours. Long-form YouTube or documentary edits typically take 3–5 business days depending on runtime.'
+          },
+          {
+            q: 'Are revisions included after delivery?',
+            a: 'Yes. Every project includes structured revision rounds on pacing, captions, color grading, or typography so the final master matches your brand standards.'
+          },
+          {
+            q: 'Do you take ongoing monthly retainers for creators & brands?',
+            a: 'Yes — I collaborate on monthly retainers for recurring YouTube channels, Reels calendars, and Meta ad creative pipelines without agency overhead.'
+          }
+        ];
+
   return (
     <div className="bg-transparent border-t border-white/[0.08]">
+      {/* 1. Sayeed-Fahad-Style Immediate Impact & Credibility Strip right after Hero */}
+      {portfolio.showHomeStats !== false && visibleStats.length > 0 && (
+        <section
+          aria-label="Studio Impact Metrics"
+          className="py-12 sm:py-14 bg-[#121419]/85 border-b border-white/[0.07]"
+        >
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+              {visibleStats.map((stat, idx) => (
+                <Reveal3D key={stat.id || idx} direction="up" delay={idx * 65}>
+                  <div className="p-6 rounded-[22px] glass-showcase-card flex items-center justify-between gap-4">
+                    <div>
+                      <EditableElement
+                        id={`homeStat.${stat.id}.value`}
+                        label={`Stat Value: ${stat.value}`}
+                        as="div"
+                        className="font-display text-3xl sm:text-4xl font-extrabold text-[#F4F0E8] tabular-nums"
+                      >
+                        {stat.value}
+                      </EditableElement>
+                      <EditableElement
+                        id={`homeStat.${stat.id}.label`}
+                        label={`Stat Label: ${loc(stat.label)}`}
+                        as="div"
+                        className="text-xs uppercase tracking-[0.16em] text-[#A7A298] mt-1"
+                      >
+                        {loc(stat.label)}
+                      </EditableElement>
+                    </div>
+                    <span className="text-xs font-mono text-[#E4583B]/80 tabular-nums">
+                      0{idx + 1}
+                    </span>
+                  </div>
+                </Reveal3D>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* 2. Dynamic Portfolio, Case Studies, Reviews & Directory Flow */}
       {effectiveSectionOrder.map((secId) => renderSection(secId))}
 
-      {/* Direct Contact Bridge: Email, WhatsApp, Behance & "Let's work together" */}
+      {/* 3. Pure Creative Services & Deliverables Grid (Agency Positioning Without Courses) */}
+      <section
+        id="services-overview"
+        className="py-20 bg-[#14171E]/82 border-t border-white/[0.07]"
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-12">
+            <Reveal3D direction="left">
+              <span className="text-[11px] font-sans uppercase tracking-[0.22em] text-[#E4583B] block mb-2">
+                {language === 'bn' ? 'আমি যেভাবে সাহায্য করতে পারি' : 'Creative Services'}
+              </span>
+              <h2 className="font-display text-2xl sm:text-4xl font-bold text-[#F4F0E8] tracking-tight">
+                {language === 'bn'
+                  ? 'আপনার ব্র্যান্ড ও কনটেন্টের জন্য সার্ভিসসমূহ'
+                  : 'Built for Creators, Brands & Agencies'}
+              </h2>
+            </Reveal3D>
+            <Reveal3D direction="right" delay={80}>
+              <button
+                type="button"
+                onClick={() => navigateTo('skills')}
+                className="inline-flex items-center space-x-2 rtl:space-x-reverse px-4 py-2 rounded-full glass-pill-ghost text-xs font-medium cursor-pointer"
+              >
+                <span>{language === 'bn' ? 'সব সার্ভিস ও দক্ষতা' : 'Explore Services & Stack'}</span>
+                <ArrowUpRight className="w-3.5 h-3.5" />
+              </button>
+            </Reveal3D>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {agencyServices.map((srv, idx) => {
+              const Icon = srv.icon;
+              return (
+                <Reveal3D key={srv.id} direction="up" delay={idx * 70}>
+                  <div className="h-full p-7 rounded-[24px] glass-showcase-card flex flex-col justify-between gap-6">
+                    <div className="space-y-4">
+                      <StudioGlassIcon size="md">
+                        <Icon className="w-4 h-4 text-[#F4F0E8]" strokeWidth={1.5} />
+                      </StudioGlassIcon>
+                      <div>
+                        <h3 className="text-lg sm:text-xl font-bold text-[#F4F0E8] mb-2">
+                          {srv.title}
+                        </h3>
+                        <p className="text-xs sm:text-sm text-[#A7A298] leading-relaxed">
+                          {srv.desc}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="pt-4 border-t border-white/[0.07] flex items-center justify-between gap-3">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setFocusMode(srv.mode);
+                          const el = document.getElementById('case-studies');
+                          if (el) el.scrollIntoView({ behavior: 'smooth' });
+                        }}
+                        className="inline-flex items-center space-x-1.5 rtl:space-x-reverse text-xs font-semibold text-[#EAE5DC] hover:text-[#E4583B] transition-colors cursor-pointer"
+                      >
+                        <span>{language === 'bn' ? 'স্যাম্পল কাজ দেখুন' : 'View Samples'}</span>
+                        <StudioArrowRight className="w-3.5 h-3.5 rtl:rotate-180" />
+                      </button>
+
+                      <a
+                        href="#contact-cta"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          const el = document.getElementById('contact-cta');
+                          if (el) el.scrollIntoView({ behavior: 'smooth' });
+                        }}
+                        className="text-xs font-medium text-[#E4583B] hover:underline"
+                      >
+                        {language === 'bn' ? 'প্রজেক্ট শুরু করুন' : 'Book Project'}
+                      </a>
+                    </div>
+                  </div>
+                </Reveal3D>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* 4. Production Workflow Pipeline (Dynamic from portfolio.workflow) */}
+      {portfolio.showWorkflow !== false && workflowSteps.length > 0 && (
+        <section className="py-16 bg-[#121419]/80 border-t border-white/[0.07]">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <Reveal3D direction="up" className="text-center max-w-2xl mx-auto mb-10">
+              <span className="text-[11px] font-sans uppercase tracking-[0.22em] text-[#E4583B] block mb-2">
+                {language === 'bn' ? 'কাজের ধাপসমূহ' : 'Production Workflow'}
+              </span>
+              <h2 className="font-display text-2xl sm:text-3xl font-bold text-[#F4F0E8] tracking-tight">
+                {language === 'bn'
+                  ? 'আইডিয়া থেকে চূড়ান্ত মাস্টার কপি'
+                  : 'From Raw Footage to Final Master Cut'}
+              </h2>
+            </Reveal3D>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+              {workflowSteps.map((wf, idx) => (
+                <Reveal3D key={wf.id || idx} direction="up" delay={idx * 55}>
+                  <div className="p-5 rounded-2xl glass-showcase-card-muted text-center flex flex-col items-center justify-center space-y-2 h-full">
+                    <span className="text-[11px] font-mono text-[#E4583B] font-semibold">
+                      {wf.step || `0${idx + 1}`}
+                    </span>
+                    <div className="text-sm font-bold text-[#F4F0E8]">
+                      {loc(wf.title)}
+                    </div>
+                  </div>
+                </Reveal3D>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* 5. Collapsible Pre-Hire FAQ Section (Sayeed-Fahad-Style Objection Handling) */}
+      <section className="py-20 bg-[#14171E]/80 border-t border-white/[0.07]">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Reveal3D direction="up" className="text-center mb-10">
+            <span className="text-[11px] font-sans uppercase tracking-[0.22em] text-[#E4583B] block mb-2">
+              {language === 'bn' ? 'সাধারণ জিজ্ঞাসা' : 'FAQ'}
+            </span>
+            <h2 className="font-display text-2xl sm:text-4xl font-bold text-[#F4F0E8] tracking-tight">
+              {language === 'bn'
+                ? 'কাজ শুরুর আগে আপনার সাধারণ প্রশ্নসমূহ'
+                : 'Frequently Asked Questions'}
+            </h2>
+          </Reveal3D>
+
+          <div className="space-y-3">
+            {faqItems.map((item, idx) => {
+              const isOpen = openFaqIndex === idx;
+              return (
+                <div
+                  key={idx}
+                  className="rounded-2xl glass-showcase-card overflow-hidden transition-colors"
+                >
+                  <button
+                    type="button"
+                    onClick={() => setOpenFaqIndex(isOpen ? null : idx)}
+                    aria-expanded={isOpen}
+                    className="w-full px-6 py-4 text-left rtl:text-right flex items-center justify-between gap-4 cursor-pointer"
+                  >
+                    <span className="text-sm sm:text-base font-semibold text-[#F4F0E8]">
+                      {item.q}
+                    </span>
+                    <ChevronDown
+                      className={`w-4 h-4 text-[#A7A298] shrink-0 transition-transform duration-300 ${
+                        isOpen ? 'rotate-180 text-[#E4583B]' : ''
+                      }`}
+                    />
+                  </button>
+                  {isOpen && (
+                    <div className="px-6 pb-5 text-xs sm:text-sm text-[#A7A298] leading-relaxed border-t border-white/[0.06] pt-3">
+                      {item.a}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* 6. Direct Contact Bridge: Reveal Email & WhatsApp Capsules + Let's Work Together */}
       <StudioSectionShell
         id="contact-cta"
         sectionBgKey="contact-cta"

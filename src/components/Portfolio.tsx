@@ -5,7 +5,7 @@ import { ProjectItem, VideoShowcaseItem } from '../types/portfolio';
 import { resolveAssetUrl } from '../utils/assetUrl';
 import { getProjectPosters } from '../lib/imageUrlResolver';
 import { EditableElement } from './common/EditableElement';
-import { VideoCardGrid } from './VideoCardGrid';
+import { CreativePortfolioOrganizer } from './CreativePortfolioOrganizer';
 import { Tilt3DImageStage } from './common/Tilt3DImageStage';
 import { Reveal3D } from './common/Reveal3D';
 import { StudioGlassIcon } from './common/StudioIcon';
@@ -210,10 +210,13 @@ export const Portfolio: React.FC<PortfolioProps> = ({
 
         {effectiveTab === 'video' ? (
           <div className="mb-12">
-            <VideoCardGrid
-              videos={visibleVideos}
+            <CreativePortfolioOrganizer
               onOpenVideo={onOpenVideo}
-              emptyPlaceholder={ui.projects.emptyPlaceholder}
+              onOpenLightbox={onOpenLightbox}
+              initialPlatformFilter={platformFilter}
+              showGraphicTab={false}
+              showTestimonialsStrip={false}
+              showProjectCta={false}
             />
           </div>
         ) : viewStyle === 'posters' ? (

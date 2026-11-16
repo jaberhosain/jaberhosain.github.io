@@ -1,30 +1,34 @@
 import React, { useState, useMemo } from 'react';
 import { usePortfolio } from '../../context/PortfolioContext';
 import { PORTFOLIO_PAGES } from '../../context/NavigationContext';
-import { VideoShowcaseItem } from '../../types/portfolio';
+import { ProjectItem, VideoShowcaseItem } from '../../types/portfolio';
 import { PageHeader } from '../common/PageHeader';
 import { PagePagination } from '../common/PagePagination';
-import { Portfolio } from '../Portfolio';
-import { VideoShowcase } from '../VideoShowcase';
+import { CreativePortfolioOrganizer } from '../CreativePortfolioOrganizer';
 import { CraftTimeline } from '../CraftTimeline';
 import { LayerExplosionShowcase } from '../LayerExplosionShowcase';
+import { mergeAndClassifyVideos } from '../../lib/videoOrganization';
 
 interface VideosPageProps {
   onOpenVideo?: (video: VideoShowcaseItem) => void;
+  onOpenLightbox?: (project: ProjectItem, initialIndex?: number) => void;
 }
 
 type PlatformFilter = 'all' | 'youtube' | 'vimeo' | 'facebook';
 
-export const VideosPage: React.FC<VideosPageProps> = ({ onOpenVideo }) => {
-  const { portfolio, language } = usePortfolio();
+export const VideosPage: React.FC<VideosPageProps> = ({ onOpenVideo, onOpenLightbox }) => {
+  const { portfolio, language, loc } = usePortfolio();
   const [platformFilter, setPlatformFilter] = useState<PlatformFilter>('all');
 
   const meta = PORTFOLIO_PAGES.find((p) => p.id === 'videos')!;
 
   const { totalCount, availablePlatforms } = useMemo(() => {
-    const projectVideos = (portfolio.videos || []).filter((v: any) => v.visible !== false && !v.hidden);
-    const bestVideos = (portfolio.bestVideoWorks || []).filter((v: any) => v.visible !== false);
-    const all = [...projectVideos, ...bestVideos];
+    const all = mergeAndClassifyVideos(
+      portfolio.videos || [],
+      portfolio.bestVideoWorks || [],
+      loc,
+      'all'
+    );
 
     const hasYouTube = all.some((v) => {
       const u = (v.videoUrl || '').toLowerCase();
@@ -47,14 +51,14 @@ export const VideosPage: React.FC<VideosPageProps> = ({ onOpenVideo }) => {
     if (hasFacebook) platforms.push({ id: 'facebook', label: 'Facebook' });
 
     return { totalCount: all.length, availablePlatforms: platforms };
-  }, [portfolio.videos, portfolio.bestVideoWorks, language]);
+  }, [portfolio.videos, portfolio.bestVideoWorks, loc, language]);
 
   const summaryText =
     language === 'bn'
-      ? `মোট ভিডিও প্রজেক্ট: ${totalCount}`
+      ? `মোট ভিডিও ও রিলস: ${totalCount}`
       : language === 'ar'
       ? `إجمالي الفيديوهات: ${totalCount}`
-      : `${totalCount} Published Cuts`;
+      : `${totalCount} Organized Cuts`;
 
   return (
     <div className="animate-page-enter-3d">
@@ -87,17 +91,11 @@ export const VideosPage: React.FC<VideosPageProps> = ({ onOpenVideo }) => {
         </div>
       )}
 
-      {/* Video Projects 3D Parallax Carousel */}
-      <Portfolio
-        mode="video"
-        platformFilter={platformFilter}
+      {/* Organized Reels (9:16) & Video Editing Sub-Sections Studio */}
+      <CreativePortfolioOrganizer
         onOpenVideo={onOpenVideo}
-      />
-
-      {/* Featured Best Video Showcase */}
-      <VideoShowcase
-        platformFilter={platformFilter}
-        onOpenVideo={onOpenVideo}
+        onOpenLightbox={onOpenLightbox}
+        initialPlatformFilter={platformFilter}
       />
 
       {/* Interactive Timeline Studio & 3D Frame Deconstruction */}

@@ -79,6 +79,17 @@ export interface ProjectItem {
   isPlaceholder?: boolean;
 }
 
+export type VideoSectionFormat =
+  | 'reels'
+  | 'long_video'
+  | 'motion_graphics'
+  | 'documentary'
+  | 'full_production'
+  | 'saas'
+  | 'cgi';
+
+export type VideoSubSectionTier = 'premium' | 'standard' | 'storytelling' | 'commercial';
+
 export interface VideoShowcaseItem {
   id: string;
   title: LocalizedText;
@@ -92,6 +103,9 @@ export interface VideoShowcaseItem {
   duration?: string;
   views?: string;
   category?: 'video_best' | 'video';
+  videoSection?: VideoSectionFormat;
+  subSection?: VideoSubSectionTier;
+  clientName?: string;
   order?: number;
   visible?: boolean;
   hidden?: boolean;
@@ -118,6 +132,9 @@ export interface BestWorkVideoItem {
   thumbnailUrl?: string;
   customThumbnailUrl?: string;
   duration?: string;
+  videoSection?: VideoSectionFormat;
+  subSection?: VideoSubSectionTier;
+  clientName?: string;
   order?: number;
   visible?: boolean;
 }

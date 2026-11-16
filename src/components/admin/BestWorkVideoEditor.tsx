@@ -15,7 +15,12 @@ import {
   RotateCcw
 } from 'lucide-react';
 import { usePortfolio } from '../../context/PortfolioContext';
-import { BestWorkVideoItem, BestWorkSectionConfig } from '../../types/portfolio';
+import {
+  BestWorkVideoItem,
+  BestWorkSectionConfig,
+  VideoSectionFormat,
+  VideoSubSectionTier
+} from '../../types/portfolio';
 import { ConfirmDeleteModal } from './ConfirmDeleteModal';
 import { extractYouTubeId } from '../VideoModal';
 import {
@@ -24,6 +29,12 @@ import {
   fetchVideoAutoMetadata,
   VimeoIcon
 } from '../../lib/videoUtils';
+import {
+  VIDEO_SECTION_META,
+  VIDEO_SUBSECTION_META,
+  resolveVideoSection,
+  resolveVideoSubSection
+} from '../../lib/videoOrganization';
 import { uploadMediaToStorage } from '../../lib/mediaUpload';
 
 interface BestWorkVideoEditorProps {
@@ -84,6 +95,9 @@ export const BestWorkVideoEditor: React.FC<BestWorkVideoEditorProps> = ({ onNoti
       videoType: 'vimeo',
       thumbnailUrl: '',
       customThumbnailUrl: '',
+      videoSection: 'long_video',
+      subSection: 'premium',
+      duration: '',
       order: items.length + 1,
       visible: true
     };
@@ -452,6 +466,80 @@ export const BestWorkVideoEditor: React.FC<BestWorkVideoEditorProps> = ({ onNoti
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
+                </div>
+              </div>
+
+              {/* Section Format, Sub-Section Tier & Duration */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3.5 rounded-xl bg-[#0B0C0F]/80 border border-white/[0.06]">
+                <div>
+                  <label className="block text-[11px] font-medium text-neutral-400 mb-1">
+                    Section Placement
+                  </label>
+                  <select
+                    value={item.videoSection || resolveVideoSection(item, item.title?.en || '')}
+                    onChange={(e) => {
+                      const val = e.target.value as VideoSectionFormat;
+                      updateDraft((prev) => ({
+                        ...prev,
+                        bestVideoWorks: (prev.bestVideoWorks || []).map((v, i) =>
+                          i === idx ? { ...v, videoSection: val } : v
+                        )
+                      }));
+                    }}
+                    className="w-full px-2.5 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] text-xs text-white focus:border-[#E4583B] focus:outline-none"
+                  >
+                    {VIDEO_SECTION_META.map((sec) => (
+                      <option key={sec.id} value={sec.id}>
+                        {sec.isVerticalReel ? `${sec.label.en} (9:16)` : `${sec.label.en} (16:9)`}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-medium text-neutral-400 mb-1">
+                    Sub-Section Tier
+                  </label>
+                  <select
+                    value={item.subSection || resolveVideoSubSection(item, true)}
+                    onChange={(e) => {
+                      const val = e.target.value as VideoSubSectionTier;
+                      updateDraft((prev) => ({
+                        ...prev,
+                        bestVideoWorks: (prev.bestVideoWorks || []).map((v, i) =>
+                          i === idx ? { ...v, subSection: val } : v
+                        )
+                      }));
+                    }}
+                    className="w-full px-2.5 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] text-xs text-white focus:border-[#E4583B] focus:outline-none"
+                  >
+                    {VIDEO_SUBSECTION_META.map((tier) => (
+                      <option key={tier.id} value={tier.id}>
+                        {tier.label.en}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-medium text-neutral-400 mb-1">
+                    Duration (e.g. 0:51)
+                  </label>
+                  <input
+                    type="text"
+                    value={item.duration || ''}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      updateDraft((prev) => ({
+                        ...prev,
+                        bestVideoWorks: (prev.bestVideoWorks || []).map((v, i) =>
+                          i === idx ? { ...v, duration: val } : v
+                        )
+                      }));
+                    }}
+                    placeholder="0:51"
+                    className="w-full px-2.5 py-2 rounded-lg bg-[#0B0C0F] border border-white/[0.08] text-xs text-white font-mono tabular-nums focus:border-[#E4583B] focus:outline-none"
+                  />
                 </div>
               </div>
 
