@@ -149,3 +149,77 @@ export async function uploadMediaToStorage(
     );
   });
 }
+
+/**
+ * Converts a local file into a compact data URL (SVG stays crisp text-based, raster images resized cleanly).
+ * Used as a fallback for custom icons or backgrounds when Storage upload is unavailable or blocked.
+ */
+async function readCompactVisualAssetAsDataUrl(file: File, maxDim = 1280): Promise<string> {
+  if (file.type === 'image/svg+xml' && file.size < 180 * 1024) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onerror = () => reject(new Error('Failed to read SVG file.'));
+      reader.onload = () => resolve(String(reader.result || ''));
+      reader.readAsDataURL(file);
+    });
+  }
+
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error('Failed to read image file.'));
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onerror = () => reject(new Error('Unsupported image format.'));
+      img.onload = () => {
+        let w = img.width;
+        let h = img.height;
+        if (w > maxDim || h > maxDim) {
+          if (w > h) {
+            h = Math.round((h * maxDim) / w);
+            w = maxDim;
+          } else {
+            w = Math.round((w * maxDim) / h);
+            h = maxDim;
+          }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return reject(new Error('Canvas context unavailable.'));
+        ctx.drawImage(img, 0, 0, w, h);
+        const isPng = file.type === 'image/png' || file.name.toLowerCase().endsWith('.png');
+        const mime = isPng ? 'image/png' : 'image/webp';
+        const dataUrl = canvas.toDataURL(mime, isPng ? 0.88 : 0.78);
+        if (dataUrl.length > 520 * 1024) {
+          resolve(canvas.toDataURL('image/jpeg', 0.68));
+        } else {
+          resolve(dataUrl);
+        }
+      };
+      img.src = String(e.target?.result || '');
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+/**
+ * Studio asset upload helper: uploads to Firebase Storage first, with a safe compressed
+ * inline asset fallback if Storage fails (e.g. unprovisioned bucket or CORS), so Live Visual
+ * Studio icons and custom backgrounds work 100% reliably.
+ */
+export async function uploadStudioAsset(
+  file: File,
+  onProgress?: (percent: number) => void,
+  maxFallbackDim = 1280
+): Promise<string> {
+  try {
+    return await uploadMediaToStorage(file, onProgress);
+  } catch (err) {
+    console.warn('Firebase Storage upload fallback to compact studio asset:', err);
+    onProgress?.(70);
+    const dataUrl = await readCompactVisualAssetAsDataUrl(file, maxFallbackDim);
+    onProgress?.(100);
+    return dataUrl;
+  }
+}

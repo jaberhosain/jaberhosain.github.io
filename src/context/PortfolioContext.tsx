@@ -330,7 +330,29 @@ export const PortfolioProvider: React.FC<{ children: ReactNode }> = ({ children 
       socialLinks: Array.isArray(data.socialLinks)
         ? data.socialLinks
         : (initialPortfolioData.socialLinks || []),
-      // Arrays: Firestore is the single source of truth. If empty [], keep it empty!
+      // Arrays: Firestore is the single source of truth when present; otherwise safe default.
+      defaultFocusMode: data.defaultFocusMode || initialPortfolioData.defaultFocusMode || 'all',
+      showFocusSwitcher: data.showFocusSwitcher !== false,
+      caseStudiesSection: data.caseStudiesSection || initialPortfolioData.caseStudiesSection,
+      caseStudies: Array.isArray(data.caseStudies) ? data.caseStudies : (initialPortfolioData.caseStudies || []),
+      homeStats: Array.isArray(data.homeStats) ? data.homeStats : (initialPortfolioData.homeStats || []),
+      showHomeStats: data.showHomeStats !== false,
+      homeTools: Array.isArray(data.homeTools) ? data.homeTools : (initialPortfolioData.homeTools || []),
+      testimonialsSection: data.testimonialsSection || initialPortfolioData.testimonialsSection,
+      testimonials:
+        Array.isArray(data.testimonials) && data.testimonials.length > 0
+          ? data.testimonials
+          : Array.isArray(data.testimonials) && (data as any).testimonialsInitialized
+          ? data.testimonials
+          : (initialPortfolioData.testimonials || []),
+      homeSectionOrder:
+        Array.isArray(data.homeSectionOrder) && data.homeSectionOrder.length > 0
+          ? data.homeSectionOrder
+          : initialPortfolioData.homeSectionOrder,
+      homeSectionVisibility: {
+        ...(initialPortfolioData.homeSectionVisibility || {}),
+        ...(data.homeSectionVisibility || {})
+      },
       videos: Array.isArray(data.videos) ? data.videos : initialPortfolioData.videos,
       projects: Array.isArray(data.projects) ? data.projects : initialPortfolioData.projects,
       bestGraphicWorks: Array.isArray(data.bestGraphicWorks) ? data.bestGraphicWorks : initialPortfolioData.bestGraphicWorks,

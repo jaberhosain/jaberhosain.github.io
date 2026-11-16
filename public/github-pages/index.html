@@ -1,0 +1,622 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- SEO: Identical Title, Open Graph Title & Twitter Title + Social Preview Image -->
+  <!-- EDIT HERE: Update your site title or domain URL if needed -->
+  <title>Md. Jaber Hosain | Video Editor &amp; Graphic Designer</title>
+  <meta name="description" content="Portfolio of Md. Jaber Hosain — Video Editor, Graphic Designer, Digital Marketer &amp; AI Tools Specialist delivering high-retention edits and brand visuals." />
+  <meta name="keywords" content="Md. Jaber Hosain, Video Editor, Graphic Designer, Motion Graphics, Digital Marketer, AI Tools Specialist, Premiere Pro, After Effects, Photoshop, Illustrator, Behance" />
+  <meta name="author" content="Md. Jaber Hosain" />
+  <link rel="canonical" href="https://jaberhosain.github.io/" />
+
+  <!-- Open Graph / Social Preview -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Md. Jaber Hosain | Video Editor &amp; Graphic Designer" />
+  <meta property="og:title" content="Md. Jaber Hosain | Video Editor &amp; Graphic Designer" />
+  <meta property="og:description" content="Portfolio of Md. Jaber Hosain — Video Editor, Graphic Designer, Digital Marketer &amp; AI Tools Specialist delivering high-retention edits and brand visuals." />
+  <!-- EDIT HERE: Replace with the URL/path to your best work social preview image -->
+  <meta property="og:image" content="https://jaberhosain.github.io/assets/jaber_hero.png" />
+  <meta property="og:image:alt" content="Md. Jaber Hosain — Video Editor &amp; Graphic Designer Portfolio Showcase" />
+  <meta property="og:url" content="https://jaberhosain.github.io/" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Md. Jaber Hosain | Video Editor &amp; Graphic Designer" />
+  <meta name="twitter:description" content="Portfolio of Md. Jaber Hosain — Video Editor, Graphic Designer, Digital Marketer &amp; AI Tools Specialist delivering high-retention edits and brand visuals." />
+  <!-- EDIT HERE: Replace with the URL/path to your Twitter social preview image -->
+  <meta name="twitter:image" content="https://jaberhosain.github.io/assets/jaber_hero.png" />
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%2317171C'/><path d='M30 70 L30 30 L55 30 C68 30 72 38 72 50 C72 62 65 70 50 70 Z' fill='none' stroke='%23FF4B5C' stroke-width='9' stroke-linejoin='round'/><circle cx='70' cy='32' r='6.5' fill='%23FF4B5C'/></svg>" />
+
+  <!-- EDIT HERE: Google Fonts — Playfair Display & Bodoni Moda (3D Display Name), Inter, Instrument Serif Italic, JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,600;6..96,700;6..96,800&family=Cormorant+Garamond:ital,wght@1,400;1,500;1,600&family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&family=Outfit:wght@400;600;700&family=Playfair+Display:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+  <!-- Existing 3D WebGL / Particle Backdrop Canvas (Untouched) -->
+  <canvas id="studio-3d-canvas" aria-hidden="true"></canvas>
+
+  <!-- 1. TOP BAR: Brand mark on the left, Work / About / Contact on the right -->
+  <header class="site-header" id="top">
+    <div class="container nav-inner">
+      <a href="#home" class="brand-nav-link" aria-label="Md. Jaber Hosain home">
+        <span class="brand-monogram" id="txt-nav-monogram">MJ</span>
+        <span class="brand-nav-name" id="txt-nav-brand">MD. JABER HOSAIN</span>
+      </a>
+
+      <button
+        type="button"
+        class="mobile-menu-btn"
+        id="mobile-menu-btn"
+        aria-expanded="false"
+        aria-controls="primary-nav"
+        aria-label="Toggle navigation menu"
+      >
+        <span class="hamburger-line"></span>
+        <span class="hamburger-line"></span>
+      </button>
+
+      <nav id="primary-nav" class="primary-nav" aria-label="Primary Navigation">
+        <a href="#works" class="nav-link" id="nav-link-works">Work</a>
+        <a href="#about" class="nav-link" id="nav-link-about">About</a>
+        <a href="#contact" class="nav-link" id="nav-link-contact">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main-content">
+    <!-- SECTION: HOME PAGE HERO (ABOVE THE FOLD) + SELECTED WORK TIMELINE STRIP -->
+    <section id="home" data-section-id="hero" class="hero-section">
+      <!-- Soft dark gradient overlay between 3D background and foreground text for strong contrast -->
+      <div class="hero-contrast-scrim" aria-hidden="true"></div>
+
+      <div class="container">
+        <div class="hero-grid">
+          <div class="hero-copy">
+            <!-- 2 & 3. HERO NAME + TIMELINE PLAYHEAD REVEAL MOTION (Sculptural 3D Metallic Serif) -->
+            <!-- EDIT HERE: Two-line Hero Name (Playfair Display / Bodoni Moda metallic 3D; also editable in Firestore siteSettings) -->
+            <div class="hero-name-stage" id="hero-name-stage">
+              <div class="hero-name hero-name-depth" aria-hidden="true">
+                <span class="hero-name-line" id="txt-hero-depth-line1">MD. JABER</span>
+                <span class="hero-name-line" id="txt-hero-depth-line2">HOSAIN</span>
+              </div>
+
+              <h1 class="hero-name hero-name-metallic" id="txt-hero-title" aria-label="MD. JABER HOSAIN">
+                <span class="sr-only" id="txt-hero-sr-name">MD. JABER HOSAIN</span>
+                <span class="hero-name-line hero-name-line-1" id="txt-hero-name-line1" aria-hidden="true">MD. JABER</span>
+                <span class="hero-name-line hero-name-line-2" id="txt-hero-name-line2" aria-hidden="true">HOSAIN</span>
+              </h1>
+
+              <!-- Red vertical playhead line with square top handle & counting timecode (00:00:00 -> 00:00:24) -->
+              <div class="hero-playhead" id="hero-playhead" aria-hidden="true">
+                <span class="playhead-handle"></span>
+                <span class="playhead-timecode" id="hero-timecode">00:00:00</span>
+                <span class="playhead-line"></span>
+              </div>
+            </div>
+
+            <!-- 4 & 5. FLOWING ITALIC BRANDING + TRACKED SUBLINE + PILL BUTTONS -->
+            <!-- EDIT HERE: Role & branding lines (also editable in Firestore siteSettings / Admin Panel) -->
+            <p class="hero-role-line hero-seq-item hero-seq-1" id="txt-hero-role">
+              Video Editor &amp; Graphic Designer.
+            </p>
+            <p class="hero-tagline hero-seq-item hero-seq-2" id="txt-hero-subline">
+              CREATING IDEAS - EDITING STORIES - BUILDING BRANDS
+            </p>
+
+            <!-- EDIT HERE: Primary (cream filled) and Secondary (thin bordered) pill buttons -->
+            <div class="hero-actions hero-seq-item hero-seq-3">
+              <a href="#works" class="btn btn-cream-pill" id="btn-hero-primary">
+                <span id="txt-hero-btn-primary">View my work</span>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+                  <path d="M7 17L17 7M17 7H7M17 7V17"/>
+                </svg>
+              </a>
+              <a href="#contact" class="btn btn-ghost-pill" id="btn-hero-secondary">
+                <span id="txt-hero-btn-secondary">Let's work together</span>
+              </a>
+            </div>
+          </div>
+
+          <!-- Existing 3D Interactive Portrait Card (Preserved cleanly below text z-index) -->
+          <div class="hero-stage reveal">
+            <div class="tilt-card" id="hero-tilt-card">
+              <div class="tilt-card-inner">
+                <!-- EDIT HERE: Hero portrait image path/URL -->
+                <img
+                  id="img-hero-portrait"
+                  src="./assets/jabir_profile.png"
+                  alt="Portrait of Md. Jaber Hosain, Video Editor and Graphic Designer"
+                  width="420"
+                  height="540"
+                  fetchpriority="high"
+                  class="hero-portrait-img"
+                />
+                <div class="tilt-glare" id="hero-tilt-glare" aria-hidden="true"></div>
+                <div class="portrait-caption">
+                  <div>
+                    <strong class="caption-name" id="txt-caption-name">MD JABER HOSAIN</strong>
+                    <span class="caption-role" id="txt-caption-role">Motion · Video · Brand Systems</span>
+                  </div>
+                  <span class="caption-index">3D</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 6. "SELECTED WORK" TIMELINE STRIP (Directly below hero buttons) -->
+        <section class="selected-work-strip" id="selected-work-strip" aria-label="Selected work timeline">
+          <div class="timeline-strip-header">
+            <span class="timeline-strip-label">Selected work</span>
+            <span class="timeline-strip-meta">NLE TIMELINE · 24 FPS</span>
+          </div>
+
+          <div class="timeline-panel">
+            <!-- Horizontal scroll container on mobile so the page never overflows horizontally -->
+            <div class="timeline-scroll-container">
+              <!-- Timecode Ruler 00:00 to 00:40 -->
+              <div class="timeline-ruler" aria-hidden="true">
+                <div class="ruler-rail-spacer">TC</div>
+                <div class="ruler-ticks">
+                  <span class="ruler-mark"><span>00:00</span></span>
+                  <span class="ruler-mark"><span>00:08</span></span>
+                  <span class="ruler-mark"><span>00:16</span></span>
+                  <span class="ruler-mark"><span>00:24</span></span>
+                  <span class="ruler-mark"><span>00:32</span></span>
+                  <span class="ruler-mark"><span>00:40</span></span>
+                </div>
+              </div>
+
+              <!-- Track V1 (Video: 3 x 16:9 tiles) -->
+              <div class="timeline-track-row">
+                <div class="track-badge" title="Video Track 1">V1</div>
+                <!-- EDIT HERE: Default V1 video tiles (Also editable live via Firestore `works` collection / Admin Panel) -->
+                <div class="track-tiles track-v1" id="timeline-track-v1">
+                  <button
+                    type="button"
+                    class="timeline-tile timeline-tile-video open-strip-lightbox"
+                    data-lightbox-type="video"
+                    data-media-url="https://www.facebook.com/share/p/1DNfXJTmTK/"
+                    data-title="Showreel"
+                    style="--tile-delay: 2050ms;"
+                  >
+                    <img src="./assets/jaber_hero.png" alt="Showreel video thumbnail preview" loading="lazy" width="480" height="270" />
+                    <span class="tile-gradient" aria-hidden="true"></span>
+                    <span class="tile-duration">01:20</span>
+                    <span class="tile-play-circle" aria-hidden="true">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                    </span>
+                    <span class="tile-label">Showreel</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    class="timeline-tile timeline-tile-video open-strip-lightbox"
+                    data-lightbox-type="video"
+                    data-media-url="https://www.facebook.com/share/v/19XfdDJYTf/"
+                    data-title="YouTube edit"
+                    style="--tile-delay: 2130ms;"
+                  >
+                    <img src="./assets/jaber_about.png" alt="YouTube edit video thumbnail preview" loading="lazy" width="480" height="270" />
+                    <span class="tile-gradient" aria-hidden="true"></span>
+                    <span class="tile-duration">08:45</span>
+                    <span class="tile-play-circle" aria-hidden="true">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                    </span>
+                    <span class="tile-label">YouTube edit</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    class="timeline-tile timeline-tile-video open-strip-lightbox"
+                    data-lightbox-type="video"
+                    data-media-url="https://www.facebook.com/share/v/1KVWkbFLLP/"
+                    data-title="Ad and promo"
+                    style="--tile-delay: 2210ms;"
+                  >
+                    <img src="./assets/jabir_profile.png" alt="Ad and promo video thumbnail preview" loading="lazy" width="480" height="270" />
+                    <span class="tile-gradient" aria-hidden="true"></span>
+                    <span class="tile-duration">00:35</span>
+                    <span class="tile-play-circle" aria-hidden="true">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                    </span>
+                    <span class="tile-label">Ad and promo</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Track G1 (Graphic Design: 4 x 1:1 square tiles) -->
+              <div class="timeline-track-row">
+                <div class="track-badge track-badge-g1" title="Graphic Design Track 1">G1</div>
+                <!-- EDIT HERE: Default G1 graphic design tiles (Also editable live via Firestore `works` collection / Admin Panel) -->
+                <div class="track-tiles track-g1" id="timeline-track-g1">
+                  <button
+                    type="button"
+                    class="timeline-tile timeline-tile-graphic open-strip-lightbox"
+                    data-lightbox-type="image"
+                    data-media-url="./assets/jaber_hero.png"
+                    data-title="Branding"
+                    style="--tile-delay: 2290ms;"
+                  >
+                    <img src="./assets/jaber_hero.png" alt="Branding graphic design showcase" loading="lazy" width="360" height="360" />
+                    <span class="tile-gradient" aria-hidden="true"></span>
+                    <span class="tile-label">Branding</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    class="timeline-tile timeline-tile-graphic open-strip-lightbox"
+                    data-lightbox-type="image"
+                    data-media-url="./assets/jaber_about.png"
+                    data-title="Social posts"
+                    style="--tile-delay: 2360ms;"
+                  >
+                    <img src="./assets/jaber_about.png" alt="Social posts graphic design showcase" loading="lazy" width="360" height="360" />
+                    <span class="tile-gradient" aria-hidden="true"></span>
+                    <span class="tile-label">Social posts</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    class="timeline-tile timeline-tile-graphic open-strip-lightbox"
+                    data-lightbox-type="image"
+                    data-media-url="./assets/jabir_profile.png"
+                    data-title="Posters"
+                    style="--tile-delay: 2430ms;"
+                  >
+                    <img src="./assets/jabir_profile.png" alt="Posters graphic design showcase" loading="lazy" width="360" height="360" />
+                    <span class="tile-gradient" aria-hidden="true"></span>
+                    <span class="tile-label">Posters</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    class="timeline-tile timeline-tile-graphic open-strip-lightbox"
+                    data-lightbox-type="image"
+                    data-media-url="./assets/jaber_hero.png"
+                    data-title="Thumbnails"
+                    style="--tile-delay: 2500ms;"
+                  >
+                    <img src="./assets/jaber_hero.png" alt="Thumbnails graphic design showcase" loading="lazy" width="360" height="360" />
+                    <span class="tile-gradient" aria-hidden="true"></span>
+                    <span class="tile-label">Thumbnails</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <!-- SECTIONS BELOW REMAIN UNTOUCHED -->
+    <!-- SECTION: STATS -->
+    <section id="stats" data-section-id="stats" class="stats-bar-section" aria-label="Portfolio Statistics">
+      <div class="container">
+        <div class="stats-grid reveal">
+          <div class="stat-item">
+            <span class="stat-value" id="txt-stat1-value">50+</span>
+            <span class="stat-label" id="txt-stat1-label">Projects Completed</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-value" id="txt-stat2-value">1.5+</span>
+            <span class="stat-label" id="txt-stat2-label">Years of Experience</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-value" id="txt-stat3-value">30+</span>
+            <span class="stat-label" id="txt-stat3-label">Happy Clients</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION: WORKS (Populated live from Firestore `projects` collection with safe static fallback) -->
+    <section id="works" data-section-id="works" class="section works-section">
+      <div class="container">
+        <div class="section-header reveal">
+          <div>
+            <p class="section-kicker" id="txt-works-kicker">SELECTED CASE STUDIES</p>
+            <h2 class="section-title" id="txt-works-title">Featured <span class="serif-italic">Works</span></h2>
+          </div>
+
+          <div class="filter-group" role="tablist" aria-label="Filter projects by category">
+            <button type="button" class="filter-btn active" data-filter="all" role="tab" aria-selected="true">
+              All Works
+            </button>
+            <button type="button" class="filter-btn" data-filter="video-editing" role="tab" aria-selected="false">
+              Video Editing
+            </button>
+            <button type="button" class="filter-btn" data-filter="graphic-design" role="tab" aria-selected="false">
+              Graphic Design
+            </button>
+            <button type="button" class="filter-btn" data-filter="motion-graphics" role="tab" aria-selected="false">
+              Motion Graphics
+            </button>
+          </div>
+        </div>
+
+        <div class="works-grid" id="works-grid">
+          <!-- Safe Default Projects (Replaced dynamically when Firestore `projects` loads) -->
+          <article class="case-card reveal" data-category="video-editing">
+            <div class="case-media">
+              <img
+                src="./assets/jaber_hero.png"
+                alt="Documentary and Short-Form Reel Editing timeline and color grading preview"
+                loading="lazy"
+                width="640"
+                height="360"
+              />
+              <span class="case-badge">Video Editing</span>
+              <button
+                type="button"
+                class="case-play-btn open-video-lightbox"
+                data-video-url="https://www.facebook.com/share/p/1DNfXJTmTK/"
+                data-video-title="Documentary &amp; Short-Form Narrative Reel"
+              >
+                <span>▶ Watch Video</span>
+              </button>
+            </div>
+            <div class="case-body">
+              <h3 class="case-title">Documentary &amp; Short-Form Narrative Reel</h3>
+              <ul class="case-points">
+                <li><span class="point-label problem">Problem:</span> <span>Raw footage had slow pacing and flat audio, causing viewers to drop off in the first 3 seconds.</span></li>
+                <li><span class="point-label process">My Process:</span> <span>Cut tight narrative hooks in Premiere Pro, added layered sound design, and graded cinematic skin tones.</span></li>
+                <li><span class="point-label result">Result:</span> <span>Delivered a high-retention social edit that increased average watch time and shares.</span></li>
+              </ul>
+            </div>
+          </article>
+
+          <article class="case-card reveal" data-category="motion-graphics">
+            <div class="case-media">
+              <img
+                src="./assets/jaber_about.png"
+                alt="Kinetic Typography and 3D Camera Motion Graphics showcase"
+                loading="lazy"
+                width="640"
+                height="360"
+              />
+              <span class="case-badge">Motion Graphics</span>
+              <button
+                type="button"
+                class="case-play-btn open-video-lightbox"
+                data-video-url="https://www.facebook.com/share/v/19XfdDJYTf/"
+                data-video-title="Kinetic Typography &amp; 3D Camera Promo"
+              >
+                <span>▶ Watch Motion Reel</span>
+              </button>
+            </div>
+            <div class="case-body">
+              <h3 class="case-title">Kinetic Typography &amp; 3D Camera Promo</h3>
+              <ul class="case-points">
+                <li><span class="point-label problem">Problem:</span> <span>Static promotional graphics were blending into busy social feeds without capturing attention.</span></li>
+                <li><span class="point-label process">My Process:</span> <span>Built custom 3D camera depth, smooth speed-graph transitions, and animated typography in After Effects.</span></li>
+                <li><span class="point-label result">Result:</span> <span>Elevated brand perception and boosted campaign click-through performance.</span></li>
+              </ul>
+            </div>
+          </article>
+
+          <article class="case-card reveal" data-category="graphic-design">
+            <div class="case-media">
+              <img
+                src="./assets/jaber_hero.png"
+                alt="Brand Identity and Visual Poster Series designed in Photoshop and Illustrator"
+                loading="lazy"
+                width="640"
+                height="360"
+              />
+              <span class="case-badge">Graphic Design</span>
+              <!-- EDIT HERE: Behance portfolio link -->
+              <a
+                href="https://www.behance.net/jaberhosain"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="case-play-btn"
+              >
+                <span>View on Behance ↗</span>
+              </a>
+            </div>
+            <div class="case-body">
+              <h3 class="case-title">Brand Identity &amp; Visual Poster Series</h3>
+              <ul class="case-points">
+                <li><span class="point-label problem">Problem:</span> <span>Inconsistent colors and typography across social channels weakened brand recognition.</span></li>
+                <li><span class="point-label process">My Process:</span> <span>Created a modular grid system, custom vector typography, and lighting composites in Photoshop &amp; Illustrator.</span></li>
+                <li><span class="point-label result">Result:</span> <span>Delivered a cohesive visual identity and print/social poster suite showcased on Behance.</span></li>
+              </ul>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION: ABOUT -->
+    <section id="about" data-section-id="about" class="section about-section">
+      <div class="container about-grid">
+        <div class="about-photo-wrap reveal">
+          <!-- EDIT HERE: About section photo -->
+          <img
+            id="img-about-photo"
+            src="./assets/jabir_profile.png"
+            alt="Md. Jaber Hosain smiling in studio portrait"
+            loading="lazy"
+            width="400"
+            height="480"
+            class="about-photo"
+          />
+        </div>
+
+        <div class="about-content reveal">
+          <p class="section-kicker" id="txt-about-kicker">ABOUT ME</p>
+          <h2 class="section-title" id="txt-about-title">
+            Hi, I’m Md. Jaber Hosain — <span class="serif-italic">your creative visual partner.</span>
+          </h2>
+
+          <p class="about-text" id="txt-about-p1">
+            I’m a Video Editor, Graphic Designer, Digital Marketer, and AI Tools Specialist trained at the As-Sunnah Skill Development Institute. I love turning raw footage and brand concepts into clean, cinematic stories and high-converting visuals that make audiences stop and watch.
+          </p>
+          <p class="about-text" id="txt-about-p2">
+            Whether you need high-retention reels, YouTube edits, motion graphics, or a complete social media design system, I combine creative craft with modern AI workflows to deliver fast, reliable results.
+          </p>
+
+          <div class="skills-block">
+            <h3 class="skills-heading" id="txt-skills-heading">Skills &amp; Tools I Use Daily</h3>
+            <div class="tools-list" id="tools-list" role="list">
+              <span class="tool-badge" role="listitem">Adobe Premiere Pro</span>
+              <span class="tool-badge" role="listitem">Adobe After Effects</span>
+              <span class="tool-badge" role="listitem">Adobe Photoshop</span>
+              <span class="tool-badge" role="listitem">Adobe Illustrator</span>
+              <span class="tool-badge" role="listitem">AI Tools &amp; Workflows</span>
+              <span class="tool-badge" role="listitem">Meta Ads &amp; Digital Marketing</span>
+              <span class="tool-badge" role="listitem">Canva Pro</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION: TESTIMONIALS -->
+    <section id="trust" data-section-id="trust" class="section testimonials-section">
+      <div class="container">
+        <div class="section-header reveal">
+          <div>
+            <p class="section-kicker" id="txt-trust-kicker">CLIENT FEEDBACK</p>
+            <h2 class="section-title" id="txt-trust-title">Trusted by <span class="serif-italic">Creators &amp; Brands</span></h2>
+          </div>
+        </div>
+
+        <div class="testimonials-grid">
+          <blockquote class="testimonial-card reveal">
+            <p class="testimonial-quote" id="txt-test1-quote">
+              “Jaber transformed our raw footage into crisp, high-retention reels. His pacing, sound design, and eye for detail made our brand look truly international.”
+            </p>
+            <footer class="testimonial-author">
+              <strong id="txt-test1-name">Client / Agency Partner</strong>
+              <span id="txt-test1-role">Content Director — Video Editing Project</span>
+            </footer>
+          </blockquote>
+
+          <blockquote class="testimonial-card reveal">
+            <p class="testimonial-quote" id="txt-test2-quote">
+              “The poster series and social media ad visuals Jaber designed gave our campaign a distinct, premium identity. Click-through rates improved immediately.”
+            </p>
+            <footer class="testimonial-author">
+              <strong id="txt-test2-name">Brand Founder</strong>
+              <span id="txt-test2-role">E-Commerce &amp; Meta Ad Campaign</span>
+            </footer>
+          </blockquote>
+
+          <blockquote class="testimonial-card reveal">
+            <p class="testimonial-quote" id="txt-test3-quote">
+              “Fast communication, clean After Effects motion graphics, and scroll-stopping thumbnails. Jaber is our go-to creative specialist.”
+            </p>
+            <footer class="testimonial-author">
+              <strong id="txt-test3-name">Digital Creator</strong>
+              <span id="txt-test3-role">YouTube &amp; Social Media Channel</span>
+            </footer>
+          </blockquote>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION: CONTACT -->
+    <section id="contact" data-section-id="contact" class="section contact-section">
+      <div class="container">
+        <div class="contact-card reveal">
+          <div class="contact-copy">
+            <p class="section-kicker" id="txt-contact-kicker">READY WHEN YOU ARE</p>
+            <h2 class="contact-title" id="txt-contact-title">
+              Let’s work <span class="serif-italic">together.</span>
+            </h2>
+            <p class="contact-sub" id="txt-contact-sub">
+              Have a video editing, motion graphics, or graphic design project in mind? Reach out directly—I typically respond within 24 hours.
+            </p>
+
+            <!-- EDIT HERE: Contact email and WhatsApp links -->
+            <div class="contact-cta-row">
+              <a href="mailto:sbmc.3925@gmail.com" class="btn btn-primary" id="link-contact-cta">
+                <span id="txt-contact-cta">Let’s Work Together</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+              </a>
+              <a href="https://wa.me/8801904621391" target="_blank" rel="noopener noreferrer" class="btn btn-secondary" id="link-whatsapp-cta">
+                <span id="txt-whatsapp-cta">Chat on WhatsApp</span>
+              </a>
+            </div>
+          </div>
+
+          <div class="contact-Methods">
+            <a href="mailto:sbmc.3925@gmail.com" class="contact-method-item" id="card-email-link">
+              <span class="method-label">Email</span>
+              <strong class="method-value" id="txt-email-value">sbmc.3925@gmail.com</strong>
+            </a>
+
+            <a href="https://wa.me/8801904621391" target="_blank" rel="noopener noreferrer" class="contact-method-item" id="card-whatsapp-link">
+              <span class="method-label">WhatsApp</span>
+              <strong class="method-value" id="txt-whatsapp-value">+880 1904-621391</strong>
+            </a>
+
+            <a href="https://www.behance.net/jaberhosain" target="_blank" rel="noopener noreferrer" class="contact-method-item" id="card-behance-link">
+              <span class="method-label">Behance</span>
+              <strong class="method-value" id="txt-behance-value">behance.net/jaberhosain ↗</strong>
+            </a>
+
+            <a href="https://www.linkedin.com/in/jaberhosainbd" target="_blank" rel="noopener noreferrer" class="contact-method-item" id="card-linkedin-link">
+              <span class="method-label">LinkedIn</span>
+              <strong class="method-value" id="txt-linkedin-value">linkedin.com/in/jaberhosainbd ↗</strong>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-top">
+        <p class="footer-copy" id="txt-footer-copy">
+          © <span id="current-year">2026</span> Md. Jaber Hosain. All rights reserved.
+        </p>
+        <div class="footer-links">
+          <!-- EDIT HERE: Footer social & admin links -->
+          <a href="https://www.behance.net/jaberhosain" id="footer-behance" target="_blank" rel="noopener noreferrer">Behance</a>
+          <a href="https://www.linkedin.com/in/jaberhosainbd" id="footer-linkedin" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+          <a href="admin.html" class="admin-footer-link">Admin Studio</a>
+          <a href="#top" class="back-to-top">Back to top ↑</a>
+        </div>
+      </div>
+      <div class="footer-wordmark-3d" id="txt-footer-wordmark" aria-hidden="true">JABER HOSAIN</div>
+    </div>
+  </footer>
+
+  <!-- ACCESSIBLE VIDEO & IMAGE LIGHTBOX MODAL -->
+  <div
+    class="lightbox-backdrop"
+    id="video-lightbox"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="lightbox-title"
+    hidden
+  >
+    <div class="lightbox-dialog">
+      <div class="lightbox-header">
+        <h3 id="lightbox-title" class="lightbox-title">Project Preview</h3>
+        <button type="button" class="lightbox-close" id="lightbox-close" aria-label="Close lightbox">
+          ✕
+        </button>
+      </div>
+      <div class="lightbox-content" id="lightbox-content"></div>
+    </div>
+  </div>
+
+  <script type="module" src="script.js"></script>
+</body>
+</html>

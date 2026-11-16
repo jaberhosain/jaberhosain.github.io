@@ -34,7 +34,8 @@ export const LiveEditHeader: React.FC<LiveEditHeaderProps> = ({ onExit }) => {
     undo,
     redo,
     resetAllOverrides,
-    overrides
+    overrides,
+    customLayers
   } = useDesignOverrides();
 
   const [confirmResetAllOpen, setConfirmResetAllOpen] = useState(false);
@@ -70,6 +71,7 @@ export const LiveEditHeader: React.FC<LiveEditHeaderProps> = ({ onExit }) => {
   };
 
   const overriddenCount = Object.keys(overrides).length;
+  const layersCount = customLayers.length;
 
   return (
     <>
@@ -95,6 +97,7 @@ export const LiveEditHeader: React.FC<LiveEditHeaderProps> = ({ onExit }) => {
             <span className="text-sm font-semibold text-[#F4F0E8]">Theme Live Edit</span>
             <span className="text-xs text-[#8E8A82] tabular-nums hidden sm:inline">
               &middot; {overriddenCount} {overriddenCount === 1 ? 'override' : 'overrides'}
+              {layersCount > 0 ? ` · ${layersCount} ${layersCount === 1 ? 'layer' : 'layers'}` : ''}
             </span>
           </div>
         </div>

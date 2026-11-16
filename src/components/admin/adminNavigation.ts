@@ -7,11 +7,13 @@ import {
   Mail,
   Inbox,
   Palette,
-  Sliders
+  Sliders,
+  LayoutGrid
 } from 'lucide-react';
 
 export type AdminGroupId =
   | 'profile'
+  | 'home-content'
   | 'education'
   | 'skills-services'
   | 'media'
@@ -44,6 +46,24 @@ export const ADMIN_GROUPS: AdminGroupDef[] = [
       { id: 'hero', label: 'Hero & Identity', desc: 'Avatar, badge, headlines & CTA buttons' },
       { id: 'about', label: 'About', desc: 'Multilingual biography in English and Bangla' },
       { id: 'photo', label: 'Profile Photo', desc: 'Upload or link about portrait image' }
+    ]
+  },
+  {
+    id: 'home-content',
+    label: 'Home & Case Studies',
+    desc: 'Case studies, focus mode, stats & testimonials',
+    icon: LayoutGrid,
+    subSections: [
+      {
+        id: 'home-case-studies',
+        label: 'Case Studies & Work Type',
+        desc: 'Edit Work That Delivers Real Results, video vs motion/graphic links'
+      },
+      {
+        id: 'home-stats-testimonials',
+        label: 'Focus Mode, Stats & Reviews',
+        desc: 'Default focus switcher, 50+ stats, Home toolkit & client testimonials'
+      }
     ]
   },
   {

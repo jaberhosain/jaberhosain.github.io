@@ -54,6 +54,193 @@
       },
       "required": ["status", "hero", "about", "projects", "socialLinks"]
     },
+    "SiteSettings": {
+      "title": "SiteSettings",
+      "description": "Global site settings document storing editable texts, colors, fonts, sectionOrder, and sectionVisibility for draft and published states.",
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["draft", "published"],
+          "description": "Publication state of the settings document."
+        },
+        "colors": {
+          "type": "object",
+          "description": "Theme color palette hex values."
+        },
+        "fonts": {
+          "type": "object",
+          "description": "Typography family selections."
+        },
+        "sectionOrder": {
+          "type": "array",
+          "description": "Ordered list of section identifiers."
+        },
+        "sectionVisibility": {
+          "type": "object",
+          "description": "Boolean visibility flags for each section."
+        },
+        "texts": {
+          "type": "object",
+          "description": "Editable headings, paragraphs, buttons, and contact links."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO timestamp when settings were updated."
+        }
+      },
+      "required": ["status", "colors", "fonts", "sectionOrder", "sectionVisibility", "texts"]
+    },
+    "ProjectRecord": {
+      "title": "ProjectRecord",
+      "description": "Individual case-study project stored in the projects collection.",
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200,
+          "description": "Project case-study title."
+        },
+        "category": {
+          "type": "string",
+          "enum": ["video-editing", "graphic-design", "motion-graphics"],
+          "description": "Project filter category."
+        },
+        "thumbnailUrl": {
+          "type": "string",
+          "maxLength": 2000,
+          "description": "Thumbnail image URL or path."
+        },
+        "videoUrl": {
+          "type": "string",
+          "maxLength": 2000,
+          "description": "Optional video link for lightbox playback."
+        },
+        "behanceUrl": {
+          "type": "string",
+          "maxLength": 2000,
+          "description": "Optional Behance or external project URL."
+        },
+        "problem": {
+          "type": "string",
+          "maxLength": 1000,
+          "description": "Case-study Problem summary line."
+        },
+        "process": {
+          "type": "string",
+          "maxLength": 1000,
+          "description": "Case-study My Process summary line."
+        },
+        "result": {
+          "type": "string",
+          "maxLength": 1000,
+          "description": "Case-study Result summary line."
+        },
+        "order": {
+          "type": "number",
+          "description": "Display sort order."
+        },
+        "visible": {
+          "type": "boolean",
+          "description": "Whether the project is visible on the site."
+        },
+        "status": {
+          "type": "string",
+          "enum": ["draft", "published"],
+          "description": "Publication state of this project record."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO timestamp when project was updated."
+        }
+      },
+      "required": ["title", "category", "problem", "process", "result", "order", "visible", "status"]
+    },
+    "SiteVersion": {
+      "title": "SiteVersion",
+      "description": "Historical version snapshot (last 10 versions) for one-click restore.",
+      "type": "object",
+      "properties": {
+        "label": {
+          "type": "string",
+          "maxLength": 200,
+          "description": "Human-readable version label."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when snapshot was recorded."
+        },
+        "siteSettings": {
+          "type": "object",
+          "description": "Snapshot of siteSettings at that point in time."
+        },
+        "projects": {
+          "type": "array",
+          "description": "Snapshot of projects array at that point in time."
+        },
+        "works": {
+          "type": "array",
+          "description": "Snapshot of V1 and G1 Selected Work timeline strip tiles at that point in time."
+        }
+      },
+      "required": ["label", "createdAt", "siteSettings", "projects"]
+    },
+    "WorkTile": {
+      "title": "WorkTile",
+      "description": "Selected Work timeline strip tile for track V1 (video) or G1 (graphic design).",
+      "type": "object",
+      "properties": {
+        "track": {
+          "type": "string",
+          "enum": ["V1", "G1"],
+          "description": "Timeline track identifier: V1 (video) or G1 (graphic design)."
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120,
+          "description": "Display label at the bottom of the tile."
+        },
+        "duration": {
+          "type": "string",
+          "maxLength": 32,
+          "description": "Duration badge text shown on V1 video tiles."
+        },
+        "thumbnailUrl": {
+          "type": "string",
+          "maxLength": 2000,
+          "description": "Thumbnail image URL or relative path."
+        },
+        "mediaUrl": {
+          "type": "string",
+          "maxLength": 2000,
+          "description": "Video URL (for V1) or large image URL (for G1) opened in the lightbox."
+        },
+        "order": {
+          "type": "number",
+          "description": "Sort order within the track."
+        },
+        "visible": {
+          "type": "boolean",
+          "description": "Whether the tile is shown or hidden."
+        },
+        "status": {
+          "type": "string",
+          "enum": ["draft", "published"],
+          "description": "Publication state of this timeline tile."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO timestamp when tile was updated."
+        }
+      },
+      "required": ["track", "label", "thumbnailUrl", "mediaUrl", "order", "visible", "status"]
+    },
     "Lead": {
       "title": "Lead",
       "description": "Client contact or project inquiry submitted via the website.",
@@ -83,7 +270,7 @@
         },
         "projectType": {
           "type": "string",
-          "maxLength": 50,
+          "maxLength": 80,
           "description": "Selected service or inquiry type."
         },
         "message": {
@@ -112,6 +299,7 @@
       "properties": {
         "email": {
           "type": "string",
+          "maxLength": 150,
           "description": "Admin email address."
         },
         "role": {
@@ -127,6 +315,22 @@
     "/portfolio/{docId}": {
       "schema": "PortfolioData",
       "description": "Global portfolio configuration. 'published' is publicly readable. 'draft' and all modifications are restricted to verified admins."
+    },
+    "/siteSettings/{docId}": {
+      "schema": "SiteSettings",
+      "description": "Static/live siteSettings documents ('published' and 'draft'). Public can read 'published'; only owner sbmc.3925@gmail.com can read 'draft' or write."
+    },
+    "/projects/{projectId}": {
+      "schema": "ProjectRecord",
+      "description": "Portfolio case-study projects collection. Public can read published projects; only owner sbmc.3925@gmail.com can create, update, or delete."
+    },
+    "/works/{workId}": {
+      "schema": "WorkTile",
+      "description": "Selected Work timeline strip tiles (V1 video and G1 graphic tracks). Public can read published tiles; only owner sbmc.3925@gmail.com can create, update, or delete."
+    },
+    "/siteVersions/{versionId}": {
+      "schema": "SiteVersion",
+      "description": "Last 10 version snapshots for restoring previous site states. Strictly restricted to owner sbmc.3925@gmail.com."
     },
     "/leads/{leadId}": {
       "schema": "Lead",

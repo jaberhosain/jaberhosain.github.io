@@ -399,8 +399,25 @@ svg.lucide,
   -webkit-text-fill-color: transparent !important;
 }
 
-[data-theme="light"] header.studio-nav-scrolled {
-  background-color: rgba(245, 242, 235, 0.96) !important;
+[data-theme="light"] header.studio-nav-scrolled,
+[data-theme="light"] .studio-nav-pill {
+  background-color: rgba(245, 242, 235, 0.94) !important;
+  border-color: rgba(23, 25, 30, 0.14) !important;
+  box-shadow: 0 18px 40px -16px rgba(23, 25, 30, 0.14) !important;
+}
+
+[data-theme="light"] .studio-nav-drawer {
+  background-color: rgba(255, 255, 255, 0.97) !important;
+  border-color: #D9D2C5 !important;
+}
+
+[data-theme="light"] .studio-pill-rail {
+  background-color: rgba(235, 230, 220, 0.92) !important;
+  border-color: rgba(23, 25, 30, 0.12) !important;
+}
+
+[data-theme="light"] .studio-marquee-bar {
+  background-color: rgba(235, 230, 220, 0.85) !important;
   border-color: #D9D2C5 !important;
 }
 
@@ -489,6 +506,29 @@ svg.lucide,
   background: rgba(23, 25, 30, 0.06) !important;
   border-color: rgba(23, 25, 30, 0.14) !important;
   color: #292524 !important;
+}
+
+[data-theme="light"] .hero-contrast-scrim {
+  background:
+    radial-gradient(ellipse 74% 78% at 28% 48%, rgba(245, 242, 235, 0.92) 0%, rgba(245, 242, 235, 0.72) 56%, rgba(245, 242, 235, 0.25) 100%),
+    linear-gradient(180deg, rgba(245, 242, 235, 0.55) 0%, rgba(245, 242, 235, 0.78) 70%, rgba(245, 242, 235, 0.95) 100%) !important;
+}
+
+[data-theme="light"] .hero-metallic-text {
+  background: linear-gradient(102deg, #17191E 0%, #2F333D 45%, #5C5852 100%) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  filter: drop-shadow(0 4px 10px rgba(23, 25, 30, 0.14)) !important;
+}
+
+[data-theme="light"] .hero-metallic-depth {
+  color: rgba(212, 205, 192, 0.8) !important;
+  text-shadow: 0 2px 0 rgba(23, 25, 30, 0.12) !important;
+}
+
+[data-theme="light"] .hero-viewfinder-corner {
+  border-color: rgba(23, 25, 30, 0.22) !important;
 }
 
 /* BLUE THEME — Nordic Slate Sapphire */
@@ -913,6 +953,7 @@ svg.lucide,
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
+  -webkit-text-stroke: 1px rgba(255, 255, 255, 0.16);
 }
 
 /* Light Theme Override — Warm Sculpted Travertine Low-Relief */
@@ -942,9 +983,312 @@ svg.lucide,
   -webkit-text-stroke: 1px rgba(23, 25, 30, 0.09);
 }
 
+[data-theme="light"] .footer-wordmark-sheen {
+  -webkit-text-stroke: 1px rgba(23, 25, 30, 0.24);
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .footer-wordmark-3d-wrap {
+  .footer-wordmark-3d-wrap,
+  .hero-char {
+    opacity: 1 !important;
     transform: none !important;
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* Hero Architectural Cursor-Spotlight Stroke Backdrop */
+.hero-stroke-base {
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(255, 255, 255, 0.048);
+  text-rendering: geometricPrecision;
+}
+
+.hero-stroke-spot {
+  color: rgba(255, 255, 255, 0.018);
+  -webkit-text-stroke: 1.45px rgba(255, 255, 255, 0.68);
+  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.22));
+  text-rendering: geometricPrecision;
+}
+
+.hero-stroke-accent {
+  color: transparent;
+  -webkit-text-stroke: 1.55px var(--brand-orange, #E4583B);
+  opacity: 0.42;
+  filter: drop-shadow(0 0 14px rgba(228, 88, 59, 0.24));
+  text-rendering: geometricPrecision;
+}
+
+[data-theme="light"] .hero-stroke-base {
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(23, 25, 30, 0.065);
+}
+
+[data-theme="light"] .hero-stroke-spot {
+  color: rgba(23, 25, 30, 0.02);
+  -webkit-text-stroke: 1.45px rgba(23, 25, 30, 0.56);
+  filter: drop-shadow(0 0 8px rgba(23, 25, 30, 0.14));
+}
+
+[data-theme="light"] .hero-stroke-accent {
+  -webkit-text-stroke: 1.55px var(--brand-orange, #C94426);
+  opacity: 0.36;
+  filter: none;
+}
+
+/* Hero Name Contrast Overlay & Sculptural 3D Editorial Serif */
+.hero-contrast-scrim {
+  background:
+    radial-gradient(ellipse 74% 78% at 28% 48%, rgba(10, 11, 15, 0.94) 0%, rgba(10, 11, 15, 0.78) 56%, rgba(10, 11, 15, 0.36) 100%),
+    linear-gradient(180deg, rgba(10, 11, 15, 0.62) 0%, rgba(10, 11, 15, 0.82) 70%, rgba(13, 14, 18, 0.96) 100%);
+}
+
+.hero-display-name {
+  font-family: 'Playfair Display', 'Bodoni Moda', 'Cormorant Garamond', Georgia, serif;
+  font-size: clamp(2.35rem, 8.8vw, 3.75rem);
+  font-weight: 700;
+  line-height: 0.94;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  transform: none !important;
+  rotate: 0deg !important;
+}
+
+@media (min-width: 768px) {
+  .hero-display-name {
+    font-size: clamp(3rem, 6.2vw, 5.25rem);
+  }
+}
+
+.hero-metallic-text {
+  background: linear-gradient(
+    102deg,
+    #68656E 0%,
+    #A9A5A0 34%,
+    #E6E1D8 68%,
+    #FFFFFF 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.82));
+}
+
+.hero-metallic-depth {
+  color: rgba(8, 9, 12, 0.92);
+  text-shadow:
+    0 2px 0 rgba(0, 0, 0, 0.85),
+    0 4px 0 rgba(0, 0, 0, 0.7),
+    0 12px 26px rgba(0, 0, 0, 0.9);
+}
+
+.hero-crimson-rule {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 75, 92, 0.65) 0%,
+    rgba(255, 75, 92, 0.25) 65%,
+    transparent 100%
+  );
+}
+
+.hero-subtitle-font {
+  font-family: 'Inter', 'DM Sans', system-ui, -apple-system, sans-serif;
+}
+
+.hero-char-mask {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: bottom;
+  padding-bottom: 0.06em;
+  margin-bottom: -0.06em;
+}
+
+.hero-char {
+  display: inline-block;
+  opacity: 0;
+  transform: translate3d(0, 105%, 0);
+  animation: heroLetterSlideUp 0.58s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
+}
+
+@keyframes heroLetterSlideUp {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 105%, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes heroPlayheadSweep {
+  0% { left: 0%; opacity: 1; }
+  85% { left: 100%; opacity: 1; }
+  100% { left: 100%; opacity: 0; }
+}
+
+@keyframes heroClipWipe {
+  0% { clip-path: inset(0 100% 0 0); }
+  100% { clip-path: inset(0 0 0 0); }
+}
+
+.hero-clip-reveal {
+  clip-path: inset(0 100% 0 0);
+  animation: heroClipWipe 1.5s cubic-bezier(0.7, 0, 0.2, 1) forwards;
+}
+
+.hero-playhead-beam {
+  animation: heroPlayheadSweep 1.65s cubic-bezier(0.7, 0, 0.2, 1) forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-clip-reveal {
+    clip-path: none !important;
+    animation: none !important;
+  }
+  .hero-playhead-beam {
+    display: none !important;
+  }
+}
+
+/* ==========================================================================
+   LIVE STUDIO ELEMENT & CUSTOM CANVAS LAYER MOTION PRESETS
+   ========================================================================== */
+@keyframes studioSlideUp {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 26px, 0);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes studioSlideLeft {
+  0% {
+    opacity: 0;
+    transform: translate3d(32px, 0, 0);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes studioSlideRight {
+  0% {
+    opacity: 0;
+    transform: translate3d(-32px, 0, 0);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes studioFloat {
+  0%, 100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -8px, 0);
+  }
+}
+
+.animate-studio-slide-up {
+  animation: studioSlideUp 0.65s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-studio-slide-left {
+  animation: studioSlideLeft 0.65s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-studio-slide-right {
+  animation: studioSlideRight 0.65s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-studio-float {
+  animation: studioFloat 4.2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-studio-slide-up,
+  .animate-studio-slide-left,
+  .animate-studio-slide-right,
+  .animate-studio-float,
+  .animate-reveal-slot,
+  .reveal-contact-lid-open {
+    animation: none !important;
     transition: none !important;
   }
 }
+
+/* ==========================================================================
+   3D TACTILE HINGE-FLIP REVEAL CONTACT CAPSULES (Email & WhatsApp)
+   ========================================================================== */
+.reveal-contact-lid {
+  background: linear-gradient(180deg, rgba(31, 35, 45, 0.96) 0%, rgba(20, 23, 30, 0.98) 100%);
+  border-color: rgba(255, 255, 255, 0.14);
+  color: #F4F0E8;
+  transform-origin: center top;
+}
+
+.reveal-contact-lid:hover {
+  border-color: rgba(255, 255, 255, 0.28);
+}
+
+@keyframes revealLidFold {
+  0% {
+    transform: rotateX(-52deg) translateY(8px);
+    opacity: 0.72;
+  }
+  100% {
+    transform: rotateX(0deg) translateY(0);
+    opacity: 1;
+  }
+}
+
+.reveal-contact-lid-open {
+  animation: revealLidFold 0.42s cubic-bezier(0.34, 1.45, 0.64, 1) forwards;
+}
+
+@keyframes revealSlotDrop {
+  0% {
+    opacity: 0;
+    transform: perspective(700px) rotateX(-24deg) translateY(-12px) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: perspective(700px) rotateX(0deg) translateY(0) scale(1);
+  }
+}
+
+.animate-reveal-slot {
+  transform-origin: center top;
+  animation: revealSlotDrop 0.45s cubic-bezier(0.34, 1.4, 0.64, 1) forwards;
+}
+
+.reveal-contact-slot {
+  background: rgba(11, 13, 18, 0.94);
+  border-color: rgba(255, 255, 255, 0.22);
+  color: #F4F0E8;
+  box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.55), 0 14px 28px -12px rgba(0, 0, 0, 0.75);
+}
+
+[data-theme="light"] .reveal-contact-lid {
+  background: linear-gradient(180deg, #FFFFFF 0%, #F7F4EC 100%) !important;
+  border-color: rgba(23, 25, 30, 0.16) !important;
+  color: #17191E !important;
+  box-shadow: 0 12px 26px -12px rgba(23, 25, 30, 0.18), inset 0 1px 0 #FFFFFF !important;
+}
+
+[data-theme="light"] .reveal-contact-slot {
+  background: #FFFFFF !important;
+  border-color: #C7C0B2 !important;
+  color: #17191E !important;
+  box-shadow: inset 0 2px 8px rgba(23, 25, 30, 0.06), 0 12px 24px -12px rgba(23, 25, 30, 0.14) !important;
+}
+

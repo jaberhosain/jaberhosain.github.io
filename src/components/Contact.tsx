@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
-import { Mail, Facebook, Send, CheckCircle2, AlertCircle, MessageSquare, Youtube, Copy, Check } from 'lucide-react';
+import { Mail, Facebook, Send, CheckCircle2, AlertCircle, MessageSquare, Youtube } from 'lucide-react';
 import { usePortfolio } from '../context/PortfolioContext';
 import { EditableElement } from './common/EditableElement';
 import { Reveal3D } from './common/Reveal3D';
 import { StudioGlassIcon } from './common/StudioIcon';
+import { RevealContactPill } from './common/RevealContactPill';
 
 export const Contact: React.FC = () => {
   const { portfolio, ui, loc, language, submitContactLead } = usePortfolio();
   const contactForm = portfolio.contactForm;
-  const [copiedEmail, setCopiedEmail] = useState(false);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -19,17 +19,6 @@ export const Contact: React.FC = () => {
 
   const [submitting, setSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
-
-  const handleCopyEmail = async () => {
-    const email = portfolio.contact?.email || 'sbmc.3925@gmail.com';
-    try {
-      await navigator.clipboard.writeText(email);
-      setCopiedEmail(true);
-      setTimeout(() => setCopiedEmail(false), 2000);
-    } catch {
-      // ignore
-    }
-  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData((prev) => ({
@@ -72,39 +61,29 @@ export const Contact: React.FC = () => {
   return (
     <div id="advice" className="py-24 bg-[#0D0E12]/70 border-t border-white/[0.08]">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-20">
-        {/* Quick Availability & Email Copy Strip */}
+        {/* Quick Availability & Click-to-Reveal Email Capsule */}
         <Reveal3D direction="up">
           <div className="glass-showcase-card p-5 rounded-[22px] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="text-xs sm:text-sm text-[#DDD1BE]">
               <span className="text-[#E4583B] font-semibold tracking-wide">
                 {loc(portfolio.hero.badge)}
               </span>
-              {portfolio.contact?.email && (
-                <>
-                  <span className="mx-2.5 text-[#A7A298]" aria-hidden="true">·</span>
-                  <span className="text-[#A7A298] break-all">{portfolio.contact.email}</span>
-                </>
-              )}
+              <span className="mx-2.5 text-[#A7A298]" aria-hidden="true">·</span>
+              <span className="text-[#A7A298]">
+                {language === 'bn'
+                  ? 'সরাসরি ইমেইল দেখতে পাশের বাটনে ক্লিক করুন'
+                  : 'Click to reveal direct email'}
+              </span>
             </div>
 
             {portfolio.contact?.email && (
-              <button
-                type="button"
-                onClick={handleCopyEmail}
-                className="inline-flex items-center space-x-2 rtl:space-x-reverse px-4 py-2 rounded-full glass-pill-ghost text-xs font-medium text-[#F4F0E8] transition-all self-start sm:self-auto shrink-0 cursor-pointer"
-              >
-                {copiedEmail ? (
-                  <>
-                    <Check className="w-3.5 h-3.5 text-emerald-400" strokeWidth={1.5} />
-                    <span>{language === 'bn' ? 'কপি হয়েছে' : 'Copied'}</span>
-                  </>
-                ) : (
-                  <>
-                    <Copy className="w-3.5 h-3.5 text-[#DDD1BE]" strokeWidth={1.35} />
-                    <span>{language === 'bn' ? 'ইমেইল কপি করুন' : 'Copy Email'}</span>
-                  </>
-                )}
-              </button>
+              <RevealContactPill
+                type="email"
+                value={portfolio.contact.email}
+                href={`mailto:${portfolio.contact.email}`}
+                language={language}
+                compact
+              />
             )}
           </div>
         </Reveal3D>
@@ -266,23 +245,57 @@ export const Contact: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-4xl mx-auto">
-            {/* Email */}
+            {/* Email (Click-to-Reveal Capsule) */}
             {portfolio.contact?.email && (
-              <a
-                href={`mailto:${portfolio.contact.email}`}
-                className="glass-showcase-card p-6 rounded-[22px] hover:-translate-y-0.5 text-center flex flex-col items-center justify-center space-y-2.5 group transition-all"
-              >
-                <StudioGlassIcon size="lg" className="group-hover:scale-105">
+              <div className="glass-showcase-card p-6 rounded-[22px] text-center flex flex-col items-center justify-center space-y-3">
+                <StudioGlassIcon size="lg">
                   <Mail className="w-5 h-5 text-[#F4F0E8]" strokeWidth={1.35} />
                 </StudioGlassIcon>
                 <div className="text-sm font-semibold text-[#F4F0E8]">
                   {ui.getInTouch.emailTitle}
                 </div>
-                <div className="text-xs text-[#A7A298] break-all">
-                  {portfolio.contact.email}
-                </div>
-              </a>
+                <RevealContactPill
+                  type="email"
+                  value={portfolio.contact.email}
+                  href={`mailto:${portfolio.contact.email}`}
+                  language={language}
+                />
+              </div>
             )}
+
+            {/* WhatsApp (Click-to-Reveal Capsule) */}
+            <div className="glass-showcase-card p-6 rounded-[22px] text-center flex flex-col items-center justify-center space-y-3">
+              <StudioGlassIcon size="lg">
+                <MessageSquare className="w-5 h-5 text-[#F4F0E8]" strokeWidth={1.35} />
+              </StudioGlassIcon>
+              <div className="text-sm font-semibold text-[#F4F0E8]">
+                WhatsApp
+              </div>
+              <RevealContactPill
+                type="whatsapp"
+                value="+880 1904-621391"
+                href="https://wa.me/8801904621391"
+                language={language}
+              />
+            </div>
+
+            {/* Behance */}
+            <a
+              href={portfolio.contact?.behanceUrl || 'https://www.behance.net/jaberhosain'}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="glass-showcase-card p-6 rounded-[22px] hover:-translate-y-0.5 text-center flex flex-col items-center justify-center space-y-2.5 group transition-all"
+            >
+              <StudioGlassIcon size="lg" className="group-hover:scale-105">
+                <span className="text-sm font-bold text-[#F4F0E8]">Bē</span>
+              </StudioGlassIcon>
+              <div className="text-sm font-semibold text-[#F4F0E8]">
+                Behance Portfolio
+              </div>
+              <div className="text-xs text-[#A7A298]">
+                behance.net/jaberhosain
+              </div>
+            </a>
 
             {/* Telegram */}
             {Boolean(portfolio.contact?.telegramUrl && portfolio.contact.telegramUrl.trim()) && (

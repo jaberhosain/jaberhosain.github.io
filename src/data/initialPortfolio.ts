@@ -108,26 +108,224 @@ export const defaultFooterConfig: FooterConfig = {
 
 export const initialPortfolioData: PortfolioConfig = {
   status: 'published',
+  defaultFocusMode: 'all',
+  showFocusSwitcher: true,
   updatedAt: new Date().toISOString(),
   publishedAt: new Date().toISOString(),
   contactForm: defaultContactForm,
   footerConfig: defaultFooterConfig,
+  caseStudiesSection: {
+    tag: {
+      en: 'Selected Case Studies',
+      bn: 'নির্বাচিত কেস স্টাডি',
+      ar: 'دراسات حالة مختارة'
+    },
+    titlePrefix: {
+      en: 'Work That Delivers',
+      bn: 'প্রজেক্ট ও ফলাফল',
+      ar: 'أعمال تحقق'
+    },
+    titleItalic: {
+      en: 'real results.',
+      bn: 'কেস স্টাডি',
+      ar: 'نتائج حقيقية.'
+    },
+    visible: true
+  },
+  caseStudies: [
+    {
+      id: 'cs-video-1',
+      category: 'video',
+      categoryLabel: { en: 'Video Editing', bn: 'ভিডিও এডিটিং', ar: 'مونتاج الفيديو' },
+      title: {
+        en: 'Documentary & Short-Form Reel Editing',
+        bn: 'ডকুমেন্টারি ও সোশ্যাল রিলস এডিটিং (প্যারালাক্স স্টোরিটেলিং)',
+        ar: 'مونتاج الأفلام الوثائقية والريلز'
+      },
+      thumbnail: '/assets/jaber_hero.png',
+      problem: {
+        en: 'Raw talking-head and documentary footage was losing viewer retention within the first 3 seconds.',
+        bn: 'সাধারণ কাটিং ও ধীর পেসিংয়ের কারণে দর্শক প্রথম ৩ সেকেন্ডের মধ্যেই ভিডিও স্কিপ করছিল।',
+        ar: 'كانت اللقطات الخام تفقد انتباه المشاهدين خلال أول ٣ ثوانٍ.'
+      },
+      process: {
+        en: 'Structured hook pacing in Premiere Pro, layered kinetic captions in After Effects, and applied rich sound design.',
+        bn: 'Premiere Pro ও After Effects দিয়ে টাইট পেসিং, সাউন্ড ডিজাইন, সাবটাইটেল হুক ও সিনেমাটিক কালার গ্রেডিং যুক্ত করা হয়।',
+        ar: 'تنسيق الإيقاع السريع في Premiere Pro وإضافة نصوص حركية وتصميم صوتي احترافي.'
+      },
+      result: {
+        en: 'Delivered a crisp, broadcast-ready cut that boosted watch-through retention and audience shares.',
+        bn: 'দর্শকের ওয়াচ-টাইম ও সোশ্যাল মিডিয়া শেয়ার উল্লেখযোগ্যভাবে বৃদ্ধি পায়।',
+        ar: 'مقطع احترافي جاهز للبث عزز نسبة المشاهدة والمشاركات.'
+      },
+      videoType: 'facebook',
+      videoUrl: 'https://www.facebook.com/share/p/1DNfXJTmTK/',
+      visible: true,
+      order: 1
+    },
+    {
+      id: 'cs-motion-1',
+      category: 'motion',
+      categoryLabel: { en: 'Motion Graphics', bn: 'মোশন গ্রাফিক্স', ar: 'موشن جرافيك' },
+      title: {
+        en: 'Kinetic Typography & Brand Promo Motion',
+        bn: 'কাইনেটিক টাইপোগ্রাফি ও প্রোমো মোশন ভিজ্যুয়াল',
+        ar: 'تايبوجرافي حركي وإعلان موشن للعلامات'
+      },
+      thumbnail: '/assets/jaber_about.png',
+      problem: {
+        en: 'Static promotional announcements were blending into crowded feeds without stopping the scroll.',
+        bn: 'স্ট্যাটিক প্রমোশনাল পোস্টার সোশ্যাল ফিডে স্ক্রল থামাতে পারছিল না।',
+        ar: 'كانت الإعلانات الثابتة تضيع وسط المنشورات دون لفت الانتباه.'
+      },
+      process: {
+        en: 'Built multi-layer 3D camera rigs, smooth speed-graph transitions, and typography motion in After Effects.',
+        bn: 'After Effects-এ কাস্টম ক্যামেরা মুভমেন্ট, ৩ডি লেয়ার ডেপথ এবং স্মুথ কি-ফ্রেম অ্যানিমেশন তৈরি করা হয়।',
+        ar: 'بناء كاميرا ثلاثية الأبعاد متعددة الطبقات وانتقالات سلسة في After Effects.'
+      },
+      result: {
+        en: 'Created high-impact motion promos that elevated brand authority and campaign click-through rates.',
+        bn: 'ব্র্যান্ডের প্রমোশনাল ক্যাম্পেইনে উচ্চ ক্লিক-থ্রু ও এনগেজমেন্ট অর্জিত হয়।',
+        ar: 'إعلانات موشن عالية التأثير رفعت من قوة العلامة ومعدل النقر.'
+      },
+      videoType: 'facebook',
+      videoUrl: 'https://www.facebook.com/share/v/19XfdDJYTf/',
+      visible: true,
+      order: 2
+    },
+    {
+      id: 'cs-graphic-1',
+      category: 'graphic',
+      categoryLabel: { en: 'Graphic Design', bn: 'গ্রাফিক ডিজাইন', ar: 'التصميم الجرافيكي' },
+      title: {
+        en: 'Brand Identity & Visual Poster System',
+        bn: 'ব্র্যান্ড আইডেন্টিটি ও ভিজ্যুয়াল পোস্টার সিরিজ',
+        ar: 'الهوية البصرية ونظام البوسترات'
+      },
+      thumbnail: '/assets/jabir_profile.png',
+      problem: {
+        en: 'Inconsistent typography and visual hierarchy made the brand look amateur across digital touchpoints.',
+        bn: 'ব্র্যান্ডের সোশ্যাল মিডিয়া ও প্রিন্ট ম্যাটেরিয়ালে একীভূত ভিজ্যুয়াল ল্যাঙ্গুয়েজের অভাব ছিল।',
+        ar: 'أدى تشتت الخطوط والتسلسل البصري إلى إضعاف مظهر العلامة التجارية.'
+      },
+      process: {
+        en: 'Crafted a cohesive poster grid, custom vector accents, and high-contrast color grading in Photoshop & Illustrator.',
+        bn: 'Photoshop ও Illustrator ব্যবহার করে গ্রিড-ভিত্তিক টাইপোগ্রাফি, কালার সিস্টেম ও পোস্টার সিরিজ ডিজাইন করা হয়।',
+        ar: 'تصميم شبكة بوسترات متناسقة وعناصر فيكتور وتنسيق ألوان متباين.'
+      },
+      result: {
+        en: 'Established an unmistakable visual identity featured on Behance with strong client recognition.',
+        bn: 'একটি প্রিমিয়াম ও আন্তর্জাতিক মানের ব্র্যান্ড পরিচিতি প্রতিষ্ঠিত হয়।',
+        ar: 'تأسيس هوية بصرية مميزة حظيت بإشادة العملاء على Behance.'
+      },
+      behanceUrl: 'https://www.behance.net/jaberhosain',
+      visible: true,
+      order: 3
+    },
+    {
+      id: 'cs-graphic-2',
+      category: 'graphic',
+      categoryLabel: { en: 'Graphic Design', bn: 'গ্রাফিক ডিজাইন', ar: 'التصميم الجرافيكي' },
+      title: {
+        en: 'High-CTR Social Media & YouTube Thumbnails',
+        bn: 'হাই-কনভার্টিং সোশ্যাল মিডিয়া ক্যাম্পেইন ও থাম্বনেইল',
+        ar: 'تصاميم السوشيال ميديا والصور المصغرة ليوتيوب'
+      },
+      thumbnail: '/assets/jaber_hero.png',
+      problem: {
+        en: 'Strong video content and Meta ad campaigns were underperforming due to cluttered, low-contrast thumbnails.',
+        bn: 'ভালো কনটেন্ট থাকা সত্ত্বেও আকর্ষণীয় থাম্বনেইল ও অ্যাড ক্রিয়েটিভের অভাবে ভিউ কম হচ্ছিল।',
+        ar: 'ضعف أداء الحملات الإعلانية والمقاطع بسبب الصور المصغرة المزدحمة.'
+      },
+      process: {
+        en: 'Designed focal-point lighting, bold readable typography, and AI-enhanced compositing in Photoshop.',
+        bn: 'ফোকাল পয়েন্ট লাইটিং, এক্সপ্রেসিভ কম্পোজিশন ও এআই-সহায়ক ভিজ্যুয়াল ওয়ার্কফ্লো দিয়ে ক্রিয়েটিভ তৈরি করা হয়।',
+        ar: 'تصميم إضاءة بؤرية وخطوط واضحة ودمج إبداعي مدعوم بالذكاء الاصطناعي.'
+      },
+      result: {
+        en: 'Significantly improved organic click-through rate (CTR) and Meta ad conversion performance.',
+        bn: 'ক্যাম্পেইনের ইমপ্রেশন ও অর্গানিক ক্লিক রেট (CTR) দ্রুত বৃদ্ধি পায়।',
+        ar: 'تحسن ملحوظ في معدل النقر والتحويلات الإعلانية.'
+      },
+      behanceUrl: 'https://www.behance.net/jaberhosain',
+      visible: true,
+      order: 4
+    }
+  ],
+  homeStats: [
+    {
+      id: 'stat-1',
+      value: '50+',
+      label: { en: 'Projects Completed', bn: 'সম্পন্ন প্রজেক্ট', ar: 'مشاريع مكتملة' },
+      order: 1
+    },
+    {
+      id: 'stat-2',
+      value: '1.5+',
+      label: { en: 'Years of Experience', bn: 'বছরের অভিজ্ঞতা', ar: 'سنوات الخبرة' },
+      order: 2
+    },
+    {
+      id: 'stat-3',
+      value: '30+',
+      label: { en: 'Happy Clients & Collaborations', bn: 'সন্তুষ্ট ক্লায়েন্ট ও প্রজেক্ট', ar: 'عملاء وشركاء سعداء' },
+      order: 3
+    }
+  ],
+  showHomeStats: true,
+  homeTools: [
+    'Adobe Premiere Pro',
+    'Adobe After Effects',
+    'Adobe Photoshop',
+    'Adobe Illustrator',
+    'AI Tools & Workflows',
+    'Meta Ads Creative'
+  ],
+  testimonialsSection: {
+    tag: {
+      en: 'Client Trust & Feedback',
+      bn: 'ক্লায়েন্টদের মতামত',
+      ar: 'ثقة وآراء العملاء'
+    },
+    title: {
+      en: 'What Clients & Collaborators Say',
+      bn: 'ক্লায়েন্টরা যা বলেন',
+      ar: 'ماذا يقول العملاء والشركاء'
+    },
+    visible: true
+  },
+  homeSectionOrder: [
+    'caseStudies',
+    'videoShowcase',
+    'graphicShowcase',
+    'aboutPreview',
+    'trustTestimonials',
+    'overviewDirectory'
+  ],
+  homeSectionVisibility: {
+    caseStudies: true,
+    videoShowcase: true,
+    graphicShowcase: true,
+    aboutPreview: true,
+    trustTestimonials: true,
+    overviewDirectory: true
+  },
   hero: {
     name: {
-      en: 'MD JABER HOSAIN',
+      en: 'MD. JABER HOSAIN',
       bn: 'মো. জাবির হোসেন',
       ar: 'محمد جابر حسين'
     },
     badge: {
-      en: 'AVAILABLE FOR CREATIVE PROJECTS',
-      bn: 'ক্রিয়েটিভ প্রজেক্টের জন্য উন্মুক্ত',
-      ar: 'متاح للمشاريع الإبداعية'
+      en: '',
+      bn: '',
+      ar: ''
     },
-    showBadge: true,
+    showBadge: false,
     tagline: {
-      en: 'CREATING IDEAS - EDITING STORIES - BUILDING BRANDS',
-      bn: 'আইডিয়া তৈরি - গল্প সম্পাদনা - ব্র্যান্ড গঠন',
-      ar: 'ابتكار الأفكار - مونتاج القصص - بناء العلامات التجارية'
+      en: 'Video Editor · Graphic Designer · Motion Designer',
+      bn: 'ভিডিও এডিটর · গ্রাফিক ডিজাইনার · মোশন ডিজাইনার',
+      ar: 'مونتير فيديو · مصمم جرافيك · مصمم موشن'
     },
     avatarUrl: '/assets/jabir_profile.png',
     ctaWork: {
@@ -138,11 +336,11 @@ export const initialPortfolioData: PortfolioConfig = {
     ctaWorkUrl: '#projects',
     showCtaWork: true,
     ctaContact: {
-      en: "Let's Work Together",
-      bn: 'একসাথে কাজ করি',
-      ar: 'لنعمل معاً'
+      en: 'Hire Me',
+      bn: 'হায়ার করুন',
+      ar: 'وظفني الآن'
     },
-    ctaContactUrl: '#advice',
+    ctaContactUrl: '#contact',
     showCtaContact: true,
     floatingBadgeText: {
       en: 'MD JABER HOSAIN',
@@ -154,23 +352,23 @@ export const initialPortfolioData: PortfolioConfig = {
       {
         id: 'cnt-1',
         value: '50+',
-        label: { en: 'Completed Projects', bn: 'সম্পন্ন প্রজেক্ট', ar: 'مشاريع مكتملة' },
+        label: { en: 'Projects Completed', bn: 'সম্পন্ন প্রজেক্ট', ar: 'مشاريع مكتملة' },
         order: 1
       },
       {
         id: 'cnt-2',
-        value: '100%',
-        label: { en: 'Client Dedication', bn: 'কাজের নিষ্ঠা', ar: 'التزام تام' },
+        value: '1.5+',
+        label: { en: 'Years of Experience', bn: 'বছরের অভিজ্ঞতা', ar: 'سنوات الخبرة' },
         order: 2
       },
       {
         id: 'cnt-3',
-        value: '24/7',
-        label: { en: 'Creative Support', bn: 'সাপোর্ট ও যোগাযোগ', ar: 'دعم وتواصل' },
+        value: '30+',
+        label: { en: 'Happy Clients', bn: 'সন্তুষ্ট ক্লায়েন্ট', ar: 'عملاء سعداء' },
         order: 3
       }
     ],
-    showCounters: false
+    showCounters: true
   },
   about: {
     bio: {
@@ -804,7 +1002,47 @@ export const initialPortfolioData: PortfolioConfig = {
       icon: 'Send'
     }
   ],
-  testimonials: [],
+  testimonials: [
+    {
+      id: 't-1',
+      clientName: 'Creative Agency Partner',
+      clientRole: { en: 'Content Director', bn: 'কনটেন্ট ডিরেক্টর', ar: 'مدير محتوى' },
+      rating: 5,
+      quote: {
+        en: 'Jaber transformed our raw footage into crisp, high-retention reels. His pacing, sound design, and attention to detail made our brand look truly international.',
+        bn: 'জাবিরের ভিডিও এডিটিং পেসিং এবং সাউন্ড ডিজাইন আমাদের রিলস ও প্রোমো ভিডিওর রিটেনশন সম্পূর্ণ বদলে দিয়েছে। সময়মতো ডেলিভারি ও চমৎকার কমিউনিকেশন।',
+        ar: 'حوّل جابر لقطاتنا الخام إلى مقاطع ريلز احترافية عالية الجاذبية، مع التزام تام بالمواعيد وتواصل رائع.'
+      },
+      visible: true,
+      order: 1
+    },
+    {
+      id: 't-2',
+      clientName: 'Brand Founder',
+      clientRole: { en: 'E-Commerce & Meta Campaigns', bn: 'ই-কমার্স ও মেটা ক্যাম্পেইন', ar: 'التجارة الإلكترونية وحملات ميتا' },
+      rating: 5,
+      quote: {
+        en: 'The poster series and ad visuals Jaber designed gave our campaign a distinct, premium look. Click-through rates improved immediately after launch.',
+        bn: 'আমাদের ব্র্যান্ডের পোস্টার সিরিজ এবং সোশ্যাল মিডিয়া অ্যাড ক্রিয়েটিভগুলো দর্শকদের নজর কেড়েছে। ডিজাইনের কালার ও টাইপোগ্রাফি ছিল একদম প্রিমিয়াম।',
+        ar: 'أعطت تصاميم البوسترات والإعلانات التي صممها جابر لحملتنا مظهراً مميزاً، مما رفع معدل النقر فوراً.'
+      },
+      visible: true,
+      order: 2
+    },
+    {
+      id: 't-3',
+      clientName: 'Digital Creator',
+      clientRole: { en: 'YouTube & Social Media', bn: 'ইউটিউব ও সোশ্যাল মিডিয়া', ar: 'يوتيوب ومنصات التواصل' },
+      rating: 5,
+      quote: {
+        en: 'Reliable, creative, and fast. Whether it is After Effects motion graphics or scroll-stopping thumbnails, Jaber consistently delivers beyond expectations.',
+        bn: 'থাম্বনেইল ডিজাইন থেকে শুরু করে মোশন গ্রাফিক্স—প্রতিটি কাজে জাবিরের সৃজনশীলতা এবং প্রফেশনালিজম প্রশংসনীয়।',
+        ar: 'موثوق ومبدع وسريع في الإنجاز، سواء في الموشن جرافيك أو الصور المصغرة الاحترافية.'
+      },
+      visible: true,
+      order: 3
+    }
+  ],
   googleSheetWebhookUrl: '',
   socialLinks: [
     {

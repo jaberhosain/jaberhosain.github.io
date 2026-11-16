@@ -68,6 +68,8 @@ import {
 } from '../../../lib/videoUtils';
 import { BestWorkGraphicEditor } from '../BestWorkGraphicEditor';
 import { BestWorkVideoEditor } from '../BestWorkVideoEditor';
+import { CaseStudiesEditor } from '../CaseStudiesEditor';
+import { StatsTestimonialsEditor } from '../StatsTestimonialsEditor';
 import { ImageUploaderField } from '../ImageUploaderField';
 import { ProjectGalleryManager } from '../ProjectGalleryManager';
 import { HomePage } from '../../pages/HomePage';
@@ -2747,6 +2749,15 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
             </div>
           </div>
         );
+
+      // ----------------------------------------
+      // HOME CASE STUDIES & FOCUS/STATS/REVIEWS
+      // ----------------------------------------
+      case 'home-case-studies':
+        return <CaseStudiesEditor onNotify={showToast} />;
+
+      case 'home-stats-testimonials':
+        return <StatsTestimonialsEditor onNotify={showToast} />;
 
       default:
         return null;

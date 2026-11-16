@@ -47,11 +47,14 @@ export const Navbar: React.FC = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const navLinks = pages.map((p) => ({
-    id: p.id,
-    href: p.hash,
-    label: p.label[language] || p.label.en
-  }));
+  const navLinks = pages
+    .filter((p) => p.id !== 'contact')
+    .slice(0, 5)
+    .map((p) => ({
+      id: p.id,
+      href: p.hash,
+      label: p.label[language] || p.label.en
+    }));
 
   const languages: { code: Language; label: string; native: string }[] = [
     { code: 'en', label: 'English', native: 'English' },
@@ -76,21 +79,25 @@ export const Navbar: React.FC = () => {
     { id: 'green', label: 'Botanical Green', dot: '#34D399' },
     { id: 'purple', label: 'Aubergine', dot: '#C084FC' },
     { id: 'warm', label: 'Smoked Amber', dot: '#E6A23C' },
-    { id: 'custom', label: 'Custom', dot: customAccentColor || '#E4583B' },
+    { id: 'custom', label: 'Custom', dot: customAccentColor || '#E4583B' }
   ];
   const themeOptions = allThemes.filter((t) => availableThemeIds.includes(t.id));
 
   return (
     <>
       {isPreviewDraft && (
-        <aside aria-label="Draft mode notice" className="sticky top-0 z-50 bg-[#E4583B] text-white text-xs font-semibold px-4 py-1.5 flex items-center justify-between shadow-md">
+        <aside
+          aria-label="Draft mode notice"
+          className="sticky top-0 z-50 bg-[#E4583B] text-white text-xs font-semibold px-4 py-1.5 flex items-center justify-between shadow-md"
+        >
           <div className="flex items-center space-x-2 rtl:space-x-reverse mx-auto">
             <Eye className="w-4 h-4" />
             <span>Previewing Draft Version — Changes are not yet published live to visitors.</span>
           </div>
           <button
+            type="button"
             onClick={() => setIsPreviewDraft(false)}
-            className="text-xs bg-black/20 hover:bg-black/30 px-2.5 py-0.5 rounded transition-colors"
+            className="text-xs bg-black/20 hover:bg-black/30 px-2.5 py-0.5 rounded transition-colors cursor-pointer"
           >
             Exit Preview
           </button>
@@ -98,18 +105,19 @@ export const Navbar: React.FC = () => {
       )}
 
       <header
-        className={`fixed left-0 right-0 z-40 transition-all duration-300 ${
-          isPreviewDraft ? 'top-8' : 'top-0'
-        } ${
-          isScrolled
-            ? 'studio-nav-scrolled bg-[#121419]/92 border-b border-[#2B303D] py-3.5 shadow-xl'
-            : 'bg-transparent py-5'
+        className={`fixed left-0 right-0 z-40 px-3 sm:px-6 transition-all duration-300 ${
+          isPreviewDraft ? 'top-10' : 'top-3.5 sm:top-5'
         }`}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between gap-4">
-
-            {/* Zone 1: Editorial Monogram */}
+        <div
+          className={`studio-nav-pill max-w-[1060px] mx-auto rounded-full border transition-all duration-300 ${
+            isScrolled
+              ? 'studio-nav-scrolled bg-[#13151B]/95 border-white/[0.12] shadow-[0_20px_50px_-14px_rgba(0,0,0,0.9)]'
+              : 'bg-[#13151B]/82 border-white/[0.09] shadow-[0_18px_46px_-16px_rgba(0,0,0,0.82)]'
+          } backdrop-blur-xl px-4 sm:px-5 py-2`}
+        >
+          <div className="flex items-center justify-between gap-6">
+            {/* Zone 1: Single-line Wordmark */}
             <a
               href="#/"
               onClick={(e) => {
@@ -118,21 +126,18 @@ export const Navbar: React.FC = () => {
                   navigateTo('home');
                 }
               }}
-              className="flex items-center space-x-3 rtl:space-x-reverse group cursor-pointer focus:outline-none shrink-0"
+              className="inline-flex items-center space-x-2.5 rtl:space-x-reverse group cursor-pointer focus-visible:outline-2 focus-visible:outline-[#E4583B] rounded-full whitespace-nowrap shrink-0"
             >
-              <div className="w-9 h-9 rounded-full glass-icon-disc flex items-center justify-center font-semibold text-xs text-[#F4F0E8] font-display tracking-tight">
-                <span>{portfolio.branding?.logoInitials?.[0] || 'M'}</span>
-                <span className="text-[#E4583B]">{portfolio.branding?.logoInitials?.[1] || 'J'}</span>
-              </div>
-              <div className="hidden sm:flex flex-col">
-                <span className="font-medium text-xs tracking-[0.16em] text-[#F4F0E8] group-hover:text-white transition-colors uppercase whitespace-nowrap">
-                  {portfolio.branding?.logoText || 'MD JABER HOSAIN'}
-                </span>
-              </div>
+              <span className="font-display font-bold text-sm sm:text-[15px] tracking-tight text-[#F4F0E8] transition-colors lowercase">
+                {(portfolio.branding?.logoText || 'md. jaber').toLowerCase()}
+              </span>
             </a>
 
-            {/* Zone 2: Clean Editorial Navigation */}
-            <nav aria-label="Primary Navigation" className="hidden lg:flex items-center space-x-7 rtl:space-x-reverse">
+            {/* Zone 2: Concise Single-Line Navigation Links */}
+            <nav
+              aria-label="Primary Navigation"
+              className="hidden lg:flex items-center gap-7"
+            >
               {navLinks.map((link) => {
                 const isActive = isMultiPageEnabled && currentPage === link.id;
                 return (
@@ -149,7 +154,7 @@ export const Navbar: React.FC = () => {
                     className={`nav-pill-link editorial-link py-1 text-xs font-medium tracking-wide transition-colors whitespace-nowrap shrink-0 ${
                       isActive
                         ? 'text-[#F4F0E8] font-semibold'
-                        : 'text-[#A7A298] hover:text-[#F4F0E8]'
+                        : 'text-[#9A958C] hover:text-[#F4F0E8]'
                     }`}
                   >
                     {link.label}
@@ -158,29 +163,60 @@ export const Navbar: React.FC = () => {
               })}
             </nav>
 
-            {/* Zone 3: Theme, Language & Architectural Contact CTA */}
-            <div className="hidden sm:flex items-center space-x-2.5 rtl:space-x-reverse shrink-0">
-              {/* Theme Selector */}
+            {/* Zone 3: Language / Color Grade Controls + Primary Action */}
+            <div className="hidden sm:flex items-center gap-2 shrink-0">
+              {/* Inline Language Switch */}
+              <div className="relative" ref={langDropdownRef}>
+                <button
+                  type="button"
+                  onClick={() => setLangDropdownOpen(!langDropdownOpen)}
+                  className="inline-flex items-center space-x-1 rtl:space-x-reverse h-8 px-2.5 text-[11px] font-semibold rounded-full text-neutral-300 hover:text-white hover:bg-white/[0.06] transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                  aria-label="Select Language"
+                >
+                  <Globe className="w-3.5 h-3.5 text-neutral-400" strokeWidth={1.5} />
+                  <span className="uppercase">{language}</span>
+                </button>
+
+                {langDropdownOpen && (
+                  <div className="absolute right-0 rtl:left-0 rtl:right-auto mt-3 w-36 py-1.5 glass-showcase-inner rounded-2xl shadow-2xl z-50">
+                    {languages.map((item) => (
+                      <button
+                        key={item.code}
+                        type="button"
+                        onClick={() => {
+                          setLanguage(item.code);
+                          setLangDropdownOpen(false);
+                        }}
+                        className={`w-full text-left rtl:text-right px-4 py-2 text-xs flex items-center justify-between hover:bg-white/5 transition-colors cursor-pointer ${
+                          language === item.code
+                            ? 'text-[#F4F0E8] font-semibold bg-white/[0.06]'
+                            : 'text-[#A7A298]'
+                        }`}
+                      >
+                        <span>{item.native}</span>
+                        {language === item.code && (
+                          <span className="text-[10px] text-[#E4583B]">Active</span>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Theme Color Grade Picker */}
               <div className="relative" ref={themeDropdownRef}>
                 <button
                   type="button"
                   onClick={() => setThemeDropdownOpen(!themeDropdownOpen)}
-                  className="flex items-center space-x-1.5 rtl:space-x-reverse h-9 px-3 text-xs rounded-full glass-icon-disc cursor-pointer"
-                  aria-label="Select Theme"
-                  title="Color Grade Theme"
+                  className="inline-flex items-center justify-center w-8 h-8 rounded-full text-neutral-300 hover:text-white hover:bg-white/[0.06] transition-colors cursor-pointer shrink-0"
+                  aria-label="Select Color Grade Theme"
+                  title="Color Grade"
                 >
-                  <Palette className="w-3.5 h-3.5" strokeWidth={1.35} />
-                  <span
-                    className="w-2 h-2 rounded-full inline-block"
-                    style={{
-                      backgroundColor:
-                        themeOptions.find((t) => t.id === activeThemeId)?.dot || '#E4583B',
-                    }}
-                  />
+                  <Palette className="w-3.5 h-3.5" strokeWidth={1.5} />
                 </button>
 
                 {themeDropdownOpen && (
-                  <div className="absolute right-0 rtl:left-0 rtl:right-auto mt-2 w-48 py-2 glass-showcase-inner rounded-2xl shadow-2xl z-50">
+                  <div className="absolute right-0 rtl:left-0 rtl:right-auto mt-3 w-48 py-2 glass-showcase-inner rounded-2xl shadow-2xl z-50">
                     <div className="px-3.5 py-1 text-[10px] uppercase text-[#8E8A82] tracking-wider border-b border-white/[0.08] mb-1">
                       Color Grade
                     </div>
@@ -200,14 +236,11 @@ export const Navbar: React.FC = () => {
                       >
                         <div className="flex items-center space-x-2 rtl:space-x-reverse">
                           <span
-                            className="w-2 h-2 rounded-full"
+                            className="w-2.5 h-2.5 rounded-full border border-white/20"
                             style={{ backgroundColor: t.dot }}
                           />
                           <span>{t.label}</span>
                         </div>
-                        {activeThemeId === t.id && (
-                          <span className="w-1.5 h-1.5 rounded-full bg-[#E4583B]" />
-                        )}
                       </button>
                     ))}
 
@@ -227,41 +260,7 @@ export const Navbar: React.FC = () => {
                 )}
               </div>
 
-              {/* Language Selector */}
-              <div className="relative" ref={langDropdownRef}>
-                <button
-                  type="button"
-                  onClick={() => setLangDropdownOpen(!langDropdownOpen)}
-                  className="flex items-center space-x-1.5 rtl:space-x-reverse h-9 px-3 text-xs font-medium rounded-full glass-icon-disc cursor-pointer"
-                  aria-label="Select Language"
-                >
-                  <Globe className="w-3.5 h-3.5" strokeWidth={1.35} />
-                  <span className="uppercase">{language}</span>
-                </button>
-
-                {langDropdownOpen && (
-                  <div className="absolute right-0 rtl:left-0 rtl:right-auto mt-2 w-36 py-1.5 glass-showcase-inner rounded-2xl shadow-2xl z-50">
-                    {languages.map((item) => (
-                      <button
-                        key={item.code}
-                        type="button"
-                        onClick={() => {
-                          setLanguage(item.code);
-                          setLangDropdownOpen(false);
-                        }}
-                        className={`w-full text-left rtl:text-right px-4 py-2 text-xs flex items-center justify-between hover:bg-white/5 transition-colors cursor-pointer ${
-                          language === item.code ? 'text-[#F4F0E8] font-semibold bg-white/[0.06]' : 'text-[#A7A298]'
-                        }`}
-                      >
-                        <span>{item.native}</span>
-                        {language === item.code && <span className="w-1.5 h-1.5 rounded-full bg-[#E4583B]" />}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Hire / Contact CTA */}
+              {/* Primary CTA Button */}
               <a
                 href="#/contact"
                 onClick={(e) => {
@@ -270,22 +269,23 @@ export const Navbar: React.FC = () => {
                     navigateTo('contact');
                   }
                 }}
-                className="inline-flex items-center space-x-1.5 rtl:space-x-reverse px-4 py-2 text-xs font-semibold rounded-full glass-pill-cta whitespace-nowrap shrink-0"
+                className="glass-pill-ghost inline-flex items-center space-x-1.5 rtl:space-x-reverse px-4 py-1.5 text-xs font-semibold rounded-full transition-all duration-200 whitespace-nowrap shrink-0"
               >
                 <span>{ui.nav.hireMe}</span>
-                <ArrowUpRight className="w-3.5 h-3.5" strokeWidth={1.5} />
+                <ArrowUpRight className="w-3.5 h-3.5" strokeWidth={1.6} />
               </a>
             </div>
 
-            {/* Mobile Hamburger Toggle */}
-            <div className="flex items-center space-x-2 rtl:space-x-reverse lg:hidden">
+            {/* Mobile Controls */}
+            <div className="flex items-center space-x-2 rtl:space-x-reverse lg:hidden shrink-0">
               <button
                 type="button"
                 onClick={() => {
-                  const nextLang: Language = language === 'en' ? 'bn' : language === 'bn' ? 'ar' : 'en';
+                  const nextLang: Language =
+                    language === 'en' ? 'bn' : language === 'bn' ? 'ar' : 'en';
                   setLanguage(nextLang);
                 }}
-                className="px-3 h-9 text-xs font-medium rounded-full glass-icon-disc"
+                className="glass-pill-ghost px-3 h-8 text-[11px] font-semibold rounded-full"
                 aria-label="Toggle language"
               >
                 {language.toUpperCase()}
@@ -294,18 +294,22 @@ export const Navbar: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="w-9 h-9 rounded-full glass-icon-disc flex items-center justify-center"
+                className="glass-pill-ghost w-8 h-8 rounded-full flex items-center justify-center"
                 aria-label="Toggle navigation menu"
               >
-                {mobileMenuOpen ? <X className="w-4 h-4" strokeWidth={1.4} /> : <Menu className="w-4 h-4" strokeWidth={1.4} />}
+                {mobileMenuOpen ? (
+                  <X className="w-4 h-4" strokeWidth={1.5} />
+                ) : (
+                  <Menu className="w-4 h-4" strokeWidth={1.5} />
+                )}
               </button>
             </div>
           </div>
         </div>
 
-        {/* Mobile menu drawer */}
+        {/* Mobile Menu Drawer */}
         {mobileMenuOpen && (
-          <div className="lg:hidden bg-[#121419]/98 border-b border-[#2B303D] px-4 pt-3 pb-6 space-y-2">
+          <div className="studio-nav-drawer lg:hidden mt-2 max-w-[1060px] mx-auto rounded-2xl bg-[#13151B]/98 border border-white/[0.1] px-4 pt-3 pb-5 space-y-2 shadow-2xl backdrop-blur-xl">
             <div className="p-3 rounded-xl bg-[#181B22] border border-[#2B303D] space-y-2 mb-2">
               <div className="flex items-center justify-between text-xs text-[#A7A298] font-mono">
                 <span className="flex items-center space-x-1.5 rtl:space-x-reverse">
@@ -347,26 +351,26 @@ export const Navbar: React.FC = () => {
               )}
             </div>
 
-            {navLinks.map((link) => {
-              const isActive = isMultiPageEnabled && currentPage === link.id;
+            {pages.map((p) => {
+              const isActive = isMultiPageEnabled && currentPage === p.id;
               return (
                 <a
-                  key={link.id}
-                  href={link.href}
+                  key={p.id}
+                  href={p.hash}
                   onClick={(e) => {
                     if (isMultiPageEnabled) {
                       e.preventDefault();
-                      navigateTo(link.id);
+                      navigateTo(p.id);
                     }
                     setMobileMenuOpen(false);
                   }}
-                  className={`block px-4 py-2.5 text-sm font-semibold rounded-lg uppercase font-mono transition-colors ${
+                  className={`block px-4 py-2.5 text-sm font-semibold rounded-xl transition-colors ${
                     isActive
                       ? 'bg-[#E4583B]/15 text-[#E4583B] border border-[#E4583B]/40'
                       : 'text-[#DDD1BE] hover:text-white hover:bg-white/5'
                   }`}
                 >
-                  {link.label}
+                  {p.label[language] || p.label.en}
                 </a>
               );
             })}
@@ -381,7 +385,7 @@ export const Navbar: React.FC = () => {
                   }
                   setMobileMenuOpen(false);
                 }}
-                className="w-full text-center block py-3 rounded-lg font-bold font-mono text-white bg-[#E4583B] hover:bg-[#D0492D] uppercase text-xs tracking-wider"
+                className="w-full text-center block py-3 rounded-xl font-semibold text-white bg-[#E4583B] hover:bg-[#D0492D] text-xs tracking-wider"
               >
                 {ui.nav.hireMe}
               </a>

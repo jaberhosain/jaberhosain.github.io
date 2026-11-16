@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { PortfolioProvider } from './context/PortfolioContext';
+import { PortfolioProvider, usePortfolio } from './context/PortfolioContext';
 import { DesignOverridesProvider } from './context/DesignOverridesContext';
 import { NavigationProvider, useNavigation } from './context/NavigationContext';
 import { Navbar } from './components/Navbar';
@@ -23,7 +23,17 @@ import { PortfolioAIAgent } from './components/PortfolioAIAgent';
 import { WelcomeSalamToast } from './components/WelcomeSalamToast';
 import { StudioBackdrop3D } from './components/three/StudioBackdrop3D';
 import { StudioCursor } from './components/common/StudioCursor';
+import { CustomLayersRenderer } from './components/common/CustomLayersRenderer';
 import { VideoShowcaseItem, ProjectItem } from './types/portfolio';
+
+function NavigationWithFocusSync({ children }: { children: React.ReactNode }) {
+  const { portfolio } = usePortfolio();
+  return (
+    <NavigationProvider initialFocusMode={portfolio.defaultFocusMode || 'all'}>
+      {children}
+    </NavigationProvider>
+  );
+}
 
 function MainApp() {
   const { currentPage, navigateTo } = useNavigation();
@@ -140,6 +150,9 @@ function MainApp() {
       {/* Persistent Three.js Interactive 3D WebGL Backdrop */}
       <StudioBackdrop3D activePage={currentPage} />
 
+      {/* Global Custom Studio Canvas Layers */}
+      <CustomLayersRenderer sectionTarget="global" />
+
       {/* Automatic Salam Greeting Popup on Site Entry */}
       <WelcomeSalamToast />
 
@@ -185,10 +198,11 @@ export default function App() {
   return (
     <PortfolioProvider>
       <DesignOverridesProvider>
-        <NavigationProvider>
+        <NavigationWithFocusSync>
           <MainApp />
-        </NavigationProvider>
+        </NavigationWithFocusSync>
       </DesignOverridesProvider>
     </PortfolioProvider>
   );
 }
+

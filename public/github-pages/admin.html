@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Studio Admin Console | Md. Jaber Hosain Portfolio</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&family=Outfit:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="admin-body">
+  <!-- LOGIN SCREEN (Firebase Authentication restricted strictly to owner email) -->
+  <div id="admin-auth-gate" class="auth-gate">
+    <div class="auth-card">
+      <div class="auth-header">
+        <span class="brand-monogram">MJ</span>
+        <div>
+          <h1 class="auth-title">Obsidian Studio Admin</h1>
+          <p class="auth-subtitle">Restricted to verified owner account</p>
+        </div>
+      </div>
+
+      <div id="auth-error-box" class="auth-error" hidden></div>
+
+      <!-- Google Sign-In (Recommended for sbmc.3925@gmail.com) -->
+      <button type="button" id="btn-google-login" class="btn btn-primary w-full">
+        <span>Sign in with Google (sbmc.3925@gmail.com)</span>
+      </button>
+
+      <div class="auth-divider"><span>OR EMAIL &amp; PASSWORD</span></div>
+
+      <form id="form-email-login" class="auth-form">
+        <label class="field-label">
+          <span>Owner Email</span>
+          <!-- EDIT HERE: Default owner email pre-filled -->
+          <input type="email" id="login-email" value="sbmc.3925@gmail.com" required class="field-input" />
+        </label>
+        <label class="field-label">
+          <span>Password</span>
+          <input type="password" id="login-password" placeholder="Enter your password" required class="field-input" />
+        </label>
+        <button type="submit" class="btn btn-secondary w-full">Sign In with Email</button>
+      </form>
+
+      <a href="index.html" class="auth-back-link">← Return to Public Portfolio</a>
+    </div>
+  </div>
+
+  <!-- ADMIN PANEL SPLIT LAYOUT: Settings on Left, Live Preview on Right -->
+  <div id="admin-workspace" class="admin-workspace" hidden>
+    <!-- Top Action Toolbar: Draft, Publish, Undo, Restore Version (Last 10), Mobile Switcher -->
+    <header class="admin-topbar">
+      <div class="admin-topbar-left">
+        <span class="brand-monogram">MJ</span>
+        <div>
+          <strong class="admin-console-title">Portfolio Studio Console</strong>
+          <span id="sync-status-badge" class="sync-badge">Ready</span>
+        </div>
+      </div>
+
+      <!-- Mobile View Toggle (Switches between Controls & Live Preview on phones/tablets) -->
+      <div class="mobile-view-switch" role="tablist">
+        <button type="button" id="btn-mobile-controls" class="view-tab active">Controls</button>
+        <button type="button" id="btn-mobile-preview" class="view-tab">Live Preview</button>
+      </div>
+
+      <div class="admin-topbar-actions">
+        <button type="button" id="btn-undo" class="btn-tool" title="Undo last change" disabled>
+          ↶ Undo
+        </button>
+
+        <div class="version-dropdown-wrap">
+          <select id="select-version-restore" class="version-select" aria-label="Restore previous version (keeps last 10)">
+            <option value="">Restore Version (Last 10)...</option>
+          </select>
+        </div>
+
+        <button type="button" id="btn-save-draft" class="btn btn-secondary btn-sm">
+          Save Draft
+        </button>
+        <button type="button" id="btn-publish-live" class="btn btn-primary btn-sm">
+          Publish to Live
+        </button>
+        <button type="button" id="btn-logout" class="btn-tool" title="Sign Out">
+          Sign Out
+        </button>
+      </div>
+    </header>
+
+    <div class="admin-split-container" id="admin-split-container">
+      <!-- LEFT PANE: SETTINGS & CONTROLS -->
+      <aside class="admin-sidebar-controls" id="admin-controls-pane">
+        <!-- Control Category Tabs -->
+        <nav class="admin-tabs" role="tablist">
+          <button type="button" class="admin-tab active" data-tab="tab-sections">Sections</button>
+          <button type="button" class="admin-tab" data-tab="tab-theme">Theme</button>
+          <button type="button" class="admin-tab" data-tab="tab-texts">Hero &amp; Copy</button>
+          <button type="button" class="admin-tab" data-tab="tab-works">Timeline Strip</button>
+          <button type="button" class="admin-tab" data-tab="tab-projects">Projects</button>
+        </nav>
+
+        <!-- TAB 1: DRAG-AND-DROP SECTION REORDERING & SHOW/HIDE TOGGLES -->
+        <section id="tab-sections" class="admin-tab-panel">
+          <h2 class="panel-heading">Section Order &amp; Visibility</h2>
+          <p class="panel-help">Drag and drop sections to reorder them, or use the Up/Down buttons and Show/Hide toggles.</p>
+          <ul id="section-order-list" class="sortable-section-list"></ul>
+        </section>
+
+        <!-- TAB 2: COLOR PICKERS & FONT DROPDOWNS -->
+        <section id="tab-theme" class="admin-tab-panel" hidden>
+          <h2 class="panel-heading">Colors &amp; Typography</h2>
+          <div class="form-grid-2">
+            <label class="field-label">
+              <span>Background Deep</span>
+              <input type="color" id="color-bg-deep" value="#121217" class="color-picker" />
+            </label>
+            <label class="field-label">
+              <span>Primary Surface</span>
+              <input type="color" id="color-bg-primary" value="#17171C" class="color-picker" />
+            </label>
+            <label class="field-label">
+              <span>Elevated Card</span>
+              <input type="color" id="color-bg-elevated" value="#1E1E26" class="color-picker" />
+            </label>
+            <label class="field-label">
+              <span>Primary Accent (Red)</span>
+              <input type="color" id="color-accent" value="#FF4B5C" class="color-picker" />
+            </label>
+            <label class="field-label">
+              <span>Primary Text (Cream)</span>
+              <input type="color" id="color-text-primary" value="#F3EFE6" class="color-picker" />
+            </label>
+            <label class="field-label">
+              <span>Muted Text</span>
+              <input type="color" id="color-text-muted" value="#A9A7B3" class="color-picker" />
+            </label>
+          </div>
+
+          <div class="field-stack">
+            <label class="field-label">
+              <span>Display Heading Font</span>
+              <select id="font-display" class="field-input">
+                <option value="'Playfair Display', 'Bodoni Moda', Georgia, serif">Playfair Display (3D Serif Default)</option>
+                <option value="'Syne', 'Arial Black', Arial, sans-serif">Syne ExtraBold</option>
+                <option value="'Space Grotesk', sans-serif">Space Grotesk</option>
+                <option value="'Outfit', sans-serif">Outfit</option>
+                <option value="'Plus Jakarta Sans', sans-serif">Plus Jakarta Sans</option>
+              </select>
+            </label>
+
+            <label class="field-label">
+              <span>Body Copy Font</span>
+              <select id="font-sans" class="field-input">
+                <option value="'Inter', 'Plus Jakarta Sans', sans-serif">Inter (Default)</option>
+                <option value="'Plus Jakarta Sans', sans-serif">Plus Jakarta Sans</option>
+                <option value="'Outfit', sans-serif">Outfit</option>
+              </select>
+            </label>
+
+            <label class="field-label">
+              <span>Editorial Accent Font</span>
+              <select id="font-serif" class="field-input">
+                <option value="'Instrument Serif', Georgia, serif">Instrument Serif (Default)</option>
+                <option value="Georgia, serif">Georgia Serif</option>
+              </select>
+            </label>
+          </div>
+        </section>
+
+        <!-- TAB 3: EDITABLE TEXT FOR EVERY HEADING, PARAGRAPH, BUTTON, IMAGE & LINK -->
+        <section id="tab-texts" class="admin-tab-panel" hidden>
+          <h2 class="panel-heading">Hero &amp; Site Texts, Images &amp; Links</h2>
+
+          <fieldset class="control-group">
+            <legend>Top Bar &amp; Hero Section</legend>
+            <label class="field-label"><span>Top Bar Availability Status</span><input type="text" data-text-key="heroEyebrow" class="field-input" /></label>
+            <div class="form-grid-2">
+              <label class="field-label"><span>Hero Name Line 1</span><input type="text" data-text-key="heroTitle" class="field-input" /></label>
+              <label class="field-label"><span>Hero Name Line 2</span><input type="text" data-text-key="heroTitleItalic" class="field-input" /></label>
+            </div>
+            <label class="field-label"><span>Role Line (&amp; automatically styled in red Instrument Serif)</span><input type="text" data-text-key="heroRole" class="field-input" /></label>
+            <label class="field-label"><span>Italic Tagline</span><input type="text" data-text-key="heroSubline" class="field-input" /></label>
+            <div class="form-grid-2">
+              <label class="field-label"><span>Primary Button Text</span><input type="text" data-text-key="heroBtnPrimary" class="field-input" /></label>
+              <label class="field-label"><span>Primary Button Link</span><input type="text" data-text-key="heroBtnPrimaryUrl" class="field-input" /></label>
+              <label class="field-label"><span>Secondary Button Text</span><input type="text" data-text-key="heroBtnSecondary" class="field-input" /></label>
+              <label class="field-label"><span>Secondary Button Link</span><input type="text" data-text-key="heroBtnSecondaryUrl" class="field-input" /></label>
+            </div>
+            <label class="field-label">
+              <span>Hero Portrait Image URL or Upload to Firebase Storage</span>
+              <div class="upload-row">
+                <input type="text" data-text-key="heroPortraitUrl" class="field-input" />
+                <input type="file" id="upload-hero-portrait" accept="image/*" class="file-input-compact" />
+              </div>
+            </label>
+          </fieldset>
+
+          <fieldset class="control-group">
+            <legend>Trust Stats Row</legend>
+            <div class="form-grid-2">
+              <label class="field-label"><span>Stat 1 Value</span><input type="text" data-text-key="stat1Value" class="field-input" /></label>
+              <label class="field-label"><span>Stat 1 Label</span><input type="text" data-text-key="stat1Label" class="field-input" /></label>
+              <label class="field-label"><span>Stat 2 Value</span><input type="text" data-text-key="stat2Value" class="field-input" /></label>
+              <label class="field-label"><span>Stat 2 Label</span><input type="text" data-text-key="stat2Label" class="field-input" /></label>
+              <label class="field-label"><span>Stat 3 Value</span><input type="text" data-text-key="stat3Value" class="field-input" /></label>
+              <label class="field-label"><span>Stat 3 Label</span><input type="text" data-text-key="stat3Label" class="field-input" /></label>
+            </div>
+          </fieldset>
+
+          <fieldset class="control-group">
+            <legend>About Section &amp; Tools</legend>
+            <label class="field-label"><span>Section Kicker</span><input type="text" data-text-key="aboutKicker" class="field-input" /></label>
+            <label class="field-label"><span>About Heading</span><input type="text" data-text-key="aboutTitle" class="field-input" /></label>
+            <label class="field-label"><span>Paragraph 1</span><textarea rows="3" data-text-key="aboutP1" class="field-input"></textarea></label>
+            <label class="field-label"><span>Paragraph 2</span><textarea rows="3" data-text-key="aboutP2" class="field-input"></textarea></label>
+            <label class="field-label"><span>Tools &amp; Skills (Comma-separated)</span><input type="text" data-text-key="aboutToolsCsv" class="field-input" /></label>
+            <label class="field-label">
+              <span>About Photo URL or Upload</span>
+              <div class="upload-row">
+                <input type="text" data-text-key="aboutPhotoUrl" class="field-input" />
+                <input type="file" id="upload-about-photo" accept="image/*" class="file-input-compact" />
+              </div>
+            </label>
+          </fieldset>
+
+          <fieldset class="control-group">
+            <legend>Client Testimonials</legend>
+            <label class="field-label"><span>Testimonial 1 Quote</span><textarea rows="2" data-text-key="test1Quote" class="field-input"></textarea></label>
+            <div class="form-grid-2">
+              <label class="field-label"><span>Client 1 Name</span><input type="text" data-text-key="test1Name" class="field-input" /></label>
+              <label class="field-label"><span>Client 1 Role</span><input type="text" data-text-key="test1Role" class="field-input" /></label>
+            </div>
+
+            <label class="field-label"><span>Testimonial 2 Quote</span><textarea rows="2" data-text-key="test2Quote" class="field-input"></textarea></label>
+            <div class="form-grid-2">
+              <label class="field-label"><span>Client 2 Name</span><input type="text" data-text-key="test2Name" class="field-input" /></label>
+              <label class="field-label"><span>Client 2 Role</span><input type="text" data-text-key="test2Role" class="field-input" /></label>
+            </div>
+
+            <label class="field-label"><span>Testimonial 3 Quote</span><textarea rows="2" data-text-key="test3Quote" class="field-input"></textarea></label>
+            <div class="form-grid-2">
+              <label class="field-label"><span>Client 3 Name</span><input type="text" data-text-key="test3Name" class="field-input" /></label>
+              <label class="field-label"><span>Client 3 Role</span><input type="text" data-text-key="test3Role" class="field-input" /></label>
+            </div>
+          </fieldset>
+
+          <fieldset class="control-group">
+            <legend>Contact Section &amp; Direct Links</legend>
+            <label class="field-label"><span>Contact Heading</span><input type="text" data-text-key="contactTitle" class="field-input" /></label>
+            <label class="field-label"><span>Contact Subtext</span><textarea rows="2" data-text-key="contactSub" class="field-input"></textarea></label>
+            <label class="field-label"><span>Primary CTA Button Text</span><input type="text" data-text-key="contactCtaText" class="field-input" /></label>
+            <label class="field-label"><span>Email Address</span><input type="email" data-text-key="contactEmail" class="field-input" /></label>
+            <label class="field-label"><span>WhatsApp Display Number</span><input type="text" data-text-key="contactWhatsappDisplay" class="field-input" /></label>
+            <label class="field-label"><span>WhatsApp Link (https://wa.me/...)</span><input type="url" data-text-key="contactWhatsappUrl" class="field-input" /></label>
+            <label class="field-label"><span>Behance URL</span><input type="url" data-text-key="contactBehanceUrl" class="field-input" /></label>
+            <label class="field-label"><span>LinkedIn URL</span><input type="url" data-text-key="contactLinkedinUrl" class="field-input" /></label>
+            <label class="field-label"><span>3D Footer Wordmark</span><input type="text" data-text-key="footerWordmark" class="field-input" /></label>
+          </fieldset>
+        </section>
+
+        <!-- TAB 4: SELECTED WORK TIMELINE STRIP (V1 VIDEO + G1 GRAPHICS) -->
+        <section id="tab-works" class="admin-tab-panel" hidden>
+          <div class="panel-header-row">
+            <h2 class="panel-heading">Selected Work Timeline (V1 / G1)</h2>
+            <div class="section-item-actions">
+              <button type="button" id="btn-add-work-v1" class="btn btn-primary btn-sm">+ V1 Video</button>
+              <button type="button" id="btn-add-work-g1" class="btn btn-secondary btn-sm">+ G1 Graphic</button>
+            </div>
+          </div>
+          <p class="panel-help">Manage every tile in your Hero NLE Timeline Strip: Track V1 (16:9 video tiles) and Track G1 (1:1 graphic design tiles).</p>
+          <div id="admin-works-list" class="admin-projects-list"></div>
+        </section>
+
+        <!-- TAB 5: ADD / EDIT / DELETE / REORDER PROJECTS -->
+        <section id="tab-projects" class="admin-tab-panel" hidden>
+          <div class="panel-header-row">
+            <h2 class="panel-heading">Case-Study Projects</h2>
+            <button type="button" id="btn-add-project" class="btn btn-primary btn-sm">+ Add Project</button>
+          </div>
+          <p class="panel-help">Add, edit, toggle visibility, upload thumbnails/videos, or reorder case studies.</p>
+          <div id="admin-projects-list" class="admin-projects-list"></div>
+        </section>
+      </aside>
+
+      <!-- RIGHT PANE: REAL-TIME INTERACTIVE LIVE PREVIEW -->
+      <section class="admin-preview-pane" id="admin-preview-pane" aria-label="Live Site Preview">
+        <div class="preview-Frame-bar">
+          <span>Live Draft Preview (Updates Instantly Before Publishing)</span>
+          <a href="index.html" target="_blank" rel="noopener noreferrer" class="preview-open-link">Open Public Site ↗</a>
+        </div>
+        <iframe id="live-preview-iframe" src="index.html?preview=draft" title="Live Portfolio Preview" class="live-preview-iframe"></iframe>
+      </section>
+    </div>
+  </div>
+
+  <script type="module" src="admin.js"></script>
+</body>
+</html>

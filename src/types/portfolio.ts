@@ -154,7 +154,51 @@ export interface TestimonialItem {
   clientAvatar?: string;
   rating: number;
   quote: LocalizedText;
+  visible?: boolean;
+  order?: number;
 }
+
+export type CaseStudyCategory = 'video' | 'graphic' | 'motion';
+
+export interface CaseStudyItem {
+  id: string;
+  category: CaseStudyCategory;
+  categoryLabel?: LocalizedText;
+  title: LocalizedText;
+  thumbnail: string;
+  problem: LocalizedText;
+  process: LocalizedText;
+  result: LocalizedText;
+  videoUrl?: string;
+  videoType?: 'youtube' | 'vimeo' | 'facebook' | 'direct';
+  behanceUrl?: string;
+  galleryImages?: string[];
+  visible?: boolean;
+  order?: number;
+}
+
+export interface CaseStudiesSectionConfig {
+  tag: LocalizedText;
+  titlePrefix: LocalizedText;
+  titleItalic: LocalizedText;
+  visible?: boolean;
+}
+
+export interface TestimonialsSectionConfig {
+  tag: LocalizedText;
+  title: LocalizedText;
+  visible?: boolean;
+}
+
+export type HomeSectionId =
+  | 'caseStudies'
+  | 'videoShowcase'
+  | 'graphicShowcase'
+  | 'aboutPreview'
+  | 'trustTestimonials'
+  | 'overviewDirectory';
+
+export type StudioFocusMode = 'all' | 'video' | 'graphic';
 
 export interface HeroCounterItem {
   id: string;
@@ -168,6 +212,7 @@ export interface HeroData {
   badge: LocalizedText;
   showBadge?: boolean;
   tagline: LocalizedText;
+  subtitle?: LocalizedText;
   avatarUrl: string;
   ctaWork: LocalizedText;
   ctaWorkUrl?: string;
@@ -264,8 +309,18 @@ export interface FooterConfig {
 export interface PortfolioConfig {
   id?: string;
   status: 'draft' | 'published';
+  defaultFocusMode?: StudioFocusMode;
+  showFocusSwitcher?: boolean;
   hero: HeroData;
   about: AboutData;
+  caseStudiesSection?: CaseStudiesSectionConfig;
+  caseStudies?: CaseStudyItem[];
+  homeStats?: HeroCounterItem[];
+  showHomeStats?: boolean;
+  homeTools?: string[];
+  testimonialsSection?: TestimonialsSectionConfig;
+  homeSectionOrder?: HomeSectionId[];
+  homeSectionVisibility?: Partial<Record<HomeSectionId, boolean>>;
   overviewCards: OverviewCardItem[];
   academicRecords: AcademicRecord[];
   professionalInstitute?: ProfessionalInstitute;

@@ -1,12 +1,26 @@
 import React from 'react';
 import { Youtube, ExternalLink, Folder, Send, Facebook, CheckCircle2 } from 'lucide-react';
 import { usePortfolio } from '../context/PortfolioContext';
+import { useNavigation } from '../context/NavigationContext';
 import { Reveal3D } from './common/Reveal3D';
 import { StudioGlassIcon } from './common/StudioIcon';
+import { EditableElement } from './common/EditableElement';
+import { StudioSectionShell } from './common/StudioSectionShell';
 
 export const ChannelLinks: React.FC = () => {
   const { portfolio, ui, loc } = usePortfolio();
+  const { focusMode } = useNavigation();
   const { channelLinks } = portfolio;
+
+  const filteredChannels = (channelLinks || []).filter((ch) => {
+    if (focusMode === 'video') {
+      return ch.id !== 'ch-behance';
+    }
+    if (focusMode === 'graphic') {
+      return ch.id !== 'ch-youtube';
+    }
+    return true;
+  });
 
   const renderIcon = (id: string) => {
     switch (id) {
@@ -26,22 +40,22 @@ export const ChannelLinks: React.FC = () => {
   };
 
   return (
-    <section id="channels" className="py-24 bg-[#121419]/75 border-t border-white/[0.07] relative">
+    <StudioSectionShell id="channels" sectionBgKey="channels" className="py-24 bg-[#121419]/75 border-t border-white/[0.07]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* Section Header */}
         <Reveal3D direction="up" className="flex flex-col items-center text-center mb-16">
-          <h2 className="font-display text-2xl sm:text-3xl lg:text-4xl font-bold text-[#F4F0E8] tracking-tight mb-3">
+          <EditableElement id="channels.title" label="Channels Heading" as="h2" className="font-display text-2xl sm:text-3xl lg:text-4xl font-bold text-[#F4F0E8] tracking-tight mb-3">
             {ui.channels.title}
-          </h2>
-          <p className="text-[#A7A298] text-xs sm:text-sm max-w-2xl">
+          </EditableElement>
+          <EditableElement id="channels.subtitle" label="Channels Subtitle" as="p" className="text-[#A7A298] text-xs sm:text-sm max-w-2xl">
             {ui.channels.subtitle}
-          </p>
+          </EditableElement>
         </Reveal3D>
 
         {/* Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
-          {channelLinks.map((item, idx) => {
+          {filteredChannels.map((item, idx) => {
             const isLinked = item.status === 'LINKED' && Boolean(item.url);
             return (
               <Reveal3D
@@ -102,6 +116,7 @@ export const ChannelLinks: React.FC = () => {
         </div>
 
       </div>
-    </section>
+    </StudioSectionShell>
   );
 };
+

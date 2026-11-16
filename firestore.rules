@@ -2,7 +2,7 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Default-deny safety net
+    // 1. Global Default-Deny Safety Net
     match /{document=**} {
       allow read, write: if false;
     }
@@ -13,7 +13,11 @@ service cloud.firestore {
 
     function isOwner() {
       return isSignedIn() && (
-        (request.auth.token.email != null && request.auth.token.email.matches('(?i)^sbmc\\.3925@gmail\\.com$')) ||
+        (
+          request.auth.token.email != null &&
+          request.auth.token.email_verified == true &&
+          request.auth.token.email.matches('(?i)^sbmc\\.3925@gmail\\.com$')
+        ) ||
         request.auth.uid == 'ngH4tKvzVDee0eI0IvTnC6mwSnS2'
       );
     }
@@ -26,9 +30,57 @@ service cloud.firestore {
       return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
     }
 
-    // Lead validation helper
+    function isValidSiteSettings(data) {
+      return data.keys().hasAll(['status', 'colors', 'fonts', 'sectionOrder', 'sectionVisibility', 'texts']) &&
+             data.status is string && (data.status == 'draft' || data.status == 'published') &&
+             data.colors is map &&
+             data.fonts is map &&
+             data.sectionOrder is list && data.sectionOrder.size() <= 20 &&
+             data.sectionVisibility is map &&
+             data.texts is map;
+    }
+
+    function isValidProjectRecord(data) {
+      return data.keys().hasAll(['title', 'category', 'problem', 'process', 'result', 'order', 'visible', 'status']) &&
+             data.title is string && data.title.size() >= 1 && data.title.size() <= 200 &&
+             data.category is string && (data.category == 'video-editing' || data.category == 'graphic-design' || data.category == 'motion-graphics') &&
+             data.problem is string && data.problem.size() <= 1000 &&
+             data.process is string && data.process.size() <= 1000 &&
+             data.result is string && data.result.size() <= 1000 &&
+             data.order is number &&
+             data.visible is bool &&
+             data.status is string && (data.status == 'draft' || data.status == 'published') &&
+             (!('thumbnailUrl' in data) || (data.thumbnailUrl is string && data.thumbnailUrl.size() <= 2000)) &&
+             (!('videoUrl' in data) || (data.videoUrl is string && data.videoUrl.size() <= 2000)) &&
+             (!('behanceUrl' in data) || (data.behanceUrl is string && data.behanceUrl.size() <= 2000)) &&
+             (!('updatedAt' in data) || (data.updatedAt is string && data.updatedAt.size() <= 64));
+    }
+
+    function isValidWorkTile(data) {
+      return data.keys().hasAll(['track', 'label', 'thumbnailUrl', 'mediaUrl', 'order', 'visible', 'status']) &&
+             data.track is string && (data.track == 'V1' || data.track == 'G1') &&
+             data.label is string && data.label.size() >= 1 && data.label.size() <= 120 &&
+             data.thumbnailUrl is string && data.thumbnailUrl.size() <= 2000 &&
+             data.mediaUrl is string && data.mediaUrl.size() <= 2000 &&
+             data.order is number &&
+             data.visible is bool &&
+             data.status is string && (data.status == 'draft' || data.status == 'published') &&
+             (!('duration' in data) || (data.duration is string && data.duration.size() <= 32)) &&
+             (!('updatedAt' in data) || (data.updatedAt is string && data.updatedAt.size() <= 64));
+    }
+
+    function isValidSiteVersion(data) {
+      return data.keys().hasAll(['label', 'createdAt', 'siteSettings', 'projects']) &&
+             data.label is string && data.label.size() >= 1 && data.label.size() <= 200 &&
+             data.createdAt is string && data.createdAt.size() <= 64 &&
+             data.siteSettings is map &&
+             data.projects is list && data.projects.size() <= 100 &&
+             (!('works' in data) || (data.works is list && data.works.size() <= 100));
+    }
+
     function isValidLead(data) {
       return data.keys().hasAll(['name', 'email', 'message']) &&
+             data.keys().hasOnly(['name', 'email', 'phone', 'country', 'projectType', 'message', 'status', 'createdAt', 'syncedToSheet', 'timestamp']) &&
              data.name is string && data.name.size() >= 2 && data.name.size() <= 100 &&
              data.email is string && data.email.size() >= 5 && data.email.size() <= 150 &&
              data.message is string && data.message.size() >= 5 && data.message.size() <= 3000 &&
@@ -37,19 +89,48 @@ service cloud.firestore {
              (!('projectType' in data) || (data.projectType is string && data.projectType.size() <= 80));
     }
 
-    // Portfolio configurations: 'published' and 'design_published' are publicly readable.
-    // 'draft', 'design_draft' and all modifications are restricted to the verified owner.
+    // Portfolio configurations (React App): 'published' and 'design_published' are publicly readable.
     match /portfolio/{docId} {
       allow get: if docId == 'published' || docId == 'design_published' || isAdmin();
       allow list: if isAdmin();
       allow create, update, delete: if isAdmin() && isValidId(docId);
     }
 
+    // SiteSettings ('published' is publicly readable; 'draft' and writes are restricted to owner)
+    match /siteSettings/{docId} {
+      allow get: if docId == 'published' || isAdmin();
+      allow list: if isAdmin();
+      allow create, update: if isAdmin() && isValidId(docId) && isValidSiteSettings(request.resource.data);
+      allow delete: if isAdmin() && isValidId(docId);
+    }
+
+    // Projects collection (Public can read published projects; owner can read/write all)
+    match /projects/{projectId} {
+      allow get: if isValidId(projectId) && (resource == null || resource.data.status == 'published' || isAdmin());
+      allow list: if resource.data.status == 'published' || isAdmin();
+      allow create, update: if isAdmin() && isValidId(projectId) && isValidProjectRecord(request.resource.data);
+      allow delete: if isAdmin() && isValidId(projectId);
+    }
+
+    // Works timeline strip collection (V1 & G1 tiles; public reads published, owner writes all)
+    match /works/{workId} {
+      allow get: if isValidId(workId) && (resource == null || resource.data.status == 'published' || isAdmin());
+      allow list: if resource.data.status == 'published' || isAdmin();
+      allow create, update: if isAdmin() && isValidId(workId) && isValidWorkTile(request.resource.data);
+      allow delete: if isAdmin() && isValidId(workId);
+    }
+
+    // Version history collection (Last 10 versions, strictly owner-only)
+    match /siteVersions/{versionId} {
+      allow get: if isAdmin() && isValidId(versionId);
+      allow list: if isAdmin();
+      allow create, update: if isAdmin() && isValidId(versionId) && isValidSiteVersion(request.resource.data);
+      allow delete: if isAdmin() && isValidId(versionId);
+    }
+
     // Contact inquiries & feedback collection
     match /leads/{leadId} {
-      // Anyone can submit a contact inquiry as long as payload meets strict validation
       allow create: if isValidId(leadId) && isValidLead(request.resource.data);
-      // Only owner can view, list, update, or delete customer inquiries
       allow get, list, update, delete: if isAdmin();
     }
 

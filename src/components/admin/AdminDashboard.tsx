@@ -65,6 +65,8 @@ import {
 import { resolveBehanceProjectFromUrl } from '../../lib/imageUrlResolver';
 import { BestWorkGraphicEditor } from './BestWorkGraphicEditor';
 import { BestWorkVideoEditor } from './BestWorkVideoEditor';
+import { CaseStudiesEditor } from './CaseStudiesEditor';
+import { StatsTestimonialsEditor } from './StatsTestimonialsEditor';
 import { ADMIN_GROUPS, AdminGroupId } from './adminNavigation';
 import { ThemeLiveEditView } from './liveEdit/ThemeLiveEditView';
 
@@ -74,6 +76,9 @@ export const getGroupFromTab = (tab: string): AdminGroupId => {
     case 'hero':
     case 'about':
       return 'profile';
+    case 'case-studies':
+    case 'stats-testimonials':
+      return 'home-content';
     case 'education':
       return 'education';
     case 'skills':
@@ -102,11 +107,13 @@ export const getGroupFromTab = (tab: string): AdminGroupId => {
 // Helper to map sub-section ID to the corresponding existing activeTab
 export const getTabFromSubSection = (
   subId: string
-): 'theme' | 'branding' | 'hero' | 'about' | 'services' | 'skills' | 'education' | 'projects' | 'graphic-best' | 'videos' | 'video-best' | 'channels' | 'contact' | 'leads' | 'sheets' => {
+): 'theme' | 'branding' | 'hero' | 'about' | 'case-studies' | 'stats-testimonials' | 'services' | 'skills' | 'education' | 'projects' | 'graphic-best' | 'videos' | 'video-best' | 'channels' | 'contact' | 'leads' | 'sheets' => {
   switch (subId) {
     case 'hero': return 'hero';
     case 'about':
     case 'photo': return 'about';
+    case 'home-case-studies': return 'case-studies';
+    case 'home-stats-testimonials': return 'stats-testimonials';
     case 'academic':
     case 'professional': return 'education';
     case 'skills':
@@ -159,7 +166,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToSite }) 
   const [lockoutUntil, setLockoutUntil] = useState<number>(0);
 
   const [activeTab, setActiveTab] = useState<
-    'theme' | 'branding' | 'hero' | 'about' | 'services' | 'skills' | 'education' | 'projects' | 'graphic-best' | 'videos' | 'video-best' | 'channels' | 'contact' | 'leads' | 'sheets'
+    'theme' | 'branding' | 'hero' | 'about' | 'case-studies' | 'stats-testimonials' | 'services' | 'skills' | 'education' | 'projects' | 'graphic-best' | 'videos' | 'video-best' | 'channels' | 'contact' | 'leads' | 'sheets'
   >('theme');
 
   // Dedicated Theme Live Edit full-screen mode
@@ -1450,6 +1457,16 @@ function doPost(e) {
           {/* TAB 1: HERO */}
           {activeTab === 'hero' && (
             <HeroEditor />
+          )}
+
+          {/* TAB: CASE STUDIES & WORK TYPE */}
+          {activeTab === 'case-studies' && (
+            <CaseStudiesEditor onNotify={showToast} />
+          )}
+
+          {/* TAB: FOCUS MODE, STATS & TESTIMONIALS */}
+          {activeTab === 'stats-testimonials' && (
+            <StatsTestimonialsEditor onNotify={showToast} />
           )}
 
           {/* TAB 2: ABOUT */}

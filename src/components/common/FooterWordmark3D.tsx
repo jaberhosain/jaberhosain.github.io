@@ -124,12 +124,14 @@ export const FooterWordmark3D: React.FC = () => {
             {displayWordmark}
           </span>
 
-          {/* Layer 5: Cursor-Tracked Specular Light Sheen */}
+          {/* Layer 5: Cursor-Tracked Specular Light Sheen & Etched Outline Rim */}
           <span
             className="footer-wordmark-sheen pointer-events-none absolute inset-0 block transition-opacity duration-300"
             style={{
-              opacity: motion.active ? 1 : 0.38,
-              backgroundImage: `radial-gradient(420px circle at ${motion.spotX}% ${motion.spotY}%, rgba(255, 248, 238, 0.22) 0%, rgba(228, 88, 59, 0.06) 42%, transparent 72%)`
+              opacity: motion.active ? 1 : 0.42,
+              backgroundImage: `radial-gradient(420px circle at ${motion.spotX}% ${motion.spotY}%, rgba(255, 248, 238, 0.24) 0%, rgba(228, 88, 59, 0.08) 42%, transparent 72%)`,
+              WebkitMaskImage: `radial-gradient(360px circle at ${motion.spotX}% ${motion.spotY}%, #000 0%, rgba(0,0,0,0.6) 45%, transparent 78%)`,
+              maskImage: `radial-gradient(360px circle at ${motion.spotX}% ${motion.spotY}%, #000 0%, rgba(0,0,0,0.6) 45%, transparent 78%)`
             }}
           >
             {displayWordmark}

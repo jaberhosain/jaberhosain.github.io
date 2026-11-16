@@ -7,6 +7,9 @@ import {
   getThemeThreePalette,
   prefersReducedMotion
 } from './webglUtils';
+import { useDesignOverrides } from '../../context/DesignOverridesContext';
+import { resolveAssetUrl } from '../../utils/assetUrl';
+import { normalizeDirectImageUrl } from '../../lib/imageUrlResolver';
 
 interface StudioBackdrop3DProps {
   activePage: string;
@@ -21,10 +24,6 @@ const PAGE_CAMERA_OFFSETS: Record<string, { x: number; y: number; z: number; pit
   contact: { x: 0.15, y: -0.1, z: 12.6, pitch: -0.02 }
 };
 
-/**
- * Generates a smooth radial bokeh disc texture in memory (SRGBColorSpace, zero 404s)
- * so ambient lens motes look like soft optical depth-of-field highlights instead of sharp polygons.
- */
 function createSoftBokehTexture(): THREE.CanvasTexture {
   const canvas = document.createElement('canvas');
   canvas.width = 128;
@@ -47,12 +46,25 @@ function createSoftBokehTexture(): THREE.CanvasTexture {
 }
 
 export const StudioBackdrop3D: React.FC<StudioBackdrop3DProps> = ({ activePage }) => {
+  const { studio3D } = useDesignOverrides();
   const mountRef = useRef<HTMLDivElement>(null);
   const pageTargetRef = useRef(PAGE_CAMERA_OFFSETS[activePage] || PAGE_CAMERA_OFFSETS.home);
+  const studioRef = useRef(studio3D);
 
   useEffect(() => {
     pageTargetRef.current = PAGE_CAMERA_OFFSETS[activePage] || PAGE_CAMERA_OFFSETS.home;
   }, [activePage]);
+
+  useEffect(() => {
+    studioRef.current = studio3D;
+  }, [studio3D]);
+
+  const resolvedCustomBg = studio3D.customBgUrl
+    ? resolveAssetUrl(normalizeDirectImageUrl(studio3D.customBgUrl))
+    : '';
+  const showBackdropParallax = Boolean(
+    resolvedCustomBg && studio3D.customBgMode === 'backdrop-parallax'
+  );
 
   useEffect(() => {
     const container = mountRef.current;
@@ -65,7 +77,7 @@ export const StudioBackdrop3D: React.FC<StudioBackdrop3DProps> = ({ activePage }
     try {
       renderer = new THREE.WebGLRenderer({
         antialias: !isSoftware,
-        alpha: false,
+        alpha: true,
         powerPreference: 'high-performance'
       });
     } catch {
@@ -85,24 +97,22 @@ export const StudioBackdrop3D: React.FC<StudioBackdrop3DProps> = ({ activePage }
 
     const palette = getThemeThreePalette();
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(palette.bg);
-    scene.fog = new THREE.FogExp2(palette.fog, 0.044);
+    scene.background = null;
+    scene.fog = new THREE.FogExp2(palette.fog, 0.042);
 
     const camera = new THREE.PerspectiveCamera(40, width / height, 0.1, 80);
     camera.position.set(0, 0.35, 12.8);
 
-    // Subtle Studio IBL Reflections
     const pmremGenerator = new THREE.PMREMGenerator(renderer);
     const roomEnv = new RoomEnvironment();
     const envTarget = pmremGenerator.fromScene(roomEnv, 0.04);
     scene.environment = envTarget.texture;
     roomEnv.dispose();
 
-    // Calibrated Warm/Cool Studio Rim Lighting (keeps background calm & filmic)
     const hemiLight = new THREE.HemisphereLight(
       palette.rimLight,
       palette.bg,
-      palette.isLight ? 1.15 : 0.62
+      palette.isLight ? 1.15 : 0.65
     );
     scene.add(hemiLight);
 
@@ -113,26 +123,26 @@ export const StudioBackdrop3D: React.FC<StudioBackdrop3DProps> = ({ activePage }
     grazingRimLight.position.set(-7, 6.5, -11);
     scene.add(grazingRimLight);
 
-    const warmAccentLight = new THREE.PointLight(palette.accent, 18, 34, 1.5);
+    const warmAccentLight = new THREE.PointLight(palette.accent, 20, 36, 1.5);
     warmAccentLight.position.set(6.5, -0.5, -6.5);
     scene.add(warmAccentLight);
 
     // =========================================================================
-    // 1. SCULPTED LIQUID OBSIDIAN SILK-WAVE HORIZON (PBR + GLSL Normals)
+    // 1. PRESET A: LIQUID OBSIDIAN SILK-WAVE
     // =========================================================================
     const waveUniforms = {
       uTime: { value: 0 },
       uScroll: { value: 0 },
-      uPointer: { value: new THREE.Vector2(0, 0) }
+      uPointer: { value: new THREE.Vector2(0, 0) },
+      uIntensity: { value: studioRef.current.waveIntensity ?? 1 }
     };
 
     const waveSegmentsX = isSoftware ? 64 : 112;
     const waveSegmentsY = isSoftware ? 44 : 74;
     const waveGeo = new THREE.PlaneGeometry(46, 30, waveSegmentsX, waveSegmentsY);
 
-    const waveBaseColor = palette.isLight ? 0xe7e1d5 : 0x14161c;
     const waveMat = new THREE.MeshPhysicalMaterial({
-      color: waveBaseColor,
+      color: palette.isLight ? 0xe7e1d5 : 0x14161c,
       metalness: palette.isLight ? 0.14 : 0.72,
       roughness: palette.isLight ? 0.52 : 0.34,
       clearcoat: palette.isLight ? 0.15 : 0.42,
@@ -144,12 +154,14 @@ export const StudioBackdrop3D: React.FC<StudioBackdrop3DProps> = ({ activePage }
       shader.uniforms.uTime = waveUniforms.uTime;
       shader.uniforms.uScroll = waveUniforms.uScroll;
       shader.uniforms.uPointer = waveUniforms.uPointer;
+      shader.uniforms.uIntensity = waveUniforms.uIntensity;
 
       shader.vertexShader =
         `
         uniform float uTime;
         uniform float uScroll;
         uniform vec2 uPointer;
+        uniform float uIntensity;
 
         float obsidianWaveHeight(vec2 p, float t, float scr, vec2 ptr) {
           float h1 = sin(p.x * 0.21 + t * 0.38 + scr * 0.45) * cos(p.y * 0.19 - t * 0.29) * 0.88;
@@ -158,7 +170,7 @@ export const StudioBackdrop3D: React.FC<StudioBackdrop3DProps> = ({ activePage }
           vec2 focus = vec2(ptr.x * 6.5, ptr.y * 4.0);
           float d = length(p - focus);
           float ptrWave = sin(d * 0.65 - t * 1.15) * exp(-d * 0.16) * 0.26;
-          return h1 + h2 + h3 + ptrWave;
+          return (h1 + h2 + h3 + ptrWave) * uIntensity;
         }
         ` + shader.vertexShader;
 
@@ -171,9 +183,7 @@ export const StudioBackdrop3D: React.FC<StudioBackdrop3DProps> = ({ activePage }
         float hC = obsidianWaveHeight(pBase, uTime, uScroll, uPointer);
         float hX = obsidianWaveHeight(pBase + vec2(eps, 0.0), uTime, uScroll, uPointer);
         float hY = obsidianWaveHeight(pBase + vec2(0.0, eps), uTime, uScroll, uPointer);
-        float dHx = (hX - hC) / eps;
-        float dHy = (hY - hC) / eps;
-        objectNormal = normalize(vec3(-dHx, -dHy, 1.0));
+        objectNormal = normalize(vec3(-(hX - hC) / eps, -(hY - hC) / eps, 1.0));
         `
       );
 
@@ -192,7 +202,50 @@ export const StudioBackdrop3D: React.FC<StudioBackdrop3DProps> = ({ activePage }
     scene.add(waveMesh);
 
     // =========================================================================
-    // 2. THREE WHISPER-THIN CURVED ANAMORPHIC LIGHT FILAMENTS
+    // 2. PRESET B: 3D ARCHITECTURAL PERSPECTIVE GRID
+    // =========================================================================
+    const gridGroup = new THREE.Group();
+    const gridHelperMain = new THREE.GridHelper(52, 40, palette.accent, 0x2b303d);
+    gridHelperMain.position.set(0, -3.4, -8);
+    (gridHelperMain.material as THREE.Material).transparent = true;
+    (gridHelperMain.material as THREE.Material).opacity = 0.45;
+    gridGroup.add(gridHelperMain);
+    gridGroup.visible = false;
+    scene.add(gridGroup);
+
+    // =========================================================================
+    // 3. PRESET C: ORBITAL 3D CINEMA RINGS & GLASS PRISMS
+    // =========================================================================
+    const orbitalGroup = new THREE.Group();
+    const ringMat = new THREE.MeshPhysicalMaterial({
+      color: palette.secondary,
+      metalness: 0.78,
+      roughness: 0.22,
+      clearcoat: 0.65,
+      transparent: true,
+      opacity: 0.75
+    });
+    const accentRingMat = new THREE.MeshPhysicalMaterial({
+      color: palette.accent,
+      metalness: 0.55,
+      roughness: 0.25,
+      emissive: new THREE.Color(palette.accent),
+      emissiveIntensity: 0.22
+    });
+
+    const torus1 = new THREE.Mesh(new THREE.TorusGeometry(4.6, 0.055, 24, 120), ringMat);
+    const torus2 = new THREE.Mesh(new THREE.TorusGeometry(3.2, 0.04, 24, 100), accentRingMat);
+    const torus3 = new THREE.Mesh(new THREE.TorusGeometry(6.2, 0.035, 20, 120), ringMat);
+    torus1.rotation.set(0.6, 0.25, 0);
+    torus2.rotation.set(-0.5, 0.7, 0.3);
+    torus3.rotation.set(0.3, -0.4, 0.5);
+    orbitalGroup.add(torus1, torus2, torus3);
+    orbitalGroup.position.set(0, 0.2, -9.5);
+    orbitalGroup.visible = false;
+    scene.add(orbitalGroup);
+
+    // =========================================================================
+    // 4. ANAMORPHIC LIGHT FILAMENTS
     // =========================================================================
     const arcPrimaryMat = new THREE.MeshBasicMaterial({
       color: palette.secondary,
@@ -200,7 +253,6 @@ export const StudioBackdrop3D: React.FC<StudioBackdrop3DProps> = ({ activePage }
       opacity: palette.isLight ? 0.14 : 0.12,
       depthWrite: false
     });
-
     const arcAccentMat = new THREE.MeshBasicMaterial({
       color: palette.accent,
       transparent: true,
@@ -228,22 +280,11 @@ export const StudioBackdrop3D: React.FC<StudioBackdrop3DProps> = ({ activePage }
         ],
         radius: 0.011,
         mat: arcAccentMat
-      },
-      {
-        points: [
-          new THREE.Vector3(-15, 5.2, -15.0),
-          new THREE.Vector3(-2, 3.1, -12.8),
-          new THREE.Vector3(8, 3.9, -13.6),
-          new THREE.Vector3(18, 2.4, -16.0)
-        ],
-        radius: 0.01,
-        mat: arcPrimaryMat
       }
     ];
 
     const filamentGroup = new THREE.Group();
     const filamentMeshes: { mesh: THREE.Mesh; baseY: number; phase: number }[] = [];
-
     filamentConfigs.forEach((cfg, idx) => {
       const curve = new THREE.CatmullRomCurve3(cfg.points);
       const tubeGeo = new THREE.TubeGeometry(curve, 96, cfg.radius, 8, false);
@@ -254,18 +295,18 @@ export const StudioBackdrop3D: React.FC<StudioBackdrop3DProps> = ({ activePage }
     scene.add(filamentGroup);
 
     // =========================================================================
-    // 3. SOFT DEFOCUSED CINEMA LENS BOKEH MOTES (Zero Geometric Satellites)
+    // 5. LENS BOKEH & STARFIELD MOTES
     // =========================================================================
-    const bokehCount = isSoftware ? 14 : 26;
+    const bokehCount = isSoftware ? 20 : 48;
     const bokehGeo = new THREE.BufferGeometry();
     const bokehPositions = new Float32Array(bokehCount * 3);
     const bokehBasePositions: { x: number; y: number; z: number; phase: number; speed: number }[] = [];
 
     for (let i = 0; i < bokehCount; i++) {
       const goldenAngle = i * 2.39996;
-      const spreadX = Math.cos(goldenAngle) * (4.2 + (i % 7) * 1.45);
-      const spreadY = ((i * 1.73) % 9.5) - 3.6;
-      const spreadZ = -5.5 - (i % 8) * 1.35;
+      const spreadX = Math.cos(goldenAngle) * (3.6 + (i % 9) * 1.35);
+      const spreadY = ((i * 1.73) % 10.5) - 4.2;
+      const spreadZ = -5.0 - (i % 9) * 1.25;
 
       bokehBasePositions.push({
         x: spreadX,
@@ -281,14 +322,13 @@ export const StudioBackdrop3D: React.FC<StudioBackdrop3DProps> = ({ activePage }
     }
 
     bokehGeo.setAttribute('position', new THREE.BufferAttribute(bokehPositions, 3));
-
     const bokehTex = createSoftBokehTexture();
     const bokehMat = new THREE.PointsMaterial({
-      size: 0.52,
+      size: 0.55,
       map: bokehTex,
       color: palette.secondary,
       transparent: true,
-      opacity: palette.isLight ? 0.14 : 0.24,
+      opacity: 0.25,
       depthWrite: false,
       blending: palette.isLight ? THREE.NormalBlending : THREE.AdditiveBlending
     });
@@ -296,13 +336,70 @@ export const StudioBackdrop3D: React.FC<StudioBackdrop3DProps> = ({ activePage }
     const bokehPoints = new THREE.Points(bokehGeo, bokehMat);
     scene.add(bokehPoints);
 
+    // =========================================================================
+    // 6. USER-UPLOADED CUSTOM 3D CINEMA BACKGROUND PLANE (CURVED PARALLAX)
+    // =========================================================================
+    const bgPlaneGeo = new THREE.CylinderGeometry(24, 24, 18, 48, 1, true, Math.PI * 0.72, Math.PI * 0.56);
+    bgPlaneGeo.scale(-1, 1, 1); // inward facing
+    const bgPlaneMat = new THREE.MeshBasicMaterial({
+      transparent: true,
+      opacity: 0,
+      depthWrite: false,
+      side: THREE.DoubleSide
+    });
+    const bgPlaneMesh = new THREE.Mesh(bgPlaneGeo, bgPlaneMat);
+    bgPlaneMesh.position.set(0, 0.2, -2.5);
+    bgPlaneMesh.visible = false;
+    scene.add(bgPlaneMesh);
+
+    let loadedCustomUrl = '';
+    let activeTexture: THREE.Texture | null = null;
+    const textureLoader = new THREE.TextureLoader();
+    textureLoader.setCrossOrigin('anonymous');
+
+    const syncCustomPlaneTexture = () => {
+      const cfg = studioRef.current;
+      const url = cfg.customBgUrl ? resolveAssetUrl(normalizeDirectImageUrl(cfg.customBgUrl)) : '';
+      const shouldUse3DPlane = Boolean(url && (cfg.customBgMode || '3d-plane') === '3d-plane');
+
+      if (!shouldUse3DPlane) {
+        bgPlaneMesh.visible = false;
+        loadedCustomUrl = '';
+        return;
+      }
+
+      bgPlaneMesh.visible = true;
+      bgPlaneMat.opacity = cfg.customBgOpacity ?? 0.55;
+      const sc = cfg.customBgScale ?? 1;
+      bgPlaneMesh.scale.set(sc, sc, sc);
+
+      if (url !== loadedCustomUrl) {
+        loadedCustomUrl = url;
+        textureLoader.load(
+          url,
+          (tex) => {
+            if (isDisposed) {
+              tex.dispose();
+              return;
+            }
+            tex.colorSpace = THREE.SRGBColorSpace;
+            if (activeTexture) activeTexture.dispose();
+            activeTexture = tex;
+            bgPlaneMat.map = tex;
+            bgPlaneMat.needsUpdate = true;
+          },
+          undefined,
+          () => {
+            bgPlaneMesh.visible = false;
+          }
+        );
+      }
+    };
+
     if (!isSoftware) {
       renderer.compile(scene, camera);
     }
 
-    // =========================================================================
-    // POINTER + SCROLL + THEME SYNC + CONTEXT RECOVERY
-    // =========================================================================
     let targetPointerX = 0;
     let targetPointerY = 0;
     let targetScrollY = window.scrollY || 0;
@@ -340,30 +437,28 @@ export const StudioBackdrop3D: React.FC<StudioBackdrop3DProps> = ({ activePage }
 
     const syncThemeColors = () => {
       const next = getThemeThreePalette();
-      if (scene.background instanceof THREE.Color) scene.background.setHex(next.bg);
       if (scene.fog instanceof THREE.FogExp2) scene.fog.color.setHex(next.fog);
 
       waveMat.color.setHex(next.isLight ? 0xe7e1d5 : next.bg === 0x121419 ? 0x14161c : next.metal);
-      waveMat.metalness = next.isLight ? 0.14 : 0.72;
-      waveMat.roughness = next.isLight ? 0.52 : 0.34;
-      waveMat.clearcoat = next.isLight ? 0.15 : 0.42;
-      waveMat.envMapIntensity = next.isLight ? 0.55 : 0.92;
-
       arcPrimaryMat.color.setHex(next.secondary);
-      arcPrimaryMat.opacity = next.isLight ? 0.14 : 0.12;
-      arcAccentMat.color.setHex(next.accent);
-      arcAccentMat.opacity = next.isLight ? 0.16 : 0.22;
+
+      const customHex = studioRef.current.accentColor;
+      if (customHex && customHex.startsWith('#')) {
+        arcAccentMat.color.set(customHex);
+        warmAccentLight.color.set(customHex);
+        accentRingMat.color.set(customHex);
+        accentRingMat.emissive.set(customHex);
+      } else {
+        arcAccentMat.color.setHex(next.accent);
+        warmAccentLight.color.setHex(next.accent);
+        accentRingMat.color.setHex(next.accent);
+        accentRingMat.emissive.setHex(next.accent);
+      }
 
       hemiLight.color.setHex(next.rimLight);
       hemiLight.groundColor.setHex(next.bg);
-      hemiLight.intensity = next.isLight ? 1.15 : 0.62;
       grazingRimLight.color.setHex(next.secondary);
-      grazingRimLight.intensity = next.isLight ? 1.1 : 1.45;
-      warmAccentLight.color.setHex(next.accent);
-
       bokehMat.color.setHex(next.secondary);
-      bokehMat.opacity = next.isLight ? 0.14 : 0.24;
-      bokehMat.blending = next.isLight ? THREE.NormalBlending : THREE.AdditiveBlending;
     };
 
     const themeObserver = new MutationObserver(() => {
@@ -380,9 +475,6 @@ export const StudioBackdrop3D: React.FC<StudioBackdrop3DProps> = ({ activePage }
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', onResize, { passive: true });
 
-    // =========================================================================
-    // ANIMATION LOOP (Proper WebGL2 Software Pacing + Smooth Damping)
-    // =========================================================================
     let frameId = 0;
     let isDisposed = false;
     let lastTime = performance.now();
@@ -425,9 +517,26 @@ export const StudioBackdrop3D: React.FC<StudioBackdrop3DProps> = ({ activePage }
         return;
       }
 
+      const cfg = studioRef.current;
+      const preset = cfg.preset || 'liquid-wave';
+      const speed = cfg.motionSpeed ?? 1;
+
       if (!reducedMotion) {
-        elapsed += dt;
+        elapsed += dt * speed;
       }
+
+      // Apply live scene preset visibility
+      waveMesh.visible = preset === 'liquid-wave';
+      gridGroup.visible = preset === 'cyber-grid';
+      orbitalGroup.visible = preset === 'orbital-rings';
+      filamentGroup.visible = preset !== 'minimal-void';
+      bokehPoints.visible = preset !== 'minimal-void';
+      bokehMat.opacity = Math.min(0.85, (preset === 'starfield-nebula' ? 0.55 : 0.24) * (cfg.bokehDensity ?? 1));
+      bokehMat.size = preset === 'starfield-nebula' ? 0.72 : 0.52;
+
+      waveUniforms.uIntensity.value = cfg.waveIntensity ?? 1;
+      syncCustomPlaneTexture();
+      syncThemeColors();
 
       const dampFactor = reducedMotion ? 12 : 4.0;
       smoothPointerX = THREE.MathUtils.damp(smoothPointerX, targetPointerX, dampFactor, dt);
@@ -438,36 +547,34 @@ export const StudioBackdrop3D: React.FC<StudioBackdrop3DProps> = ({ activePage }
       const scrollNorm = smoothScrollY * 0.0012;
       const scrollDollyZ = Math.min(2.6, scrollNorm * 1.15);
 
-      camera.position.x = THREE.MathUtils.damp(
-        camera.position.x,
-        pageTarget.x + smoothPointerX * 0.68,
-        3.4,
-        dt
-      );
-      camera.position.y = THREE.MathUtils.damp(
-        camera.position.y,
-        pageTarget.y + smoothPointerY * 0.42 - scrollNorm * 0.35,
-        3.4,
-        dt
-      );
-      camera.position.z = THREE.MathUtils.damp(
-        camera.position.z,
-        pageTarget.z - scrollDollyZ,
-        3.4,
-        dt
-      );
-      camera.lookAt(
-        smoothPointerX * 0.22,
-        pageTarget.pitch * 4 - scrollNorm * 0.25,
-        -6.5
-      );
+      camera.position.x = THREE.MathUtils.damp(camera.position.x, pageTarget.x + smoothPointerX * 0.68, 3.4, dt);
+      camera.position.y = THREE.MathUtils.damp(camera.position.y, pageTarget.y + smoothPointerY * 0.42 - scrollNorm * 0.35, 3.4, dt);
+      camera.position.z = THREE.MathUtils.damp(camera.position.z, pageTarget.z - scrollDollyZ, 3.4, dt);
+      camera.lookAt(smoothPointerX * 0.22, pageTarget.pitch * 4 - scrollNorm * 0.25, -6.5);
 
-      // Update GLSL Obsidian Silk-Wave Uniforms
       waveUniforms.uTime.value = elapsed;
       waveUniforms.uScroll.value = scrollNorm;
       waveUniforms.uPointer.value.set(smoothPointerX, smoothPointerY);
 
-      // Gentle optical filament horizon breathing
+      if (gridGroup.visible) {
+        gridGroup.rotation.y = smoothPointerX * 0.08 + elapsed * 0.03;
+        gridGroup.position.z = ((elapsed * 1.2) % 2.6) - 8;
+      }
+
+      if (orbitalGroup.visible) {
+        torus1.rotation.x = 0.6 + elapsed * 0.24;
+        torus1.rotation.y = 0.25 + elapsed * 0.18;
+        torus2.rotation.z = elapsed * -0.32;
+        torus3.rotation.y = -0.4 + elapsed * 0.14;
+        orbitalGroup.rotation.y = smoothPointerX * 0.18;
+        orbitalGroup.rotation.x = -smoothPointerY * 0.12;
+      }
+
+      if (bgPlaneMesh.visible) {
+        bgPlaneMesh.rotation.y = smoothPointerX * 0.07;
+        bgPlaneMesh.rotation.x = -smoothPointerY * 0.04;
+      }
+
       for (let i = 0; i < filamentMeshes.length; i++) {
         const f = filamentMeshes[i];
         f.mesh.position.y = f.baseY + Math.sin(elapsed * 0.35 + f.phase) * 0.18;
@@ -475,7 +582,6 @@ export const StudioBackdrop3D: React.FC<StudioBackdrop3DProps> = ({ activePage }
       filamentGroup.rotation.z = smoothPointerX * 0.025;
       filamentGroup.position.y = -scrollNorm * 0.35;
 
-      // Lazy stationary optical lens bokeh breathing (never flying upward like satellites)
       if (!reducedMotion) {
         const posAttr = bokehGeo.getAttribute('position') as THREE.BufferAttribute;
         const arr = posAttr.array as Float32Array;
@@ -506,6 +612,7 @@ export const StudioBackdrop3D: React.FC<StudioBackdrop3DProps> = ({ activePage }
       cancelAnimationFrame(frameId);
       clearTimeout(frameId);
       themeObserver.disconnect();
+      if (activeTexture) activeTexture.dispose();
       renderer.domElement.removeEventListener('webglcontextlost', onContextLost);
       renderer.domElement.removeEventListener('webglcontextrestored', onContextRestored);
       window.removeEventListener('pointermove', onPointerMove);
@@ -522,10 +629,19 @@ export const StudioBackdrop3D: React.FC<StudioBackdrop3DProps> = ({ activePage }
   }, []);
 
   return (
-    <div
-      ref={mountRef}
-      className="fixed inset-0 z-0 pointer-events-none"
-      aria-hidden="true"
-    />
+    <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden" aria-hidden="true">
+      {showBackdropParallax && (
+        <div
+          className="absolute inset-0 bg-cover bg-center transition-all duration-300"
+          style={{
+            backgroundImage: `url("${resolvedCustomBg}")`,
+            opacity: studio3D.customBgOpacity ?? 0.55,
+            filter: (studio3D.customBgBlur ?? 0) > 0 ? `blur(${studio3D.customBgBlur}px)` : undefined,
+            transform: `scale(${studio3D.customBgScale ?? 1})`
+          }}
+        />
+      )}
+      <div ref={mountRef} className="absolute inset-0" />
+    </div>
   );
 };

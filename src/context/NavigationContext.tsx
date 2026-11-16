@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
-import { Language } from '../types/portfolio';
+import { Language, StudioFocusMode } from '../types/portfolio';
 
 export type PageId = 'home' | 'about' | 'videos' | 'design' | 'skills' | 'contact';
 
@@ -149,17 +149,27 @@ interface NavigationContextType {
   pages: PageMeta[];
   currentMeta: PageMeta;
   isMultiPageEnabled: boolean;
+  focusMode: StudioFocusMode;
+  setFocusMode: (mode: StudioFocusMode) => void;
 }
 
 const NavigationContext = createContext<NavigationContextType | null>(null);
 
-export const NavigationProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const NavigationProvider: React.FC<{ children: ReactNode; initialFocusMode?: StudioFocusMode }> = ({
+  children,
+  initialFocusMode = 'all'
+}) => {
+  const [focusMode, setFocusMode] = useState<StudioFocusMode>(initialFocusMode);
   const [currentPage, setCurrentPage] = useState<PageId>(() => {
     if (typeof window === 'undefined') return 'home';
     const hash = window.location.hash;
     if (hash.toLowerCase().startsWith('#admin')) return 'home';
     return resolveTargetToPage(hash).page;
   });
+
+  useEffect(() => {
+    setFocusMode(initialFocusMode);
+  }, [initialFocusMode]);
 
   const scrollToSectionOrTop = useCallback((sectionAnchor?: string) => {
     if (typeof window === 'undefined') return;
@@ -244,7 +254,9 @@ export const NavigationProvider: React.FC<{ children: ReactNode }> = ({ children
         goPrevPage,
         pages: PORTFOLIO_PAGES,
         currentMeta,
-        isMultiPageEnabled: true
+        isMultiPageEnabled: true,
+        focusMode,
+        setFocusMode
       }}
     >
       {children}
@@ -271,6 +283,8 @@ export const useNavigation = (): NavigationContextType => {
     goPrevPage: () => {},
     pages: PORTFOLIO_PAGES,
     currentMeta: PORTFOLIO_PAGES[0],
-    isMultiPageEnabled: false
+    isMultiPageEnabled: false,
+    focusMode: 'all',
+    setFocusMode: () => {}
   };
 };
