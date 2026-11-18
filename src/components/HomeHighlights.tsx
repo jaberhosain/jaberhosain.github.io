@@ -22,6 +22,8 @@ import { detectVideoType } from '../lib/videoUtils';
 import { FeaturedShowcaseStage } from './home/FeaturedShowcaseStage';
 import { CreativityTipsSection } from './home/CreativityTipsSection';
 import { ReelsAndTrustSections } from './home/ReelsAndTrustSections';
+import { AIAutomationRoadmapSection } from './home/AIAutomationRoadmapSection';
+import { CreativeGameArena } from './games/CreativeGameArena';
 
 interface HomeHighlightsProps {
   onOpenLightbox?: (project: ProjectItem, initialIndex?: number) => void;
@@ -515,7 +517,13 @@ export const HomeHighlights: React.FC<HomeHighlightsProps> = ({
       {/* 5. SLIDING REELS, CLIENT REVIEWS, VIVA FAQ, CONVERSION CTA & AS-SUNNAH LOGOS */}
       <ReelsAndTrustSections onOpenVideo={onOpenVideo} />
 
-      {/* 6. STUDIO DIRECTORY NAVIGATION CARDS */}
+      {/* 6. AI, AI AUTOMATION & AI OPERATIONS RESEARCH ROADMAP */}
+      <AIAutomationRoadmapSection />
+
+      {/* 7. PLAYABLE VIDEO EDITING, VISUAL & SOUND MCQ GAME ZONE */}
+      <CreativeGameArena variant="section" />
+
+      {/* 8. STUDIO DIRECTORY NAVIGATION CARDS */}
       {portfolio.homeSectionVisibility?.overviewDirectory !== false &&
         filteredOverviewCards.length > 0 && (
           <StudioSectionShell

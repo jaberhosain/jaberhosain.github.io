@@ -18,6 +18,7 @@ import { AboutPage } from './components/pages/AboutPage';
 import { VideosPage } from './components/pages/VideosPage';
 import { DesignPage } from './components/pages/DesignPage';
 import { SkillsPage } from './components/pages/SkillsPage';
+import { GameZonePage } from './components/pages/GameZonePage';
 import { ContactPage } from './components/pages/ContactPage';
 import { PortfolioAIAgent } from './components/PortfolioAIAgent';
 import { WelcomeSalamToast } from './components/WelcomeSalamToast';
@@ -131,6 +132,8 @@ function MainApp() {
         return <DesignPage key="design" onOpenLightbox={handleOpenLightbox} />;
       case 'skills':
         return <SkillsPage key="skills" />;
+      case 'games':
+        return <GameZonePage key="games" />;
       case 'contact':
         return <ContactPage key="contact" />;
       case 'home':

@@ -49,7 +49,7 @@ export const Navbar: React.FC = () => {
 
   const navLinks = pages
     .filter((p) => p.id !== 'contact')
-    .slice(0, 5)
+    .slice(0, 6)
     .map((p) => ({
       id: p.id,
       href: p.hash,
@@ -136,7 +136,7 @@ export const Navbar: React.FC = () => {
             {/* Zone 2: Concise Single-Line Navigation Links */}
             <nav
               aria-label="Primary Navigation"
-              className="hidden lg:flex items-center gap-7"
+              className="hidden lg:flex items-center gap-5 xl:gap-7"
             >
               {navLinks.map((link) => {
                 const isActive = isMultiPageEnabled && currentPage === link.id;

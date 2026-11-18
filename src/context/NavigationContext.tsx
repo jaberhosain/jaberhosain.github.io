@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { Language, StudioFocusMode } from '../types/portfolio';
 
-export type PageId = 'home' | 'about' | 'videos' | 'design' | 'skills' | 'contact';
+export type PageId = 'home' | 'about' | 'videos' | 'design' | 'skills' | 'games' | 'contact';
 
 export interface PageMeta {
   id: PageId;
@@ -74,8 +74,20 @@ export const PORTFOLIO_PAGES: PageMeta[] = [
     }
   },
   {
-    id: 'contact',
+    id: 'games',
     index: '06',
+    hash: '#/games',
+    label: { en: 'Games', bn: 'গেম জোন', ar: 'الألعاب' },
+    title: { en: 'Creative Game Zone', bn: 'ক্রিয়েটিভ গেম জোন', ar: 'منطقة الألعاب الإبداعية' },
+    subtitle: {
+      en: 'Test your video editing, visual color grading, and sound design knowledge with interactive MCQ.',
+      bn: 'ভিডিও এডিটিং, কালার গ্রেডিং এবং সাউন্ড ডিজাইনের ওপর মজাদার এমসিকিউ গেম খেলুন।',
+      ar: 'اختبر معرفتك بمونتاج الفيديو وتصحيح الألوان وهندسة الصوت عبر أسئلة تفاعلية.'
+    }
+  },
+  {
+    id: 'contact',
+    index: '07',
     hash: '#/contact',
     label: { en: 'Contact', bn: 'যোগাযোগ', ar: 'تواصل' },
     title: { en: 'Contact & Advice', bn: 'পরামর্শ ও যোগাযোগ', ar: 'النصيحة والتواصل' },
@@ -92,7 +104,7 @@ interface ResolvedRoute {
   sectionAnchor?: string;
 }
 
-const VALID_PAGES: PageId[] = ['home', 'about', 'videos', 'design', 'skills', 'contact'];
+const VALID_PAGES: PageId[] = ['home', 'about', 'videos', 'design', 'skills', 'games', 'contact'];
 
 export function resolveTargetToPage(target: string): ResolvedRoute {
   const clean = (target || '').trim().toLowerCase();
@@ -133,6 +145,15 @@ export function resolveTargetToPage(target: string): ResolvedRoute {
     case 'skills':
     case 'channels':
       return { page: 'skills', sectionAnchor: segment === 'skills' ? undefined : segment };
+    case 'game':
+    case 'games':
+    case 'game-zone':
+      return { page: 'games' };
+    case 'ai':
+    case 'ai-roadmap':
+    case 'automation':
+    case 'ai-ops':
+      return { page: 'home', sectionAnchor: 'ai-roadmap' };
     case 'advice':
     case 'contact':
       return { page: 'contact', sectionAnchor: segment === 'advice' ? undefined : segment };
