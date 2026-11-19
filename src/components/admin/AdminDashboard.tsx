@@ -83,6 +83,7 @@ import { CaseStudiesEditor } from './CaseStudiesEditor';
 import { StatsTestimonialsEditor } from './StatsTestimonialsEditor';
 import { ADMIN_GROUPS, AdminGroupId } from './adminNavigation';
 import { ThemeLiveEditView } from './liveEdit/ThemeLiveEditView';
+import { AdminEmberGate } from './AdminEmberGate';
 
 // Helper to map activeTab to its parent AdminGroupId
 export const getGroupFromTab = (tab: string): AdminGroupId => {
@@ -813,17 +814,16 @@ function doPost(e) {
   }
 }`;
 
-  // While auth session is restoring from browserLocalPersistence / IndexedDB, show clean loader
+  // While auth session is restoring from browserLocalPersistence / IndexedDB, show clean obsidian loader
   if (authRestoring) {
     return (
-      <div className="min-h-screen bg-[#0B0C0F] text-[#F4F0E8] flex flex-col justify-center items-center p-4 font-sans selection:bg-[#E4583B] selection:text-white">
+      <div className="min-h-screen bg-[#040406] text-white flex flex-col justify-center items-center p-4 font-sans selection:bg-white selection:text-[#0A0A0C]">
         <div className="flex flex-col items-center space-y-4">
-          <div className="w-11 h-11 rounded-xl bg-[#121419] border border-white/[0.08] flex items-center justify-center font-bold text-lg text-[#F4F0E8]">
-            <span>M</span>
-            <span className="text-[#E4583B]">J</span>
+          <div className="w-11 h-11 rounded-full bg-white/[0.06] border border-white/[0.12] flex items-center justify-center font-bold text-base text-white">
+            MJ
           </div>
-          <div className="flex items-center space-x-2 text-xs text-[#8E8A82]">
-            <RefreshCw className="w-3.5 h-3.5 animate-spin text-[#E4583B]" />
+          <div className="flex items-center space-x-2 text-xs text-white/50">
+            <RefreshCw className="w-3.5 h-3.5 animate-spin text-white/75" />
             <span>Verifying session...</span>
           </div>
         </div>
@@ -831,130 +831,25 @@ function doPost(e) {
     );
   }
 
-  // If not logged in or unauthorized: SHOW ONLY THE SECURE LOGIN SCREEN
+  // If not logged in or unauthorized: SHOW THE BURNING-PAPER EMBER GATE & MINIMALIST DARK SIGN-IN
   if (!currentUser || !isAdmin) {
     return (
-      <div className="min-h-screen bg-[#0B0C0F] text-[#F4F0E8] flex flex-col justify-center items-center p-4 font-sans selection:bg-[#E4583B] selection:text-white">
-        <div className="w-full max-w-md bg-[#121419] border border-white/[0.08] rounded-2xl p-8 sm:p-10 shadow-2xl">
-          {/* Brand header */}
-          <div className="flex flex-col items-center text-center mb-8">
-            <div className="w-11 h-11 rounded-xl bg-[#171A21] border border-white/[0.08] flex items-center justify-center font-bold text-lg text-[#F4F0E8] mb-4">
-              <span>M</span>
-              <span className="text-[#E4583B]">J</span>
-            </div>
-
-            <h1 className="text-xl font-semibold text-[#F4F0E8] tracking-tight mb-1">
-              Studio Admin Console
-            </h1>
-            <p className="text-xs text-[#8E8A82]">
-              Sign in with your owner credentials to manage site content.
-            </p>
-          </div>
-
-          {/* Access Warning if signed in with non-owner account */}
-          {currentUser && !isAdmin && (
-            <div className="p-4 rounded-xl bg-amber-950/35 border border-amber-500/30 text-amber-300 text-xs mb-6 space-y-2">
-              <div className="font-semibold flex items-center space-x-1.5 rtl:space-x-reverse">
-                <ShieldAlert className="w-4 h-4 text-amber-400" />
-                <span>Unauthorized User</span>
-              </div>
-              <p>
-                Signed in as <span className="font-mono text-white">{currentUser.email}</span>. Only the verified site owner (<span className="font-mono text-white">sbmc.3925@gmail.com</span>) has administrative rights.
-              </p>
-              <button
-                onClick={handleSignOut}
-                className="text-xs text-white underline hover:text-[#E4583B]"
-              >
-                Sign out and use owner account
-              </button>
-            </div>
-          )}
-
-          {/* Error notice */}
-          {authError && (
-            <div className="p-3.5 rounded-xl bg-rose-950/50 border border-rose-500/35 text-rose-300 text-xs mb-6 flex items-start space-x-2.5 rtl:space-x-reverse">
-              <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
-              <span>{authError}</span>
-            </div>
-          )}
-
-          {/* Username + Password Form (Auto-maps to username@jabir.internal) */}
-          <form onSubmit={handleUsernamePasswordAuth} className="space-y-4">
-            <div>
-              <label className="block text-xs font-medium text-[#A7A298] mb-1.5">
-                Username or Email
-              </label>
-              <div className="relative">
-                <UserIcon className="absolute left-3.5 rtl:left-auto rtl:right-3.5 top-3 w-4 h-4 text-[#6F6B64]" />
-                <input
-                  type="text"
-                  required
-                  autoComplete="username"
-                  value={usernameInput}
-                  onChange={(e) => setUsernameInput(e.target.value)}
-                  placeholder="jabirbd"
-                  className="w-full pl-10 rtl:pl-4 rtl:pr-10 pr-4 py-2.5 rounded-xl bg-[#0B0C0F] border border-white/[0.08] text-sm text-[#F4F0E8] focus:outline-none focus:border-[#E4583B] font-mono transition-colors"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-medium text-[#A7A298] mb-1.5">
-                Password
-              </label>
-              <div className="relative">
-                <Lock className="absolute left-3.5 rtl:left-auto rtl:right-3.5 top-3 w-4 h-4 text-[#6F6B64]" />
-                <input
-                  type="password"
-                  required
-                  autoComplete="current-password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••••••"
-                  className="w-full pl-10 rtl:pl-4 rtl:pr-10 pr-4 py-2.5 rounded-xl bg-[#0B0C0F] border border-white/[0.08] text-sm text-[#F4F0E8] focus:outline-none focus:border-[#E4583B] transition-colors"
-                />
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              disabled={authLoading}
-              className="w-full py-2.5 rounded-xl font-semibold text-xs text-white bg-[#E4583B] hover:bg-[#D0492D] transition-colors flex items-center justify-center space-x-2 rtl:space-x-reverse disabled:opacity-50 cursor-pointer"
-            >
-              <KeyRound className="w-4 h-4" />
-              <span>{authLoading ? 'Verifying...' : 'Sign In as Admin'}</span>
-            </button>
-          </form>
-
-          {/* Divider */}
-          <div className="relative my-6 text-center">
-            <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-white/[0.08]" /></div>
-            <span className="relative px-3 text-[11px] bg-[#121419] text-[#6F6B64]">Or continue with</span>
-          </div>
-
-          {/* Backup Google Sign-In */}
-          <button
-            type="button"
-            onClick={handleGoogleLogin}
-            disabled={authLoading}
-            className="w-full py-2.5 rounded-xl text-xs font-medium text-[#EAE5DC] bg-[#171A21] hover:bg-[#1E222B] border border-white/[0.08] transition-colors flex items-center justify-center space-x-2 rtl:space-x-reverse cursor-pointer"
-          >
-            <LogIn className="w-3.5 h-3.5 text-[#E4583B]" />
-            <span>Sign In with Google</span>
-          </button>
-
-          {/* Back to public site button */}
-          <div className="mt-6 pt-4 border-t border-white/[0.06] text-center">
-            <button
-              onClick={onBackToSite}
-              className="inline-flex items-center space-x-1.5 rtl:space-x-reverse text-xs text-[#8E8A82] hover:text-[#F4F0E8] transition-colors"
-            >
-              <ArrowLeft className="w-3.5 h-3.5" />
-              <span>Return to Public Website</span>
-            </button>
-          </div>
-        </div>
-      </div>
+      <AdminEmberGate
+        usernameInput={usernameInput}
+        setUsernameInput={setUsernameInput}
+        password={password}
+        setPassword={setPassword}
+        authLoading={authLoading}
+        authError={authError}
+        currentUser={currentUser}
+        isAdmin={isAdmin}
+        projectCount={draftPortfolio.projects?.length || 0}
+        videoCount={draftPortfolio.videos?.length || 0}
+        onSubmit={handleUsernamePasswordAuth}
+        onGoogleLogin={handleGoogleLogin}
+        onSignOut={handleSignOut}
+        onBackToSite={onBackToSite}
+      />
     );
   }
 
@@ -963,35 +858,35 @@ function doPost(e) {
     return <ThemeLiveEditView onExit={() => setIsLiveEditOpen(false)} />;
   }
 
-  // AUTHENTICATED OWNER: FULL CONTROL CENTER
+  // AUTHENTICATED OWNER: FULL CONTROL CENTER (Minimalist Pitch-Black Obsidian & Pure White Pill Actions)
   return (
-    <div className="min-h-screen bg-[#0B0C0F] text-[#F4F0E8] flex flex-col font-sans selection:bg-[#E4583B] selection:text-white">
+    <div className="min-h-screen bg-[#050507] text-[#F4F4F6] flex flex-col font-sans selection:bg-white selection:text-[#0A0A0C]">
 
       {/* Top Header Toolbar */}
-      <header className="sticky top-0 z-40 bg-[#121419]/95 backdrop-blur-md border-b border-white/[0.08] px-6 py-3.5 flex items-center justify-between gap-4">
+      <header className="sticky top-0 z-40 bg-[#08080B]/92 backdrop-blur-xl border-b border-white/[0.08] px-6 py-3.5 flex items-center justify-between gap-4">
         <div className="flex items-center space-x-3 rtl:space-x-reverse min-w-0">
-          <div className="w-9 h-9 rounded-lg bg-[#E4583B] text-white flex items-center justify-center font-bold text-sm shrink-0">
+          <div className="w-9 h-9 rounded-full bg-white text-[#0A0A0C] flex items-center justify-center font-bold text-xs tracking-tight shrink-0">
             MJ
           </div>
           <div className="min-w-0">
-            <h1 className="text-sm sm:text-base font-semibold text-[#F4F0E8] tracking-tight truncate">
+            <h1 className="text-sm sm:text-base font-semibold text-white tracking-tight truncate">
               {ui.admin.title}
             </h1>
-            <p className="text-xs text-[#8E8A82] truncate">
-              Signed in as <span className="font-mono text-[#D7D2C8]">{loggedInLabel}</span>
+            <p className="text-xs text-white/45 truncate">
+              Signed in as <span className="font-mono text-white/80">{loggedInLabel}</span>
             </p>
           </div>
         </div>
 
-        {/* Actions: Save Draft, Preview, Publish Live, Back to site, Logout */}
+        {/* Actions: Backup, Save Draft, Preview, Publish Live, Back to site, Logout */}
         <div className="flex items-center space-x-2 rtl:space-x-reverse shrink-0">
           {/* Backup & Export JSON */}
           <button
             onClick={exportPortfolioBackup}
-            className="inline-flex items-center space-x-1.5 rtl:space-x-reverse px-3 py-2 rounded-lg text-xs font-medium text-[#D7D2C8] hover:text-white bg-[#171A21] hover:bg-[#1E222B] border border-white/[0.08] transition-colors whitespace-nowrap cursor-pointer"
+            className="inline-flex items-center space-x-1.5 rtl:space-x-reverse px-3.5 py-2 rounded-full text-xs font-medium text-white/75 hover:text-white bg-white/[0.06] hover:bg-white/[0.11] border border-white/[0.1] transition-colors whitespace-nowrap cursor-pointer"
             title="Download complete JSON backup of portfolio content"
           >
-            <Download className="w-3.5 h-3.5 text-[#E4583B]" />
+            <Download className="w-3.5 h-3.5 text-white/70" />
             <span className="hidden md:inline">Backup JSON</span>
           </button>
 
@@ -999,19 +894,19 @@ function doPost(e) {
           <button
             onClick={handleSaveDraft}
             disabled={savingDraft || publishing}
-            className="inline-flex items-center space-x-1.5 rtl:space-x-reverse px-3.5 py-2 rounded-lg text-xs font-medium text-[#F4F0E8] bg-[#171A21] hover:bg-[#1E222B] border border-white/[0.08] transition-colors disabled:opacity-50 whitespace-nowrap cursor-pointer"
+            className="inline-flex items-center space-x-1.5 rtl:space-x-reverse px-3.5 py-2 rounded-full text-xs font-medium text-white bg-white/[0.08] hover:bg-white/[0.14] border border-white/[0.12] transition-colors disabled:opacity-50 whitespace-nowrap cursor-pointer"
           >
-            <Save className="w-3.5 h-3.5 text-[#E4583B]" />
+            <Save className="w-3.5 h-3.5 text-amber-300" />
             <span className="hidden sm:inline">{savingDraft ? 'Saving...' : ui.admin.saveDraft}</span>
           </button>
 
           {/* Preview Toggle */}
           <button
             onClick={() => setIsPreviewDraft(!isPreviewDraft)}
-            className={`inline-flex items-center space-x-1.5 rtl:space-x-reverse px-3.5 py-2 rounded-lg text-xs font-medium border transition-colors whitespace-nowrap cursor-pointer ${
+            className={`inline-flex items-center space-x-1.5 rtl:space-x-reverse px-3.5 py-2 rounded-full text-xs font-medium border transition-colors whitespace-nowrap cursor-pointer ${
               isPreviewDraft
-                ? 'bg-[#E4583B]/15 text-[#F07C63] border-[#E4583B]/60'
-                : 'bg-[#171A21] text-[#D7D2C8] border-white/[0.08] hover:text-white'
+                ? 'bg-amber-500/15 text-amber-200 border-amber-400/45'
+                : 'bg-white/[0.06] text-white/75 border-white/[0.1] hover:text-white hover:bg-white/[0.11]'
             }`}
           >
             <Eye className="w-3.5 h-3.5" />
@@ -1020,11 +915,11 @@ function doPost(e) {
             </span>
           </button>
 
-          {/* Publish Live */}
+          {/* Publish Live — Pure White Primary Pill CTA */}
           <button
             onClick={handlePublishLive}
             disabled={publishing || savingDraft}
-            className="inline-flex items-center space-x-1.5 rtl:space-x-reverse px-4 py-2 rounded-lg text-xs font-semibold text-white bg-[#E4583B] hover:bg-[#D0492D] transition-colors disabled:opacity-50 whitespace-nowrap cursor-pointer"
+            className="inline-flex items-center space-x-1.5 rtl:space-x-reverse px-4 py-2 rounded-full text-xs font-semibold text-[#0A0A0C] bg-white hover:bg-white/90 transition-colors disabled:opacity-50 whitespace-nowrap cursor-pointer shadow-[0_8px_24px_-6px_rgba(255,255,255,0.28)]"
           >
             <Send className="w-3.5 h-3.5" />
             <span>{publishing ? ui.admin.publishing : ui.admin.publishLive}</span>
@@ -1033,7 +928,7 @@ function doPost(e) {
           {/* View Website */}
           <button
             onClick={onBackToSite}
-            className="p-2 text-[#A7A298] hover:text-white rounded-lg hover:bg-white/[0.06] transition-colors cursor-pointer"
+            className="p-2 text-white/55 hover:text-white rounded-full hover:bg-white/[0.08] transition-colors cursor-pointer"
             title="View Public Website"
           >
             <ArrowLeft className="w-4 h-4" />
@@ -1042,7 +937,7 @@ function doPost(e) {
           {/* LOGOUT BUTTON */}
           <button
             onClick={handleSignOut}
-            className="inline-flex items-center space-x-1 px-3 py-2 rounded-lg text-xs font-medium text-rose-400 hover:text-rose-300 bg-rose-950/25 border border-rose-500/25 hover:bg-rose-950/45 transition-colors whitespace-nowrap cursor-pointer"
+            className="inline-flex items-center space-x-1 px-3.5 py-2 rounded-full text-xs font-medium text-rose-300 hover:text-rose-200 bg-rose-500/10 border border-rose-500/25 hover:bg-rose-500/20 transition-colors whitespace-nowrap cursor-pointer"
             title="Logout"
           >
             <LogOut className="w-3.5 h-3.5" />
@@ -1135,9 +1030,9 @@ function doPost(e) {
       <div className="flex-1 flex flex-col md:flex-row max-w-7xl w-full mx-auto p-4 sm:p-6 gap-6">
 
         {/* Grouped Navigation Sidebar */}
-        <aside className="w-full md:w-72 bg-[#121419] border border-white/[0.08] rounded-2xl p-3 flex flex-col space-y-1 shrink-0 h-fit">
+        <aside className="w-full md:w-72 bg-[#0B0C10] border border-white/[0.08] rounded-2xl p-3 flex flex-col space-y-1 shrink-0 h-fit">
           <div className="px-3 py-2 border-b border-white/[0.06] mb-1">
-            <span className="text-xs font-semibold text-[#8E8A82]">
+            <span className="text-xs font-semibold text-white/45">
               Content Sections
             </span>
           </div>
@@ -1163,23 +1058,23 @@ function doPost(e) {
                     }}
                     className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-medium transition-colors cursor-pointer ${
                       isGroupActive
-                        ? 'bg-[#171A21] text-[#F4F0E8] border border-white/[0.08]'
-                        : 'text-[#A7A298] hover:text-[#F4F0E8] hover:bg-white/[0.03]'
+                        ? 'bg-white/[0.08] text-white border border-white/[0.1]'
+                        : 'text-white/60 hover:text-white hover:bg-white/[0.04]'
                     }`}
                   >
                     <div className="flex items-center space-x-2.5 rtl:space-x-reverse min-w-0">
-                      <GroupIcon className={`w-4 h-4 shrink-0 ${isGroupActive ? 'text-[#E4583B]' : 'text-[#6F6B64]'}`} />
+                      <GroupIcon className={`w-4 h-4 shrink-0 ${isGroupActive ? 'text-white' : 'text-white/40'}`} />
                       <span className="truncate text-xs font-medium">{group.label}</span>
                     </div>
 
                     <div className="flex items-center space-x-1.5 rtl:space-x-reverse shrink-0">
-                      <span className="text-[11px] text-[#6F6B64] tabular-nums">
+                      <span className="text-[11px] text-white/40 tabular-nums">
                         {group.subSections.length}
                       </span>
                       {isExpanded ? (
-                        <ChevronDown className="w-3.5 h-3.5 text-[#8E8A82]" />
+                        <ChevronDown className="w-3.5 h-3.5 text-white/60" />
                       ) : (
-                        <ChevronRight className="w-3.5 h-3.5 text-[#6F6B64]" />
+                        <ChevronRight className="w-3.5 h-3.5 text-white/40" />
                       )}
                     </div>
                   </button>
@@ -1196,10 +1091,10 @@ function doPost(e) {
                             key={sub.id}
                             type="button"
                             onClick={() => setActiveTab(targetTab as any)}
-                            className={`w-full text-left px-3 py-1.5 rounded-lg text-xs transition-colors flex items-center justify-between cursor-pointer ${
+                            className={`w-full text-left px-3 py-1.5 rounded-full text-xs transition-colors flex items-center justify-between cursor-pointer ${
                               isSubActive
-                                ? 'bg-[#E4583B] text-white font-semibold'
-                                : 'text-[#A7A298] hover:text-[#F4F0E8] hover:bg-white/[0.04]'
+                                ? 'bg-white text-[#0A0A0C] font-semibold'
+                                : 'text-white/60 hover:text-white hover:bg-white/[0.05]'
                             }`}
                           >
                             <span className="truncate">{sub.label}</span>

@@ -66,6 +66,7 @@ import { WorkflowEditor } from '../WorkflowEditor';
 import { ContactFooterEditor } from '../ContactFooterEditor';
 import { ThemeEditor } from '../ThemeEditor';
 import { ConfirmDeleteModal } from '../ConfirmDeleteModal';
+import { AdminEmberGate } from '../AdminEmberGate';
 import { ADMIN_GROUPS, AdminGroupId } from '../adminNavigation';
 import {
   detectVideoType,
@@ -745,17 +746,16 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
     });
   };
 
-  // While auth session is restoring from browserLocalPersistence / IndexedDB, show clean loader
+  // While auth session is restoring from browserLocalPersistence / IndexedDB, show clean obsidian loader
   if (authRestoring) {
     return (
-      <div className="min-h-screen bg-[#0B0C0F] text-[#F4F0E8] flex flex-col justify-center items-center p-4 font-sans selection:bg-[#E4583B] selection:text-white">
+      <div className="min-h-screen bg-[#040406] text-white flex flex-col justify-center items-center p-4 font-sans selection:bg-white selection:text-[#0A0A0C]">
         <div className="flex flex-col items-center space-y-4">
-          <div className="w-11 h-11 rounded-xl bg-[#121419] border border-white/[0.08] flex items-center justify-center font-bold text-lg text-[#F4F0E8]">
-            <span>M</span>
-            <span className="text-[#E4583B]">J</span>
+          <div className="w-11 h-11 rounded-full bg-white/[0.06] border border-white/[0.12] flex items-center justify-center font-bold text-base text-white">
+            MJ
           </div>
-          <div className="flex items-center space-x-2 text-xs text-[#8E8A82]">
-            <RefreshCw className="w-3.5 h-3.5 animate-spin text-[#E4583B]" />
+          <div className="flex items-center space-x-2 text-xs text-white/50">
+            <RefreshCw className="w-3.5 h-3.5 animate-spin text-white/75" />
             <span>Verifying session...</span>
           </div>
         </div>
@@ -764,164 +764,26 @@ export const MobileAdminDashboard: React.FC<MobileAdminDashboardProps> = ({ onBa
   }
 
   // ==========================================
-  // 1. MOBILE LOGIN VIEW (Touch-friendly, exact same Firebase credentials)
+  // 1. MOBILE BURNING-PAPER EMBER GATE & COSMIC SIGN-IN VIEW
   // ==========================================
   if (!currentUser || !isAdmin) {
     return (
-      <div className="min-h-screen bg-[#0B0C0F] text-[#F4F0E8] flex flex-col justify-between p-4 font-sans">
-        {/* Top Header */}
-        <div className="flex items-center justify-between pt-2 pb-5 border-b border-white/[0.08]">
-          <div className="flex items-center space-x-2.5 rtl:space-x-reverse">
-            <div className="w-9 h-9 rounded-lg bg-[#E4583B] flex items-center justify-center font-bold text-white text-sm">
-              MJ
-            </div>
-            <div>
-              <h1 className="text-sm font-semibold text-[#F4F0E8]">
-                MD JABER HOSAIN
-              </h1>
-              <p className="text-[11px] text-[#8E8A82]">Mobile Studio Console</p>
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={onBackToSite}
-            className="px-3.5 py-2 text-xs font-medium text-[#D7D2C8] hover:text-white rounded-lg bg-[#121419] border border-white/[0.08] min-h-[44px] flex items-center justify-center"
-          >
-            Back to Site
-          </button>
-        </div>
-
-        {/* Center Login Box */}
-        <div className="my-auto py-6 max-w-sm mx-auto w-full">
-          <div className="p-6 rounded-2xl bg-[#121419] border border-white/[0.08] shadow-2xl space-y-5">
-            <div className="text-center space-y-1.5">
-              <div className="w-11 h-11 rounded-xl bg-[#171A21] border border-white/[0.08] text-[#E4583B] flex items-center justify-center mx-auto mb-2">
-                <Lock className="w-5 h-5" />
-              </div>
-              <h2 className="text-lg font-semibold text-[#F4F0E8]">Admin Authentication</h2>
-              <p className="text-xs text-[#8E8A82]">
-                Sign in with your username or backup Gmail
-              </p>
-            </div>
-
-            {currentUser && !isAdmin && (
-              <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-start space-x-2">
-                <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-                <div>
-                  <p className="font-semibold">Access Restricted</p>
-                  <p className="text-[11px] text-amber-200/80">
-                    Logged in as <span className="font-mono">{currentUser.email}</span>, which is not the designated owner account.
-                  </p>
-                  <button
-                    type="button"
-                    onClick={handleSignOut}
-                    className="mt-2 text-xs underline text-amber-300 min-h-[44px] flex items-center"
-                  >
-                    Sign out to switch account
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {authError && (
-              <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-center space-x-2">
-                <AlertCircle className="w-4 h-4 shrink-0" />
-                <span>{authError}</span>
-              </div>
-            )}
-
-            <form onSubmit={handleUsernamePasswordAuth} className="space-y-4">
-              <div>
-                <label className="block text-xs font-medium text-[#A7A298] mb-1.5">
-                  Username or Email
-                </label>
-                <div className="relative">
-                  <User className="w-4 h-4 text-[#6F6B64] absolute left-3 top-3.5" />
-                  <input
-                    type="text"
-                    required
-                    value={usernameInput}
-                    onChange={(e) => setUsernameInput(e.target.value)}
-                    placeholder="jabirbd"
-                    autoCapitalize="none"
-                    autoCorrect="off"
-                    className="w-full pl-9 pr-3 py-3 rounded-xl bg-[#0B0C0F] border border-white/[0.08] text-sm font-mono text-[#F4F0E8] placeholder-[#6F6B64] focus:border-[#E4583B] focus:outline-none min-h-[44px]"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-medium text-[#A7A298] mb-1.5">
-                  Password
-                </label>
-                <div className="relative">
-                  <KeyRound className="w-4 h-4 text-[#6F6B64] absolute left-3 top-3.5" />
-                  <input
-                    type="password"
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••"
-                    className="w-full pl-9 pr-3 py-3 rounded-xl bg-[#0B0C0F] border border-white/[0.08] text-sm text-[#F4F0E8] placeholder-[#6F6B64] focus:border-[#E4583B] focus:outline-none min-h-[44px]"
-                  />
-                </div>
-              </div>
-
-              <button
-                type="submit"
-                disabled={authLoading}
-                className="w-full py-3 px-4 rounded-xl font-semibold text-sm text-white bg-[#E4583B] hover:bg-[#D0492D] transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 min-h-[48px]"
-              >
-                {authLoading ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <>
-                    <LogIn className="w-4 h-4" />
-                    <span>Sign In</span>
-                  </>
-                )}
-              </button>
-            </form>
-
-            <div className="relative py-2 flex items-center justify-center">
-              <div className="border-t border-white/[0.08] w-full"></div>
-              <span className="bg-[#121419] px-3 text-[11px] text-[#6F6B64] absolute">OR</span>
-            </div>
-
-            <button
-              type="button"
-              onClick={handleGoogleLogin}
-              disabled={authLoading}
-              className="w-full py-3 px-4 rounded-xl font-medium text-xs text-[#EAE5DC] bg-[#171A21] hover:bg-[#1E222B] border border-white/[0.08] transition-colors flex items-center justify-center space-x-2 min-h-[48px]"
-            >
-              <svg className="w-4 h-4" viewBox="0 0 24 24">
-                <path
-                  fill="#4285F4"
-                  d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                />
-                <path
-                  fill="#34A853"
-                  d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                />
-                <path
-                  fill="#FBBC05"
-                  d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
-                />
-                <path
-                  fill="#EA4335"
-                  d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
-                />
-              </svg>
-              <span>Sign in with Google</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Footer */}
-        <p className="text-[11px] text-center text-[#6F6B64] pb-2">
-          Studio Admin &middot; Synced with Firebase
-        </p>
-      </div>
+      <AdminEmberGate
+        usernameInput={usernameInput}
+        setUsernameInput={setUsernameInput}
+        password={password}
+        setPassword={setPassword}
+        authLoading={authLoading}
+        authError={authError}
+        currentUser={currentUser}
+        isAdmin={isAdmin}
+        projectCount={draftPortfolio.projects?.length || 0}
+        videoCount={draftPortfolio.videos?.length || 0}
+        onSubmit={handleUsernamePasswordAuth}
+        onGoogleLogin={handleGoogleLogin}
+        onSignOut={handleSignOut}
+        onBackToSite={onBackToSite}
+      />
     );
   }
 
